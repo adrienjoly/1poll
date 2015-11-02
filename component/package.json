@@ -1,7 +1,8 @@
 {
   "name": "react-1poll",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple doodle-like poll component that makes it easy for contributors to add more options.",
+  "main": "src/1poll-react-component.js",
   "scripts": {
     "build": "webpack ./src/1poll-react-component.js ./dist/1poll-react-component.js --progress --colors",
     "build-app": "webpack ./src/1poll-sample-app.js ./dist/1poll-sample-app.js --progress --colors",
