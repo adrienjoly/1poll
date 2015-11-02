@@ -2,19 +2,11 @@ module.exports = (function(){
   'use strict';
   var React = require('react');
   var ReactDOM = require('react-dom');
-  var Paper = require('material-ui/lib/paper');
   var Checkbox = require('material-ui/lib/checkbox');
   var TextField = require('material-ui/lib/text-field');
-  var RaisedButton = require('material-ui/lib/raised-button');
 
   function renderComponent(children) {
-    var divContainer = [ Paper, {
-      className: '1poll-component',
-      style: {
-        padding: '16px',
-        paddingTop: '1px'
-      }
-    } ];
+    var divContainer = [ 'div', { className: '1poll-component' } ];
     return React.createElement.apply(React, divContainer.concat(children));
   }
 
@@ -43,12 +35,6 @@ module.exports = (function(){
             paddingLeft: '42px',
             marginBottom: '20px'
           }
-        }),
-        React.createElement(RaisedButton, {
-          label: 'Submit',
-          primary: true,
-          style: { display: 'block' },
-          onTouchTap: this.props.onSubmit || this._handleSubmit
         })
       ]));
     },
@@ -59,17 +45,6 @@ module.exports = (function(){
           defaultChecked: true
         } ])
       });
-    },
-    _handleSubmit(evt) {
-      // Propagate event to component's submit handler(s), if any
-      var myEvent = document.createEventObject ?
-        document.createEventObject() :
-        document.createEvent("Events");
-      myEvent.initEvent('submit', true, true);
-      var targetElement = ReactDOM.findDOMNode(this); // || document.getElementById('app');
-      targetElement.dispatchEvent ?
-        targetElement.dispatchEvent(myEvent) :
-        targetElement.fireEvent('onSubmit', myEvent);
     }
   });
 
