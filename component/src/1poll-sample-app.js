@@ -23,15 +23,14 @@
       { name: '\'<happy-hours> wednesday\'' }
     ],
     onSubmit: function(evt) {
-      // Create a event that can be handled from outside of the react component
-      var myEvent = document.createEventObject ?
-        document.createEventObject() :
-        document.createEvent("Events");
-      myEvent.initEvent('submit', true, true);
-      var targetElement = appDiv;
-      targetElement.dispatchEvent ?
-        targetElement.dispatchEvent(myEvent) :
-        targetElement.fireEvent('onSubmit', myEvent);
+      var selected = [];
+      var form = document.getElementsByTagName('form')[0];
+      for (var i=0; i<form.elements.length; ++i) {
+        if (form.elements[i].name == 'selected' && form.elements[i].checked) {
+          selected.push(form.elements[i].value);
+        }
+      }
+      alert('selected items:\n' + selected.join('\n'));
     }
   };
 
