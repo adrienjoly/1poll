@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+  // inpired by: https://github.com/callemall/material-ui/blob/master/examples/webpack-example/src/app/app.jsx
+  
   var React = require('react');
   var ReactDOM = require('react-dom');
   var injectTapEventPlugin = require('react-tap-event-plugin');
