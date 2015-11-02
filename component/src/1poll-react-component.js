@@ -30,11 +30,7 @@ module.exports = (function(){
   var Poll = React.createClass({
     getInitialState() {
       return {
-        options: [
-          { name: 'monday' },
-          { name: 'tuesday' },
-          { name: 'wednesday' }
-        ]
+        options: this.props.options || []
       };
     },
     render() {

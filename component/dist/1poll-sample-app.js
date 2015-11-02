@@ -60,11 +60,18 @@
 	  // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
 	  injectTapEventPlugin();
 
+	  var props = {
+	    options: [
+	      { name: 'monday, after school' },
+	      { name: 'tuesday, before "the arrival"' },
+	      { name: '\'<happy-hours> wednesday\'' }
+	    ]
+	  };
+
 	  // Render the main app react component into the app div.
 	  // For more details see: https://facebook.github.io/react/docs/top-level-api.html#react.render
-	  ReactDOM.render(React.createElement(Poll, {}), document.getElementById('app'));
+	  ReactDOM.render(React.createElement(Poll, props), document.getElementById('app'));
 
-	  console.log('1poll-sample-app loaded.');
 	})();
 
 
@@ -19946,19 +19953,15 @@
 	      name: 'selected',
 	      value: option.name,
 	      label: option.name,
-	      defaultChecked: option.checked,
+	      defaultChecked: option.defaultChecked,
 	      style: { marginTop: '16px' }
 	    });
 	  }
 
-	  return React.createClass({
+	  var Poll = React.createClass({
 	    getInitialState() {
 	      return {
-	        options: [
-	          { name: 'monday' },
-	          { name: 'tuesday' },
-	          { name: 'wednesday' }
-	        ]
+	        options: this.props.options || []
 	      };
 	    },
 	    render() {
@@ -19975,7 +19978,7 @@
 	          label: 'Submit',
 	          primary: true,
 	          style: { display: 'block' },
-	          onTouchTap: this._handleTouchTap
+	          onTouchTap: this._handleSubmit
 	        })
 	      ]));
 	    },
@@ -19984,11 +19987,11 @@
 	      this.setState({
 	        options: this.state.options.concat([ {
 	          name: evt.target.value,
-	          checked: true
+	          defaultChecked: true
 	        } ])
 	      });
 	    },
-	    _handleTouchTap(evt) {
+	    _handleSubmit(evt) {
 	      console.log('touché', this.state.options);
 	      // Create a event that can be handled from outside of the react component
 	      var myEvent = document.createEventObject ?
@@ -20002,6 +20005,8 @@
 	        targetElement.fireEvent('onSubmit', myEvent);
 	    }
 	  });
+
+	  return Poll;
 
 	})();
 

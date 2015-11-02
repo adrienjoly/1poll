@@ -68,19 +68,15 @@
 	      name: 'selected',
 	      value: option.name,
 	      label: option.name,
-	      defaultChecked: option.checked,
+	      defaultChecked: option.defaultChecked,
 	      style: { marginTop: '16px' }
 	    });
 	  }
 
-	  return React.createClass({
+	  var Poll = React.createClass({
 	    getInitialState() {
 	      return {
-	        options: [
-	          { name: 'monday' },
-	          { name: 'tuesday' },
-	          { name: 'wednesday' }
-	        ]
+	        options: this.props.options || []
 	      };
 	    },
 	    render() {
@@ -97,7 +93,7 @@
 	          label: 'Submit',
 	          primary: true,
 	          style: { display: 'block' },
-	          onTouchTap: this._handleTouchTap
+	          onTouchTap: this._handleSubmit
 	        })
 	      ]));
 	    },
@@ -106,11 +102,11 @@
 	      this.setState({
 	        options: this.state.options.concat([ {
 	          name: evt.target.value,
-	          checked: true
+	          defaultChecked: true
 	        } ])
 	      });
 	    },
-	    _handleTouchTap(evt) {
+	    _handleSubmit(evt) {
 	      console.log('touché', this.state.options);
 	      // Create a event that can be handled from outside of the react component
 	      var myEvent = document.createEventObject ?
@@ -124,6 +120,8 @@
 	        targetElement.fireEvent('onSubmit', myEvent);
 	    }
 	  });
+
+	  return Poll;
 
 	})();
 
