@@ -60,17 +60,30 @@
 	  // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
 	  injectTapEventPlugin();
 
+	  var appDiv = document.getElementById('app');
+
 	  var props = {
 	    options: [
 	      { name: 'monday, after school' },
 	      { name: 'tuesday, before "the arrival"' },
 	      { name: '\'<happy-hours> wednesday\'' }
-	    ]
+	    ],
+	    onSubmit: function(evt) {
+	      // Create a event that can be handled from outside of the react component
+	      var myEvent = document.createEventObject ?
+	        document.createEventObject() :
+	        document.createEvent("Events");
+	      myEvent.initEvent('submit', true, true);
+	      var targetElement = appDiv;
+	      targetElement.dispatchEvent ?
+	        targetElement.dispatchEvent(myEvent) :
+	        targetElement.fireEvent('onSubmit', myEvent);
+	    }
 	  };
 
 	  // Render the main app react component into the app div.
 	  // For more details see: https://facebook.github.io/react/docs/top-level-api.html#react.render
-	  ReactDOM.render(React.createElement(Poll, props), document.getElementById('app'));
+	  ReactDOM.render(React.createElement(Poll, props), appDiv);
 
 	})();
 
@@ -19932,6 +19945,7 @@
 	module.exports = (function(){
 	  'use strict';
 	  var React = __webpack_require__(1);
+	  var ReactDOM = __webpack_require__(158);
 	  var Paper = __webpack_require__(164);
 	  var Checkbox = __webpack_require__(184);
 	  var TextField = __webpack_require__(204);
@@ -19978,12 +19992,11 @@
 	          label: 'Submit',
 	          primary: true,
 	          style: { display: 'block' },
-	          onTouchTap: this._handleSubmit
+	          onTouchTap: this.props.onSubmit || this._handleSubmit
 	        })
 	      ]));
 	    },
 	    _handleAddOption(evt) {
-	      console.log('added', evt.target.value);
 	      this.setState({
 	        options: this.state.options.concat([ {
 	          name: evt.target.value,
@@ -19992,14 +20005,12 @@
 	      });
 	    },
 	    _handleSubmit(evt) {
-	      console.log('touché', this.state.options);
-	      // Create a event that can be handled from outside of the react component
+	      // Propagate event to component's submit handler(s), if any
 	      var myEvent = document.createEventObject ?
 	        document.createEventObject() :
 	        document.createEvent("Events");
 	      myEvent.initEvent('submit', true, true);
-	      var targetElement = evt.target;
-	      targetElement = document.getElementById('app');
+	      var targetElement = ReactDOM.findDOMNode(this); // || document.getElementById('app');
 	      targetElement.dispatchEvent ?
 	        targetElement.dispatchEvent(myEvent) :
 	        targetElement.fireEvent('onSubmit', myEvent);

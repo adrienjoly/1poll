@@ -31,11 +31,31 @@
                   </div>
                 </div>
                 <div class="row">
-                  <form>
-                    <div id='app' onsubmit="event.target.parentNode.submit();">
+                  <form action="#">
+                    <div id='app'>
                       <script src="../component/dist/1poll-sample-app.js"></script>
                     </div>
                   </form>
+                  <script>
+                    var form = document.getElementsByTagName('form')[0];
+                    function onFormSubmit(evt) {
+                      evt.preventDefault();
+                      var selected = [];
+                      for (var i=0; i<form.elements.length; ++i) {
+                        if (form.elements[i].name == 'selected' && form.elements[i].checked) {
+                          selected.push(form.elements[i].value);
+                        }
+                      }
+                      alert('selected: ' + selected.join(', '));
+                      return false;
+                    };
+                    var app = document.getElementById('app');
+                    if (app.attachEvent) {
+                        app.attachEvent("submit", onFormSubmit);
+                    } else {
+                        app.addEventListener("submit", onFormSubmit);
+                    }
+                  </script>
                 <!--
                   <form class="form form-horizontal user-signup__form" name="form" novalidate="" action="//adrienjoly.us12.list-manage.com/subscribe/post?u=c1cfafd58fc9699f6d5a661e2&amp;id=5ba23a5f2f" method="POST">
                     <div class="mt-table--full">

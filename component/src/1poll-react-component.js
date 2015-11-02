@@ -1,6 +1,7 @@
 module.exports = (function(){
   'use strict';
   var React = require('react');
+  var ReactDOM = require('react-dom');
   var Paper = require('material-ui/lib/paper');
   var Checkbox = require('material-ui/lib/checkbox');
   var TextField = require('material-ui/lib/text-field');
@@ -47,12 +48,11 @@ module.exports = (function(){
           label: 'Submit',
           primary: true,
           style: { display: 'block' },
-          onTouchTap: this._handleSubmit
+          onTouchTap: this.props.onSubmit || this._handleSubmit
         })
       ]));
     },
     _handleAddOption(evt) {
-      console.log('added', evt.target.value);
       this.setState({
         options: this.state.options.concat([ {
           name: evt.target.value,
@@ -61,14 +61,12 @@ module.exports = (function(){
       });
     },
     _handleSubmit(evt) {
-      console.log('touché', this.state.options);
-      // Create a event that can be handled from outside of the react component
+      // Propagate event to component's submit handler(s), if any
       var myEvent = document.createEventObject ?
         document.createEventObject() :
         document.createEvent("Events");
       myEvent.initEvent('submit', true, true);
-      var targetElement = evt.target;
-      targetElement = document.getElementById('app');
+      var targetElement = ReactDOM.findDOMNode(this); // || document.getElementById('app');
       targetElement.dispatchEvent ?
         targetElement.dispatchEvent(myEvent) :
         targetElement.fireEvent('onSubmit', myEvent);
