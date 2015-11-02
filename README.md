@@ -10,4 +10,15 @@ The `gh-pages` branch of this repository contains:
 - The `1poll` react component, as defined in [the component subdirectory](https://github.com/adrienjoly/1poll/tree/gh-pages/component);
 - A [demo page](http://adrienjoly.com/1poll/demo) to demonstrate the use of the `1poll` component.
 
-**Feel free to fork and use this component! :-)**
+## Component API reference
+
+### Properties
+
+- `options`: an Array of Objects that accept the following fields:
+  - `name`: (String) name of the option, seen as a checkbox.
+  - `defaultChecked`: (Boolean) true if the checkbox should be checked initially.
+- `onSubmit`: a Function that will be called when the user clicks the Submit button.
+
+### Events
+
+- `submit`: fired when the user clicks the Submit button.
