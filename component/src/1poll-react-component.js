@@ -27,7 +27,7 @@ module.exports = (function(){
     });
   }
 
-  return React.createClass({
+  var Poll = React.createClass({
     getInitialState() {
       return {
         options: [
@@ -78,5 +78,7 @@ module.exports = (function(){
         targetElement.fireEvent('onSubmit', myEvent);
     }
   });
+
+  return Poll;
 
 })();
