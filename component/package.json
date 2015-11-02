@@ -4,6 +4,7 @@
   "description": "A simple doodle-like poll component that makes it easy for contributors to add more options.",
   "scripts": {
     "build": "webpack ./src/1poll-react-component.js ./dist/1poll-react-component.js --progress --colors",
+    "build-app": "webpack ./src/1poll-sample-app.js ./dist/1poll-sample-app.js --progress --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

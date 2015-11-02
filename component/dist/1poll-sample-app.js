@@ -44,29 +44,25 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = (function(){
+	(function(){
 	  'use strict';
 	  var React = __webpack_require__(1);
-	  var RaisedButton = __webpack_require__(158);
+	  var ReactDOM = __webpack_require__(158);
+	  var injectTapEventPlugin = __webpack_require__(159);
+	  var Poll = __webpack_require__(163);
 
-	  console.log('1poll-react-component loaded.');
+	  // Needed for React Developer Tools
+	  window.React = React;
 
-	  return React.createClass({
-	    render() {
-	      return (
-	        // TODO: add checkboxes
-	        React.createElement(RaisedButton, {
-	          label: 'Sample button',
-	          primary: true,
-	          onTouchTap: this._handleTouchTap
-	        })
-	      );
-	    },
-	    _handleTouchTap() {
-	      alert('touché');
-	    },
-	  });
+	  // Needed for onTouchTap
+	  // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
+	  injectTapEventPlugin();
 
+	  // Render the main app react component into the app div.
+	  // For more details see: https://facebook.github.io/react/docs/top-level-api.html#react.render
+	  ReactDOM.render(React.createElement(Poll, {}), document.getElementById('app'));
+
+	  console.log('1poll-sample-app loaded.');
 	})();
 
 
@@ -19643,20 +19639,333 @@
 
 	'use strict';
 
+	module.exports = __webpack_require__(3);
+
+
+/***/ },
+/* 159 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function injectTapEventPlugin () {
+	  __webpack_require__(31).injection.injectEventPluginsByName({
+	    "TapEventPlugin":       __webpack_require__(160)
+	  });
+	};
+
+
+/***/ },
+/* 160 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2014 Facebook, Inc.
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 *
+	 * @providesModule TapEventPlugin
+	 * @typechecks static-only
+	 */
+
+	"use strict";
+
+	var EventConstants = __webpack_require__(30);
+	var EventPluginUtils = __webpack_require__(33);
+	var EventPropagators = __webpack_require__(73);
+	var SyntheticUIEvent = __webpack_require__(87);
+	var TouchEventUtils = __webpack_require__(161);
+	var ViewportMetrics = __webpack_require__(38);
+
+	var keyOf = __webpack_require__(162);
+	var topLevelTypes = EventConstants.topLevelTypes;
+
+	var isStartish = EventPluginUtils.isStartish;
+	var isEndish = EventPluginUtils.isEndish;
+
+	var isTouch = function(topLevelType) {
+	  var touchTypes = [
+	    topLevelTypes.topTouchCancel,
+	    topLevelTypes.topTouchEnd,
+	    topLevelTypes.topTouchStart,
+	    topLevelTypes.topTouchMove
+	  ];
+	  return touchTypes.indexOf(topLevelType) >= 0;
+	}
+
+	/**
+	 * Number of pixels that are tolerated in between a `touchStart` and `touchEnd`
+	 * in order to still be considered a 'tap' event.
+	 */
+	var tapMoveThreshold = 10;
+	var ignoreMouseThreshold = 750;
+	var startCoords = {x: null, y: null};
+	var lastTouchEvent = null;
+
+	var Axis = {
+	  x: {page: 'pageX', client: 'clientX', envScroll: 'currentPageScrollLeft'},
+	  y: {page: 'pageY', client: 'clientY', envScroll: 'currentPageScrollTop'}
+	};
+
+	function getAxisCoordOfEvent(axis, nativeEvent) {
+	  var singleTouch = TouchEventUtils.extractSingleTouch(nativeEvent);
+	  if (singleTouch) {
+	    return singleTouch[axis.page];
+	  }
+	  return axis.page in nativeEvent ?
+	    nativeEvent[axis.page] :
+	    nativeEvent[axis.client] + ViewportMetrics[axis.envScroll];
+	}
+
+	function getDistance(coords, nativeEvent) {
+	  var pageX = getAxisCoordOfEvent(Axis.x, nativeEvent);
+	  var pageY = getAxisCoordOfEvent(Axis.y, nativeEvent);
+	  return Math.pow(
+	    Math.pow(pageX - coords.x, 2) + Math.pow(pageY - coords.y, 2),
+	    0.5
+	  );
+	}
+
+	var touchEvents = [
+	  topLevelTypes.topTouchStart,
+	  topLevelTypes.topTouchCancel,
+	  topLevelTypes.topTouchEnd,
+	  topLevelTypes.topTouchMove,
+	];
+
+	var dependencies = [
+	  topLevelTypes.topMouseDown,
+	  topLevelTypes.topMouseMove,
+	  topLevelTypes.topMouseUp,
+	].concat(touchEvents);
+
+	var eventTypes = {
+	  touchTap: {
+	    phasedRegistrationNames: {
+	      bubbled: keyOf({onTouchTap: null}),
+	      captured: keyOf({onTouchTapCapture: null})
+	    },
+	    dependencies: dependencies
+	  }
+	};
+
+	var now = (function() {
+	  if (Date.now) {
+	    return Date.now;
+	  } else {
+	    // IE8 support: http://stackoverflow.com/questions/9430357/please-explain-why-and-how-new-date-works-as-workaround-for-date-now-in
+	    return function () {
+	      return +new Date;
+	    }
+	  }
+	})();
+
+	var TapEventPlugin = {
+
+	  tapMoveThreshold: tapMoveThreshold,
+
+	  ignoreMouseThreshold: ignoreMouseThreshold,
+
+	  eventTypes: eventTypes,
+
+	  /**
+	   * @param {string} topLevelType Record from `EventConstants`.
+	   * @param {DOMEventTarget} topLevelTarget The listening component root node.
+	   * @param {string} topLevelTargetID ID of `topLevelTarget`.
+	   * @param {object} nativeEvent Native browser event.
+	   * @return {*} An accumulation of synthetic events.
+	   * @see {EventPluginHub.extractEvents}
+	   */
+	  extractEvents: function(
+	      topLevelType,
+	      topLevelTarget,
+	      topLevelTargetID,
+	      nativeEvent,
+	      nativeEventTarget) {
+
+	    if (isTouch(topLevelType)) {
+	      lastTouchEvent = now();
+	    } else {
+	      if (lastTouchEvent && (now() - lastTouchEvent) < ignoreMouseThreshold) {
+	        return null;
+	      }
+	    }
+
+	    if (!isStartish(topLevelType) && !isEndish(topLevelType)) {
+	      return null;
+	    }
+	    var event = null;
+	    var distance = getDistance(startCoords, nativeEvent);
+	    if (isEndish(topLevelType) && distance < tapMoveThreshold) {
+	      event = SyntheticUIEvent.getPooled(
+	        eventTypes.touchTap,
+	        topLevelTargetID,
+	        nativeEvent,
+	        nativeEventTarget
+	      );
+	    }
+	    if (isStartish(topLevelType)) {
+	      startCoords.x = getAxisCoordOfEvent(Axis.x, nativeEvent);
+	      startCoords.y = getAxisCoordOfEvent(Axis.y, nativeEvent);
+	    } else if (isEndish(topLevelType)) {
+	      startCoords.x = 0;
+	      startCoords.y = 0;
+	    }
+	    EventPropagators.accumulateTwoPhaseDispatches(event);
+	    return event;
+	  }
+
+	};
+
+	module.exports = TapEventPlugin;
+
+
+/***/ },
+/* 161 */
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2014 Facebook, Inc.
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 * http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 *
+	 * @providesModule TouchEventUtils
+	 */
+
+	var TouchEventUtils = {
+	  /**
+	   * Utility function for common case of extracting out the primary touch from a
+	   * touch event.
+	   * - `touchEnd` events usually do not have the `touches` property.
+	   *   http://stackoverflow.com/questions/3666929/
+	   *   mobile-sarai-touchend-event-not-firing-when-last-touch-is-removed
+	   *
+	   * @param {Event} nativeEvent Native event that may or may not be a touch.
+	   * @return {TouchesObject?} an object with pageX and pageY or null.
+	   */
+	  extractSingleTouch: function(nativeEvent) {
+	    var touches = nativeEvent.touches;
+	    var changedTouches = nativeEvent.changedTouches;
+	    var hasTouches = touches && touches.length > 0;
+	    var hasChangedTouches = changedTouches && changedTouches.length > 0;
+
+	    return !hasTouches && hasChangedTouches ? changedTouches[0] :
+	           hasTouches ? touches[0] :
+	           nativeEvent;
+	  }
+	};
+
+	module.exports = TouchEventUtils;
+
+
+/***/ },
+/* 162 */
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule keyOf
+	 */
+
+	/**
+	 * Allows extraction of a minified key. Let's the build system minify keys
+	 * without losing the ability to dynamically use key strings as values
+	 * themselves. Pass in an object with a single key/val pair and it will return
+	 * you the string key of that single record. Suppose you want to grab the
+	 * value for a key 'className' inside of an object. Key/val minification may
+	 * have aliased that key to be 'xa12'. keyOf({className: null}) will return
+	 * 'xa12' in that case. Resolve keys you want to use once at startup time, then
+	 * reuse those resolutions.
+	 */
+	"use strict";
+
+	var keyOf = function (oneKeyObj) {
+	  var key;
+	  for (key in oneKeyObj) {
+	    if (!oneKeyObj.hasOwnProperty(key)) {
+	      continue;
+	    }
+	    return key;
+	  }
+	  return null;
+	};
+
+	module.exports = keyOf;
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = (function(){
+	  'use strict';
+	  var React = __webpack_require__(1);
+	  var RaisedButton = __webpack_require__(164);
+
+	  console.log('1poll-react-component loaded.');
+
+	  return React.createClass({
+	    render() {
+	      return (
+	        // TODO: add checkboxes
+	        React.createElement(RaisedButton, {
+	          label: 'Sample button',
+	          primary: true,
+	          onTouchTap: this._handleTouchTap
+	        })
+	      );
+	    },
+	    _handleTouchTap() {
+	      alert('touché');
+	    },
+	  });
+
+	})();
+
+
+/***/ },
+/* 164 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(159);
-	var StylePropable = __webpack_require__(160);
-	var Transitions = __webpack_require__(168);
-	var ColorManipulator = __webpack_require__(169);
-	var Typography = __webpack_require__(170);
-	var EnhancedButton = __webpack_require__(172);
-	var Paper = __webpack_require__(194);
-	var DefaultRawTheme = __webpack_require__(187);
-	var ThemeManager = __webpack_require__(189);
+	var ReactDOM = __webpack_require__(158);
+	var StylePropable = __webpack_require__(165);
+	var Transitions = __webpack_require__(173);
+	var ColorManipulator = __webpack_require__(174);
+	var Typography = __webpack_require__(175);
+	var EnhancedButton = __webpack_require__(177);
+	var Paper = __webpack_require__(199);
+	var DefaultRawTheme = __webpack_require__(192);
+	var ThemeManager = __webpack_require__(194);
 
 	function validateLabel(props, propName, componentName) {
 	  if (!props.children && !props.label) {
@@ -19905,23 +20214,14 @@
 	module.exports = RaisedButton;
 
 /***/ },
-/* 159 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = __webpack_require__(3);
-
-
-/***/ },
-/* 160 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var ImmutabilityHelper = __webpack_require__(161);
-	var Styles = __webpack_require__(164);
+	var ImmutabilityHelper = __webpack_require__(166);
+	var Styles = __webpack_require__(169);
 
 	// This mixin isn't necessary and will be removed in v0.11
 
@@ -19959,13 +20259,13 @@
 	};
 
 /***/ },
-/* 161 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var update = __webpack_require__(162);
+	var update = __webpack_require__(167);
 
 	function mergeSingle(objA, objB) {
 	  if (!objA) return objB;
@@ -20005,13 +20305,13 @@
 	};
 
 /***/ },
-/* 162 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(163);
+	module.exports = __webpack_require__(168);
 
 /***/ },
-/* 163 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20124,13 +20424,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 164 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
-	var AutoPrefix = __webpack_require__(165);
-	var ImmutabilityHelper = __webpack_require__(161);
+	var AutoPrefix = __webpack_require__(170);
+	var ImmutabilityHelper = __webpack_require__(166);
 
 	var reTranslate = /((^|\s)translate(3d|X)?\()(\-?[\d]+)/;
 
@@ -20233,14 +20533,14 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 165 */
+/* 170 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var isBrowser = __webpack_require__(166);
+	var isBrowser = __webpack_require__(171);
 
-	var Modernizr = isBrowser ? __webpack_require__(167) : undefined;
+	var Modernizr = isBrowser ? __webpack_require__(172) : undefined;
 
 	//Keep track of already prefixed keys so we can skip Modernizr prefixing
 	var prefixedKeys = {};
@@ -20291,7 +20591,7 @@
 	};
 
 /***/ },
-/* 166 */
+/* 171 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20299,7 +20599,7 @@
 	module.exports = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
 
 /***/ },
-/* 167 */
+/* 172 */
 /***/ function(module, exports) {
 
 	/* Modernizr 2.8.3 (Custom Build) | MIT & BSD
@@ -20563,12 +20863,12 @@
 	})(window, window.document);
 
 /***/ },
-/* 168 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var AutoPrefix = __webpack_require__(165);
+	var AutoPrefix = __webpack_require__(170);
 
 	module.exports = {
 
@@ -20603,7 +20903,7 @@
 	};
 
 /***/ },
-/* 169 */
+/* 174 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20782,14 +21082,14 @@
 	};
 
 /***/ },
-/* 170 */
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	var Colors = __webpack_require__(171);
+	var Colors = __webpack_require__(176);
 
 	var Typography = function Typography() {
 	  _classCallCheck(this, Typography);
@@ -20814,7 +21114,7 @@
 	module.exports = new Typography();
 
 /***/ },
-/* 171 */
+/* 176 */
 /***/ function(module, exports) {
 
 	// To include this file in your project:
@@ -21114,7 +21414,7 @@
 	};
 
 /***/ },
-/* 172 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21124,16 +21424,16 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var PureRenderMixin = __webpack_require__(173);
-	var StylePropable = __webpack_require__(160);
-	var Colors = __webpack_require__(171);
-	var Children = __webpack_require__(176);
-	var Events = __webpack_require__(179);
-	var KeyCode = __webpack_require__(180);
-	var FocusRipple = __webpack_require__(181);
-	var TouchRipple = __webpack_require__(191);
-	var DefaultRawTheme = __webpack_require__(187);
-	var ThemeManager = __webpack_require__(189);
+	var PureRenderMixin = __webpack_require__(178);
+	var StylePropable = __webpack_require__(165);
+	var Colors = __webpack_require__(176);
+	var Children = __webpack_require__(181);
+	var Events = __webpack_require__(184);
+	var KeyCode = __webpack_require__(185);
+	var FocusRipple = __webpack_require__(186);
+	var TouchRipple = __webpack_require__(196);
+	var DefaultRawTheme = __webpack_require__(192);
+	var ThemeManager = __webpack_require__(194);
 
 	var styleInjected = false;
 	var listening = false;
@@ -21419,13 +21719,13 @@
 	module.exports = EnhancedButton;
 
 /***/ },
-/* 173 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(174);
+	module.exports = __webpack_require__(179);
 
 /***/ },
-/* 174 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21441,7 +21741,7 @@
 
 	'use strict';
 
-	var shallowCompare = __webpack_require__(175);
+	var shallowCompare = __webpack_require__(180);
 
 	/**
 	 * If your React component's render function is "pure", e.g. it will render the
@@ -21476,7 +21776,7 @@
 	module.exports = ReactComponentWithPureRenderMixin;
 
 /***/ },
-/* 175 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21505,13 +21805,13 @@
 	module.exports = shallowCompare;
 
 /***/ },
-/* 176 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var createFragment = __webpack_require__(177);
+	var createFragment = __webpack_require__(182);
 
 	module.exports = {
 
@@ -21551,13 +21851,13 @@
 	};
 
 /***/ },
-/* 177 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(178).create;
+	module.exports = __webpack_require__(183).create;
 
 /***/ },
-/* 178 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -21627,7 +21927,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 179 */
+/* 184 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -21672,7 +21972,7 @@
 	};
 
 /***/ },
-/* 180 */
+/* 185 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -21689,19 +21989,19 @@
 	};
 
 /***/ },
-/* 181 */
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(159);
-	var PureRenderMixin = __webpack_require__(173);
-	var StylePropable = __webpack_require__(160);
-	var AutoPrefix = __webpack_require__(165);
-	var Colors = __webpack_require__(171);
-	var Transitions = __webpack_require__(168);
-	var ScaleInTransitionGroup = __webpack_require__(182);
+	var ReactDOM = __webpack_require__(158);
+	var PureRenderMixin = __webpack_require__(178);
+	var StylePropable = __webpack_require__(165);
+	var AutoPrefix = __webpack_require__(170);
+	var Colors = __webpack_require__(176);
+	var Transitions = __webpack_require__(173);
+	var ScaleInTransitionGroup = __webpack_require__(187);
 
 	var pulsateDuration = 750;
 
@@ -21819,7 +22119,7 @@
 	module.exports = FocusRipple;
 
 /***/ },
-/* 182 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21829,12 +22129,12 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var PureRenderMixin = __webpack_require__(173);
-	var ReactTransitionGroup = __webpack_require__(183);
-	var StylePropable = __webpack_require__(160);
-	var ScaleInChild = __webpack_require__(186);
-	var DefaultRawTheme = __webpack_require__(187);
-	var ThemeManager = __webpack_require__(189);
+	var PureRenderMixin = __webpack_require__(178);
+	var ReactTransitionGroup = __webpack_require__(188);
+	var StylePropable = __webpack_require__(165);
+	var ScaleInChild = __webpack_require__(191);
+	var DefaultRawTheme = __webpack_require__(192);
+	var ThemeManager = __webpack_require__(194);
 
 	var ScaleIn = React.createClass({
 	  displayName: 'ScaleIn',
@@ -21926,13 +22226,13 @@
 	module.exports = ScaleIn;
 
 /***/ },
-/* 183 */
+/* 188 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(184);
+	module.exports = __webpack_require__(189);
 
 /***/ },
-/* 184 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -21949,7 +22249,7 @@
 	'use strict';
 
 	var React = __webpack_require__(2);
-	var ReactTransitionChildMapping = __webpack_require__(185);
+	var ReactTransitionChildMapping = __webpack_require__(190);
 
 	var assign = __webpack_require__(39);
 	var emptyFunction = __webpack_require__(15);
@@ -22142,7 +22442,7 @@
 	module.exports = ReactTransitionGroup;
 
 /***/ },
-/* 185 */
+/* 190 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22245,7 +22545,7 @@
 	module.exports = ReactTransitionChildMapping;
 
 /***/ },
-/* 186 */
+/* 191 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22255,13 +22555,13 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(159);
-	var PureRenderMixin = __webpack_require__(173);
-	var StylePropable = __webpack_require__(160);
-	var AutoPrefix = __webpack_require__(165);
-	var Transitions = __webpack_require__(168);
-	var DefaultRawTheme = __webpack_require__(187);
-	var ThemeManager = __webpack_require__(189);
+	var ReactDOM = __webpack_require__(158);
+	var PureRenderMixin = __webpack_require__(178);
+	var StylePropable = __webpack_require__(165);
+	var AutoPrefix = __webpack_require__(170);
+	var Transitions = __webpack_require__(173);
+	var DefaultRawTheme = __webpack_require__(192);
+	var ThemeManager = __webpack_require__(194);
 
 	var ScaleInChild = React.createClass({
 	  displayName: 'ScaleInChild',
@@ -22388,14 +22688,14 @@
 	module.exports = ScaleInChild;
 
 /***/ },
-/* 187 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Colors = __webpack_require__(171);
-	var ColorManipulator = __webpack_require__(169);
-	var Spacing = __webpack_require__(188);
+	var Colors = __webpack_require__(176);
+	var ColorManipulator = __webpack_require__(174);
+	var Spacing = __webpack_require__(193);
 
 	/*
 	 *  Light Theme is the default theme used in material-ui. It is guaranteed to
@@ -22422,7 +22722,7 @@
 	};
 
 /***/ },
-/* 188 */
+/* 193 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22443,15 +22743,15 @@
 	};
 
 /***/ },
-/* 189 */
+/* 194 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Colors = __webpack_require__(171);
-	var ColorManipulator = __webpack_require__(169);
-	var Extend = __webpack_require__(190);
-	var update = __webpack_require__(162);
+	var Colors = __webpack_require__(176);
+	var ColorManipulator = __webpack_require__(174);
+	var Extend = __webpack_require__(195);
+	var update = __webpack_require__(167);
 
 	module.exports = {
 
@@ -22694,7 +22994,7 @@
 	};
 
 /***/ },
-/* 190 */
+/* 195 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22748,19 +23048,19 @@
 	module.exports = extend;
 
 /***/ },
-/* 191 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(159);
-	var PureRenderMixin = __webpack_require__(173);
-	var ReactTransitionGroup = __webpack_require__(183);
-	var StylePropable = __webpack_require__(160);
-	var Dom = __webpack_require__(192);
-	var ImmutabilityHelper = __webpack_require__(161);
-	var CircleRipple = __webpack_require__(193);
+	var ReactDOM = __webpack_require__(158);
+	var PureRenderMixin = __webpack_require__(178);
+	var ReactTransitionGroup = __webpack_require__(188);
+	var StylePropable = __webpack_require__(165);
+	var Dom = __webpack_require__(197);
+	var ImmutabilityHelper = __webpack_require__(166);
+	var CircleRipple = __webpack_require__(198);
 
 	var TouchRipple = React.createClass({
 	  displayName: 'TouchRipple',
@@ -22914,7 +23214,7 @@
 	module.exports = TouchRipple;
 
 /***/ },
-/* 192 */
+/* 197 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22991,7 +23291,7 @@
 	};
 
 /***/ },
-/* 193 */
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23001,12 +23301,12 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(159);
-	var PureRenderMixin = __webpack_require__(173);
-	var StylePropable = __webpack_require__(160);
-	var AutoPrefix = __webpack_require__(165);
-	var Transitions = __webpack_require__(168);
-	var Colors = __webpack_require__(171);
+	var ReactDOM = __webpack_require__(158);
+	var PureRenderMixin = __webpack_require__(178);
+	var StylePropable = __webpack_require__(165);
+	var AutoPrefix = __webpack_require__(170);
+	var Transitions = __webpack_require__(173);
+	var Colors = __webpack_require__(176);
 
 	var CircleRipple = React.createClass({
 	  displayName: 'CircleRipple',
@@ -23095,7 +23395,7 @@
 	module.exports = CircleRipple;
 
 /***/ },
-/* 194 */
+/* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23105,12 +23405,12 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var PureRenderMixin = __webpack_require__(173);
-	var StylePropable = __webpack_require__(160);
-	var PropTypes = __webpack_require__(195);
-	var Transitions = __webpack_require__(168);
-	var DefaultRawTheme = __webpack_require__(187);
-	var ThemeManager = __webpack_require__(189);
+	var PureRenderMixin = __webpack_require__(178);
+	var StylePropable = __webpack_require__(165);
+	var PropTypes = __webpack_require__(200);
+	var Transitions = __webpack_require__(173);
+	var DefaultRawTheme = __webpack_require__(192);
+	var ThemeManager = __webpack_require__(194);
 
 	var Paper = React.createClass({
 	  displayName: 'Paper',
@@ -23200,7 +23500,7 @@
 	module.exports = Paper;
 
 /***/ },
-/* 195 */
+/* 200 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
