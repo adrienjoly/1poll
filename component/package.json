@@ -1,0 +1,43 @@
+{
+  "name": "react-1poll",
+  "version": "0.0.1",
+  "description": "A simple doodle-like poll component that makes it easy for contributors to add more options.",
+  "scripts": {
+    "build": "webpack ./src/1poll-react-component.js ./dist/1poll-react-component.js --progress --colors",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adrienjoly/1poll.git"
+  },
+  "keywords": [
+    "poll",
+    "survey",
+    "doodle",
+    "vote",
+    "options",
+    "scheduling",
+    "collaboration",
+    "collaborative",
+    "list",
+    "doodle",
+    "react"
+  ],
+  "author": "Adrien Joly <contact@adrienjoly.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adrienjoly/1poll/issues"
+  },
+  "homepage": "https://github.com/adrienjoly/1poll#readme",
+  "devDependencies": {
+    "material-ui": "^0.13.1",
+    "react": "^0.14.1",
+    "react-addons-create-fragment": "^0.14.1",
+    "react-addons-pure-render-mixin": "^0.14.1",
+    "react-addons-transition-group": "^0.14.1",
+    "react-addons-update": "^0.14.1",
+    "react-dom": "^0.14.1",
+    "react-tap-event-plugin": "^0.2.1",
+    "webpack": "^1.12.2"
+  }
+}
