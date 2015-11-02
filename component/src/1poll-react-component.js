@@ -51,7 +51,7 @@ module.exports = (function(){
           label: 'Submit',
           primary: true,
           style: { display: 'block' },
-          onTouchTap: this._handleTouchTap
+          onTouchTap: this._handleSubmit
         })
       ]));
     },
@@ -64,7 +64,7 @@ module.exports = (function(){
         } ])
       });
     },
-    _handleTouchTap(evt) {
+    _handleSubmit(evt) {
       console.log('touché', this.state.options);
       // Create a event that can be handled from outside of the react component
       var myEvent = document.createEventObject ?
