@@ -22,7 +22,7 @@ module.exports = (function(){
       name: 'selected',
       value: option.name,
       label: option.name,
-      defaultChecked: option.checked,
+      defaultChecked: option.defaultChecked,
       style: { marginTop: '16px' }
     });
   }
@@ -60,7 +60,7 @@ module.exports = (function(){
       this.setState({
         options: this.state.options.concat([ {
           name: evt.target.value,
-          checked: true
+          defaultChecked: true
         } ])
       });
     },
