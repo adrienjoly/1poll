@@ -23548,16 +23548,6 @@
 	    return React.createElement.apply(React, divContainer.concat(children));
 	  }
 
-	  function renderOption(option) {
-	    return React.createElement(Checkbox, {
-	      name: 'selected',
-	      value: option.name,
-	      label: option.name,
-	      defaultChecked: option.defaultChecked,
-	      style: { marginTop: '16px' }
-	    });
-	  }
-
 	  var Poll = React.createClass({
 	    getInitialState() {
 	      return {
@@ -23565,7 +23555,7 @@
 	      };
 	    },
 	    render() {
-	      return renderComponent(this.state.options.map(renderOption).concat([
+	      return renderComponent(this.state.options.map(this._renderOption.bind(this)).concat([
 	        React.createElement(TextField, {
 	          hintText: 'Add an option',
 	          onEnterKeyDown: this._handleAddOption,
@@ -23575,6 +23565,16 @@
 	          }
 	        })
 	      ]));
+	    },
+	    _renderOption(option) {
+	      return React.createElement(Checkbox, {
+	        name: 'selected',
+	        value: option.name,
+	        label: option.name,
+	        defaultChecked: option.defaultChecked,
+	        labelStyle: this.props.labelStyle,
+	        style: { marginTop: '16px' }
+	      });
 	    },
 	    _handleAddOption(evt) {
 	      this.setState({

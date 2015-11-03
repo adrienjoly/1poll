@@ -17,3 +17,4 @@ The `gh-pages` branch of this repository contains:
 - `options`: an Array of Objects that accept the following fields:
   - `name`: (String) name of the option, seen as a checkbox.
   - `defaultChecked`: (Boolean) true if the checkbox should be checked initially.
+- `labelStyle`: an optional Object to override the inline-style of the Checkbox labels.
