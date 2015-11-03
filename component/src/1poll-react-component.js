@@ -14,7 +14,8 @@ module.exports = (function(){
     getDefaultProps() {
       return {
         options: [],
-        labelStyle: undefined
+        labelStyle: undefined,
+        onNewOption: undefined // function({ name: String, defaultChecked: Boolean }) that should update this.props.options
       };
     },
     render() {
@@ -40,11 +41,9 @@ module.exports = (function(){
       });
     },
     _handleAddOption(evt) {
-      this.setProps({
-        options: this.props.options.concat([ {
-          name: evt.target.value,
-          defaultChecked: true
-        } ])
+      this.props.onNewOption({
+        name: evt.target.value,
+        defaultChecked: true
       });
     }
   });

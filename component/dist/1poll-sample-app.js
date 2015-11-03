@@ -79,6 +79,12 @@
 	    alert('selected items:\n' + selected.join('\n'));
 	  }
 
+	  var DEFAULT_ITEMS = [
+	    { name: 'monday, after school' },
+	    { name: 'tuesday, before "the arrival"' },
+	    { name: '\'<happy-hours> wednesday\'' }
+	  ];
+
 	  var paperProps = {
 	    style: {
 	      padding: '16px',
@@ -86,25 +92,37 @@
 	    }
 	  };
 
-	  var pollForm = React.createElement(Paper, paperProps,
-	    React.createElement(Poll, {
-	      options: [
-	        { name: 'monday, after school' },
-	        { name: 'tuesday, before "the arrival"' },
-	        { name: '\'<happy-hours> wednesday\'' }
-	      ]
-	    }),
-	    React.createElement(RaisedButton, {
-	      label: 'Submit',
-	      primary: true,
-	      style: { display: 'block' },
-	      onTouchTap: onSubmit
-	    })
-	  );
+	  var App = React.createClass({
+	    getInitialState() {
+	      return {
+	        options: DEFAULT_ITEMS
+	      };
+	    },
+	    render() {
+	      return React.createElement(Paper, paperProps,
+	        React.createElement(Poll, {
+	          options: this.state.options,
+	          onNewOption: this.onNewOption
+	        }),
+	        React.createElement(RaisedButton, {
+	          label: 'Submit',
+	          primary: true,
+	          style: { display: 'block' },
+	          onTouchTap: onSubmit
+	        })
+	      );
+	    },
+	    onNewOption(newOption) {
+	      this.setState({
+	        options: this.state.options.concat([ newOption ])
+	      });
+	    }
+	  });
+	  
 
 	  // Render the main app react component into the app div.
 	  // For more details see: https://facebook.github.io/react/docs/top-level-api.html#react.render
-	  ReactDOM.render(pollForm, appDiv);
+	  ReactDOM.render(React.createElement(App), appDiv);
 
 	})();
 
@@ -23552,7 +23570,8 @@
 	    getDefaultProps() {
 	      return {
 	        options: [],
-	        labelStyle: undefined
+	        labelStyle: undefined,
+	        onNewOption: undefined // function({ name: String, defaultChecked: Boolean }) that should update this.props.options
 	      };
 	    },
 	    render() {
@@ -23578,11 +23597,9 @@
 	      });
 	    },
 	    _handleAddOption(evt) {
-	      this.setProps({
-	        options: this.props.options.concat([ {
-	          name: evt.target.value,
-	          defaultChecked: true
-	        } ])
+	      this.props.onNewOption({
+	        name: evt.target.value,
+	        defaultChecked: true
 	      });
 	    }
 	  });
