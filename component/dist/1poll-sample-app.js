@@ -23549,13 +23549,14 @@
 	  }
 
 	  var Poll = React.createClass({
-	    getInitialState() {
+	    getDefaultProps() {
 	      return {
-	        options: this.props.options || []
+	        options: [],
+	        labelStyle: undefined
 	      };
 	    },
 	    render() {
-	      return renderComponent(this.state.options.map(this._renderOption.bind(this)).concat([
+	      return renderComponent(this.props.options.map(this._renderOption).concat([
 	        React.createElement(TextField, {
 	          hintText: 'Add an option',
 	          onEnterKeyDown: this._handleAddOption,
@@ -23577,8 +23578,8 @@
 	      });
 	    },
 	    _handleAddOption(evt) {
-	      this.setState({
-	        options: this.state.options.concat([ {
+	      this.setProps({
+	        options: this.props.options.concat([ {
 	          name: evt.target.value,
 	          defaultChecked: true
 	        } ])

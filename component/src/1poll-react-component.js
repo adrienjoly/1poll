@@ -11,9 +11,10 @@ module.exports = (function(){
   }
 
   var Poll = React.createClass({
-    getInitialState() {
+    getDefaultProps() {
       return {
-        options: this.props.options || []
+        options: [],
+        labelStyle: undefined
       };
     },
     render() {
@@ -39,8 +40,8 @@ module.exports = (function(){
       });
     },
     _handleAddOption(evt) {
-      this.setState({
-        options: this.state.options.concat([ {
+      this.setProps({
+        options: this.props.options.concat([ {
           name: evt.target.value,
           defaultChecked: true
         } ])
