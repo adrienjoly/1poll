@@ -1,7 +1,6 @@
 module.exports = (function(){
   'use strict';
   var React = require('react');
-  var ReactDOM = require('react-dom');
   var Checkbox = require('material-ui/lib/checkbox');
   var TextField = require('material-ui/lib/text-field');
 
@@ -11,14 +10,14 @@ module.exports = (function(){
   }
 
   var Poll = React.createClass({
-    getDefaultProps() {
+    getDefaultProps: function() {
       return {
         options: [],
         labelStyle: undefined,
         onNewOption: undefined // function({ name: String, defaultChecked: Boolean }) that should update this.props.options
       };
     },
-    render() {
+    render: function() {
       return renderComponent(this.props.options.map(this._renderOption).concat([
         React.createElement(TextField, {
           hintText: 'Add an option',
@@ -30,7 +29,7 @@ module.exports = (function(){
         })
       ]));
     },
-    _renderOption(option) {
+    _renderOption: function(option) {
       return React.createElement(Checkbox, {
         name: 'selected',
         value: option.name,
@@ -40,7 +39,7 @@ module.exports = (function(){
         style: { marginTop: '16px' }
       });
     },
-    _handleAddOption(evt) {
+    _handleAddOption: function(evt) {
       this.props.onNewOption({
         name: evt.target.value,
         defaultChecked: true

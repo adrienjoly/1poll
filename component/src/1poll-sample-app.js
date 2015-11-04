@@ -47,12 +47,12 @@
   };
 
   var App = React.createClass({
-    getInitialState() {
+    getInitialState: function() {
       return {
         options: DEFAULT_ITEMS
       };
     },
-    render() {
+    render: function() {
       return React.createElement(Paper, paperProps,
         React.createElement(Poll, {
           options: this.state.options,
@@ -66,7 +66,7 @@
         })
       );
     },
-    onNewOption(newOption) {
+    onNewOption: function(newOption) {
       this.setState({
         options: this.state.options.concat([ newOption ])
       });

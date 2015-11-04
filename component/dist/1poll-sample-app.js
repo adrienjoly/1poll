@@ -93,12 +93,12 @@
 	  };
 
 	  var App = React.createClass({
-	    getInitialState() {
+	    getInitialState: function() {
 	      return {
 	        options: DEFAULT_ITEMS
 	      };
 	    },
-	    render() {
+	    render: function() {
 	      return React.createElement(Paper, paperProps,
 	        React.createElement(Poll, {
 	          options: this.state.options,
@@ -112,7 +112,7 @@
 	        })
 	      );
 	    },
-	    onNewOption(newOption) {
+	    onNewOption: function(newOption) {
 	      this.setState({
 	        options: this.state.options.concat([ newOption ])
 	      });
@@ -23557,7 +23557,6 @@
 	module.exports = (function(){
 	  'use strict';
 	  var React = __webpack_require__(1);
-	  var ReactDOM = __webpack_require__(158);
 	  var Checkbox = __webpack_require__(201);
 	  var TextField = __webpack_require__(210);
 
@@ -23567,14 +23566,14 @@
 	  }
 
 	  var Poll = React.createClass({
-	    getDefaultProps() {
+	    getDefaultProps: function() {
 	      return {
 	        options: [],
 	        labelStyle: undefined,
 	        onNewOption: undefined // function({ name: String, defaultChecked: Boolean }) that should update this.props.options
 	      };
 	    },
-	    render() {
+	    render: function() {
 	      return renderComponent(this.props.options.map(this._renderOption).concat([
 	        React.createElement(TextField, {
 	          hintText: 'Add an option',
@@ -23586,7 +23585,7 @@
 	        })
 	      ]));
 	    },
-	    _renderOption(option) {
+	    _renderOption: function(option) {
 	      return React.createElement(Checkbox, {
 	        name: 'selected',
 	        value: option.name,
@@ -23596,7 +23595,7 @@
 	        style: { marginTop: '16px' }
 	      });
 	    },
-	    _handleAddOption(evt) {
+	    _handleAddOption: function(evt) {
 	      this.props.onNewOption({
 	        name: evt.target.value,
 	        defaultChecked: true
