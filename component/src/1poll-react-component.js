@@ -88,6 +88,7 @@ module.exports = (function(){
       this._toggleOption(evt.target.getAttribute('data-index'), checked);
     },
     _handleEntryBlur: function(evt) {
+      if (!evt.target.value.trim()) return;
       this.props.onNewOption({
         name: evt.target.value,
         defaultChecked: false
