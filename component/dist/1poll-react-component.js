@@ -47,8 +47,7 @@
 	module.exports = (function(){
 	  'use strict';
 	  var React = __webpack_require__(1);
-	  var ReactDOM = __webpack_require__(158);
-	  var Checkbox = __webpack_require__(159);
+	  var Checkbox = __webpack_require__(158);
 	  var TextField = __webpack_require__(199);
 
 	  function renderComponent(children) {
@@ -57,15 +56,29 @@
 	  }
 
 	  var Poll = React.createClass({
-	    getDefaultProps() {
+	    getDefaultProps: function() {
 	      return {
 	        options: [],
 	        labelStyle: undefined,
+	        onSelectionChange: undefined, // function([ { name: String, defaultChecked: Boolean } ])
 	        onNewOption: undefined // function({ name: String, defaultChecked: Boolean }) that should update this.props.options
 	      };
 	    },
-	    render() {
-	      return renderComponent(this.props.options.map(this._renderOption).concat([
+	    getInitialState: function() {
+	      return {
+	        options: this.props.options.map(this._checkByDefault),
+	        selectedOptions: []
+	      };
+	    },
+	    componentWillReceiveProps: function(props) {
+	      //console.log('new props. options:');
+	      //console.table(props.options);
+	      this.setState({
+	        options: props.options.map(this._checkByDefault)
+	      }, this._refreshSelectedOptions);
+	    },
+	    render: function() {
+	      return renderComponent(this.state.options.map(this._renderOption).concat([
 	        React.createElement(TextField, {
 	          hintText: 'Add an option',
 	          onEnterKeyDown: this._handleAddOption,
@@ -76,17 +89,48 @@
 	        })
 	      ]));
 	    },
-	    _renderOption(option) {
+	    /*
+	    componentDidUpdate: function() {
+	      console.log('1poll componentDidUpdate. selectedOptions:');
+	      console.table(this.state.selectedOptions);
+	    },
+	    */
+	    _checkByDefault: function(option) {
+	      option.checked = option.checked || !!option.defaultChecked;
+	      return option;
+	    },
+	    _renderOption: function(option, index) {
 	      return React.createElement(Checkbox, {
 	        name: 'selected',
+	        'data-index': index,
 	        value: option.name,
 	        label: option.name,
-	        defaultChecked: option.defaultChecked,
+	        defaultChecked: option.checked,
+	        onCheck: this._onCheck,
 	        labelStyle: this.props.labelStyle,
 	        style: { marginTop: '16px' }
 	      });
 	    },
-	    _handleAddOption(evt) {
+	    _refreshSelectedOptions: function() {
+	      //console.log('_refreshSelectedOptions. options:');
+	      //console.table(this.state.options);
+	      var selectedOptions = [];
+	      for (var i in this.state.options) {
+	        if (this.state.options[i].checked) {
+	          selectedOptions.push(this.state.options[i]);
+	        }
+	      }
+	      this.setState({ selectedOptions: selectedOptions });
+	      this.props.onSelectionChange && this.props.onSelectionChange(selectedOptions);
+	    },
+	    _toggleOption: function(optionIndex, checked) {
+	      this.state.options[parseInt(optionIndex)].checked = checked;
+	      this._refreshSelectedOptions();
+	    },
+	    _onCheck: function(evt, checked) {
+	      this._toggleOption(evt.target.getAttribute('data-index'), checked);
+	    },
+	    _handleAddOption: function(evt) {
 	      this.props.onNewOption({
 	        name: evt.target.value,
 	        defaultChecked: true
@@ -19672,21 +19716,12 @@
 
 	'use strict';
 
-	module.exports = __webpack_require__(3);
-
-
-/***/ },
-/* 159 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var EnhancedSwitch = __webpack_require__(160);
+	var EnhancedSwitch = __webpack_require__(159);
 	var StylePropable = __webpack_require__(162);
 	var Transitions = __webpack_require__(170);
 	var CheckboxOutline = __webpack_require__(196);
@@ -19861,7 +19896,7 @@
 	module.exports = Checkbox;
 
 /***/ },
-/* 160 */
+/* 159 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -19871,7 +19906,7 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var KeyCode = __webpack_require__(161);
 	var StylePropable = __webpack_require__(162);
 	var Transitions = __webpack_require__(170);
@@ -20293,6 +20328,15 @@
 
 	module.exports = EnhancedSwitch;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
+
+/***/ },
+/* 160 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	module.exports = __webpack_require__(3);
+
 
 /***/ },
 /* 161 */
@@ -22147,7 +22191,7 @@
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var PureRenderMixin = __webpack_require__(183);
 	var StylePropable = __webpack_require__(162);
 	var AutoPrefix = __webpack_require__(167);
@@ -22793,7 +22837,7 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var PureRenderMixin = __webpack_require__(183);
 	var StylePropable = __webpack_require__(162);
 	var AutoPrefix = __webpack_require__(167);
@@ -22932,7 +22976,7 @@
 	'use strict';
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var PureRenderMixin = __webpack_require__(183);
 	var ReactTransitionGroup = __webpack_require__(187);
 	var StylePropable = __webpack_require__(162);
@@ -23179,7 +23223,7 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var PureRenderMixin = __webpack_require__(183);
 	var StylePropable = __webpack_require__(162);
 	var AutoPrefix = __webpack_require__(167);
@@ -23581,7 +23625,7 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var ColorManipulator = __webpack_require__(178);
 	var StylePropable = __webpack_require__(162);
 	var Transitions = __webpack_require__(170);
@@ -24030,7 +24074,7 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(158);
+	var ReactDOM = __webpack_require__(160);
 	var StylePropable = __webpack_require__(162);
 	var DefaultRawTheme = __webpack_require__(176);
 	var ThemeManager = __webpack_require__(180);

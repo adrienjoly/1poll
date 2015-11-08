@@ -1,3 +1,5 @@
+// OLD VERSION => use .js version instead
+
 (function(){
   var React = require('react');
   var ReactDOM = require('react-dom');
