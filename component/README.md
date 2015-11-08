@@ -1,6 +1,39 @@
 # 1poll
 
-A simple doodle-like poll component that makes it easy for contributors to add more options.
+A simple [Doodle](http://doodle.com)-like poll component that makes it easy for contributors to add more options. Star it on [npm](https://www.npmjs.com/package/react-1poll) and on [github](https://github.com/adrienjoly/1poll).
+
+Made with [React.js](https://facebook.github.io/react/) and [Material-UI](material-ui.com). Thanks to [Romain Dardour](http://twitter.com/rdardour) for his help!
+
+## Demo / examples of use
+
+- [Official demo](http://adrienjoly.com/1poll/demo)
+- [1task's landing page](http://1task.org/) (and [source code](https://github.com/adrienjoly/1task))
+
+## How to install and use
+
+### Using npm
+
+First, install it in your project's directory:
+
+    npm install react-1poll
+
+Then, integrate it in your javascript project:
+
+'''jsx
+    var PollForm = require('./PollForm.jsx');
+    var options = [
+      { name: 'Option A', defaultCheck: true },
+      { name: 'Option B' },
+      { name: 'Option C' }
+    ];
+    function onValidSubmit(selectedItems) {
+      assert.equal(selectedItems, [ 'Option A' ]);
+    }
+    ReactDOM.render(<PollForm
+      options={options}
+      onNewOption={console.log}
+      onValidSubmit={onValidSubmit} />, appDiv);
+'''
 
 ## Component API reference
 
