@@ -81,6 +81,7 @@
 	      return renderComponent(this.state.options.map(this._renderOption).concat([
 	        React.createElement(TextField, {
 	          hintText: 'Add an option',
+	          onBlur: this._handleEntryBlur,
 	          onEnterKeyDown: this._handleAddOption,
 	          style: {
 	            paddingLeft: '42px',
@@ -131,6 +132,12 @@
 	    },
 	    _onCheck: function(evt, checked) {
 	      this._toggleOption(evt.target.getAttribute('data-index'), checked);
+	    },
+	    _handleEntryBlur: function(evt) {
+	      this.props.onNewOption({
+	        name: evt.target.value,
+	        defaultChecked: false
+	      });
 	    },
 	    _handleAddOption: function(evt) {
 	      this.props.onNewOption({
