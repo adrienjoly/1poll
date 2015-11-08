@@ -28,19 +28,19 @@ First, install it in your project's directory:
 Then, integrate it in your javascript project:
 
 '''jsx
-    var PollForm = require('./PollForm.jsx');
-    var options = [
-      { name: 'Option A', defaultCheck: true },
-      { name: 'Option B' },
-      { name: 'Option C' }
-    ];
-    function onValidSubmit(selectedItems) {
-      assert.equal(selectedItems, [ 'Option A' ]);
-    }
-    ReactDOM.render(<PollForm
-      options={options}
-      onNewOption={console.log}
-      onValidSubmit={onValidSubmit} />, appDiv);
+var PollForm = require('./PollForm.jsx');
+var options = [
+  { name: 'Option A', defaultCheck: true },
+  { name: 'Option B' },
+  { name: 'Option C' }
+];
+function onValidSubmit(selectedItems) {
+  assert.equal(selectedItems, [ 'Option A' ]);
+}
+ReactDOM.render(<PollForm
+  options={options}
+  onNewOption={console.log}
+  onValidSubmit={onValidSubmit} />, appDiv);
 '''
 
 ## Component API reference

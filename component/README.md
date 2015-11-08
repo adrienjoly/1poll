@@ -19,7 +19,6 @@ First, install it in your project's directory:
 
 Then, integrate it in your javascript project:
 
-'''jsx
     var PollForm = require('./PollForm.jsx');
     var options = [
       { name: 'Option A', defaultCheck: true },
@@ -33,7 +32,6 @@ Then, integrate it in your javascript project:
       options={options}
       onNewOption={console.log}
       onValidSubmit={onValidSubmit} />, appDiv);
-'''
 
 ## Component API reference
 
