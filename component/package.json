@@ -1,6 +1,6 @@
 {
   "name": "react-1poll",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "A simple doodle-like poll component that makes it easy for contributors to add more options.",
   "main": "src/1poll-react-component.js",
   "scripts": {

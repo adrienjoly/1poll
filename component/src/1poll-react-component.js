@@ -74,8 +74,10 @@ module.exports = (function(){
           selectedOptions.push(this.state.options[i]);
         }
       }
-      this.setState({ selectedOptions: selectedOptions });
-      this.props.onSelectionChange && this.props.onSelectionChange(selectedOptions);
+      if (this.state.selectedOptions.length != selectedOptions.length) {
+        this.setState({ selectedOptions: selectedOptions });
+        this.props.onSelectionChange && this.props.onSelectionChange(selectedOptions);
+      }
     },
     _toggleOption: function(optionIndex, checked) {
       this.state.options[parseInt(optionIndex)].checked = checked;
