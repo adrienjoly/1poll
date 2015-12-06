@@ -25056,9 +25056,17 @@
 	
 	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var _reactDocumentTitle = __webpack_require__(/*! react-document-title */ 280);
+	
+	var _reactDocumentTitle2 = _interopRequireDefault(_reactDocumentTitle);
+	
+	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 212);
@@ -25103,46 +25111,50 @@
 	
 	    this.render = function () {
 	      return React.createElement(
-	        'form',
-	        { action: '#' },
+	        _reactDocumentTitle2['default'],
+	        { title: (_this2.state.poll.title || '( loading )') + ' - 1poll' },
 	        React.createElement(
-	          'div',
-	          { className: 'row' },
+	          'form',
+	          { action: '#' },
 	          React.createElement(
 	            'div',
-	            { className: 'user-signup__intro' },
+	            { className: 'row' },
 	            React.createElement(
-	              'p',
-	              {
-	                ref: 'title',
-	                style: { fontSize: '22px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
-	              },
-	              _this2.state.poll.title
-	            ),
-	            React.createElement(
-	              'p',
-	              {
-	                ref: 'subtitle',
-	                style: { fontSize: '14px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
-	              },
-	              _this2.state.poll.subtitle
+	              'div',
+	              { className: 'user-signup__intro' },
+	              React.createElement(
+	                'p',
+	                {
+	                  ref: 'title',
+	                  style: { fontSize: '22px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
+	                },
+	                _this2.state.poll.title
+	              ),
+	              React.createElement(
+	                'p',
+	                {
+	                  ref: 'subtitle',
+	                  style: { fontSize: '14px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
+	                },
+	                _this2.state.poll.subtitle
+	              )
 	            )
+	          ),
+	          React.createElement(
+	            'div',
+	            { className: 'row' },
+	            React.createElement(PollForm, {
+	              ref: 'pollForm',
+	              disabled: _this2.props.disabled,
+	              options: _this2.state.poll.options,
+	              onValidSubmit: _this2._submitVote })
 	          )
-	        ),
-	        React.createElement(
-	          'div',
-	          { className: 'row' },
-	          React.createElement(PollForm, {
-	            ref: 'pollForm',
-	            disabled: _this2.props.disabled,
-	            options: _this2.state.poll.options,
-	            onValidSubmit: _this2._submitVote })
 	        )
 	      );
 	    };
 	
 	    this._submitVote = function () {
-	      console.log('submitvote', arguments);
+	      console.log('submitvote', arguments); // TODO
 	    };
 	  }
 	
@@ -31991,6 +32003,10 @@
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
+	var _reactDocumentTitle = __webpack_require__(/*! react-document-title */ 280);
+	
+	var _reactDocumentTitle2 = _interopRequireDefault(_reactDocumentTitle);
+	
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
@@ -32022,45 +32038,49 @@
 	
 	    this.render = function () {
 	      return React.createElement(
-	        'form',
-	        { action: '#' },
+	        _reactDocumentTitle2['default'],
+	        { title: 'Create a new 1poll' },
 	        React.createElement(
-	          'div',
-	          { className: 'row' },
+	          'form',
+	          { action: '#' },
 	          React.createElement(
 	            'div',
-	            { className: 'user-signup__intro' },
-	            React.createElement(TextField, {
-	              ref: 'title',
-	              autoFocus: true,
+	            { className: 'row' },
+	            React.createElement(
+	              'div',
+	              { className: 'user-signup__intro' },
+	              React.createElement(TextField, {
+	                ref: 'title',
+	                autoFocus: true,
+	                disabled: _this.state.disabled,
+	                hintText: 'Enter a title for your poll',
+	                hintStyle: { color: '#999' },
+	                inputStyle: { textAlign: 'center', color: 'white' },
+	                underlineStyle: { borderColor: 'transparent' },
+	                underlineFocusStyle: { borderColor: '#999' },
+	                style: { fontSize: '22px', width: '100%' }
+	              }),
+	              React.createElement(TextField, {
+	                ref: 'subtitle',
+	                disabled: _this.state.disabled,
+	                hintText: 'Enter a description / call to action (optional)',
+	                hintStyle: { color: '#999' },
+	                inputStyle: { textAlign: 'center', color: 'white' },
+	                underlineStyle: { borderColor: 'transparent' },
+	                underlineFocusStyle: { borderColor: '#999' },
+	                style: { fontSize: '14px', marginBottom: '20px', width: '100%' }
+	              })
+	            )
+	          ),
+	          React.createElement(
+	            'div',
+	            { className: 'row' },
+	            React.createElement(PollForm, {
+	              ref: 'pollForm',
 	              disabled: _this.state.disabled,
-	              hintText: 'Enter a title for your poll',
-	              hintStyle: { color: '#999' },
-	              inputStyle: { textAlign: 'center', color: 'white' },
-	              underlineStyle: { borderColor: 'transparent' },
-	              underlineFocusStyle: { borderColor: '#999' },
-	              style: { fontSize: '22px', width: '100%' }
-	            }),
-	            React.createElement(TextField, {
-	              ref: 'subtitle',
-	              disabled: _this.state.disabled,
-	              hintText: 'Enter a description / call to action (optional)',
-	              hintStyle: { color: '#999' },
-	              inputStyle: { textAlign: 'center', color: 'white' },
-	              underlineStyle: { borderColor: 'transparent' },
-	              underlineFocusStyle: { borderColor: '#999' },
-	              style: { fontSize: '14px', marginBottom: '20px', width: '100%' }
-	            })
+	              options: _this.props.defaultItems,
+	              onValidSubmit: _this._submitNewPoll })
 	          )
-	        ),
-	        React.createElement(
-	          'div',
-	          { className: 'row' },
-	          React.createElement(PollForm, {
-	            ref: 'pollForm',
-	            disabled: _this.state.disabled,
-	            options: _this.props.defaultItems,
-	            onValidSubmit: _this._submitNewPoll })
 	        )
 	      );
 	    };
@@ -32156,6 +32176,283 @@
 	    save: save
 	  };
 	})();
+
+/***/ },
+/* 280 */
+/*!*****************************************!*\
+  !*** ./~/react-document-title/index.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 1),
+	    withSideEffect = __webpack_require__(/*! react-side-effect */ 281);
+	
+	function reducePropsToState(propsList) {
+	  var innermostProps = propsList[propsList.length - 1];
+	  if (innermostProps) {
+	    return innermostProps.title;
+	  }
+	}
+	
+	function handleStateChangeOnClient(title) {
+	  document.title = title || '';
+	}
+	
+	var DocumentTitle = React.createClass({
+	  propTypes: {
+	    title: React.PropTypes.string.isRequired
+	  },
+	
+	  render: function render() {
+	    if (this.props.children) {
+	      return React.Children.only(this.props.children);
+	    } else {
+	      return null;
+	    }
+	  }
+	});
+	
+	module.exports = withSideEffect(
+	  reducePropsToState,
+	  handleStateChangeOnClient
+	)(DocumentTitle);
+
+
+/***/ },
+/* 281 */
+/*!******************************************!*\
+  !*** ./~/react-side-effect/lib/index.js ***!
+  \******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _fbjsLibExecutionEnvironment = __webpack_require__(/*! fbjs/lib/ExecutionEnvironment */ 282);
+	
+	var _fbjsLibExecutionEnvironment2 = _interopRequireDefault(_fbjsLibExecutionEnvironment);
+	
+	var _fbjsLibShallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 283);
+	
+	var _fbjsLibShallowEqual2 = _interopRequireDefault(_fbjsLibShallowEqual);
+	
+	module.exports = function withSideEffect(reducePropsToState, handleStateChangeOnClient, mapStateOnServer) {
+	  if (typeof reducePropsToState !== 'function') {
+	    throw new Error('Expected reducePropsToState to be a function.');
+	  }
+	  if (typeof handleStateChangeOnClient !== 'function') {
+	    throw new Error('Expected handleStateChangeOnClient to be a function.');
+	  }
+	  if (typeof mapStateOnServer !== 'undefined' && typeof mapStateOnServer !== 'function') {
+	    throw new Error('Expected mapStateOnServer to either be undefined or a function.');
+	  }
+	
+	  function getDisplayName(WrappedComponent) {
+	    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+	  }
+	
+	  return function wrap(WrappedComponent) {
+	    if (typeof WrappedComponent !== 'function') {
+	      throw new Error('Expected WrappedComponent to be a React component.');
+	    }
+	
+	    var mountedInstances = [];
+	    var state = undefined;
+	
+	    function emitChange() {
+	      state = reducePropsToState(mountedInstances.map(function (instance) {
+	        return instance.props;
+	      }));
+	
+	      if (SideEffect.canUseDOM) {
+	        handleStateChangeOnClient(state);
+	      } else if (mapStateOnServer) {
+	        state = mapStateOnServer(state);
+	      }
+	    }
+	
+	    var SideEffect = (function (_Component) {
+	      _inherits(SideEffect, _Component);
+	
+	      function SideEffect() {
+	        _classCallCheck(this, SideEffect);
+	
+	        _Component.apply(this, arguments);
+	      }
+	
+	      SideEffect.peek = function peek() {
+	        return state;
+	      };
+	
+	      SideEffect.rewind = function rewind() {
+	        if (SideEffect.canUseDOM) {
+	          throw new Error('You may ony call rewind() on the server. Call peek() to read the current state.');
+	        }
+	
+	        var recordedState = state;
+	        state = undefined;
+	        mountedInstances = [];
+	        return recordedState;
+	      };
+	
+	      SideEffect.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps) {
+	        return !_fbjsLibShallowEqual2['default'](nextProps, this.props);
+	      };
+	
+	      SideEffect.prototype.componentWillMount = function componentWillMount() {
+	        mountedInstances.push(this);
+	        emitChange();
+	      };
+	
+	      SideEffect.prototype.componentDidUpdate = function componentDidUpdate() {
+	        emitChange();
+	      };
+	
+	      SideEffect.prototype.componentWillUnmount = function componentWillUnmount() {
+	        var index = mountedInstances.indexOf(this);
+	        mountedInstances.splice(index, 1);
+	        emitChange();
+	      };
+	
+	      SideEffect.prototype.render = function render() {
+	        return _react2['default'].createElement(WrappedComponent, this.props);
+	      };
+	
+	      _createClass(SideEffect, null, [{
+	        key: 'displayName',
+	
+	        // Try to use displayName of wrapped component
+	        value: 'SideEffect(' + getDisplayName(WrappedComponent) + ')',
+	
+	        // Expose canUseDOM so tests can monkeypatch it
+	        enumerable: true
+	      }, {
+	        key: 'canUseDOM',
+	        value: _fbjsLibExecutionEnvironment2['default'].canUseDOM,
+	        enumerable: true
+	      }]);
+	
+	      return SideEffect;
+	    })(_react.Component);
+	
+	    return SideEffect;
+	  };
+	};
+
+/***/ },
+/* 282 */
+/*!****************************************************************!*\
+  !*** ./~/react-side-effect/~/fbjs/lib/ExecutionEnvironment.js ***!
+  \****************************************************************/
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ExecutionEnvironment
+	 */
+	
+	'use strict';
+	
+	var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
+	
+	/**
+	 * Simple, lightweight module assisting with the detection and context of
+	 * Worker. Helps avoid circular dependencies and allows code to reason about
+	 * whether or not they are in a Worker, even if they never include the main
+	 * `ReactWorker` dependency.
+	 */
+	var ExecutionEnvironment = {
+	
+	  canUseDOM: canUseDOM,
+	
+	  canUseWorkers: typeof Worker !== 'undefined',
+	
+	  canUseEventListeners: canUseDOM && !!(window.addEventListener || window.attachEvent),
+	
+	  canUseViewport: canUseDOM && !!window.screen,
+	
+	  isInWorker: !canUseDOM // For now, this is true - might change in the future.
+	
+	};
+	
+	module.exports = ExecutionEnvironment;
+
+/***/ },
+/* 283 */
+/*!********************************************************!*\
+  !*** ./~/react-side-effect/~/fbjs/lib/shallowEqual.js ***!
+  \********************************************************/
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule shallowEqual
+	 * @typechecks
+	 * 
+	 */
+	
+	'use strict';
+	
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	
+	/**
+	 * Performs equality by iterating through keys on an object and returning false
+	 * when any key has values which are not strictly equal between the arguments.
+	 * Returns true when the values of all keys are strictly equal.
+	 */
+	function shallowEqual(objA, objB) {
+	  if (objA === objB) {
+	    return true;
+	  }
+	
+	  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+	    return false;
+	  }
+	
+	  var keysA = Object.keys(objA);
+	  var keysB = Object.keys(objB);
+	
+	  if (keysA.length !== keysB.length) {
+	    return false;
+	  }
+	
+	  // Test for A's keys different from B.
+	  var bHasOwnProperty = hasOwnProperty.bind(objB);
+	  for (var i = 0; i < keysA.length; i++) {
+	    if (!bHasOwnProperty(keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
+	      return false;
+	    }
+	  }
+	
+	  return true;
+	}
+	
+	module.exports = shallowEqual;
 
 /***/ }
 /******/ ]);

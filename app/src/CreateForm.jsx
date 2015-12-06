@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom';
+import DocumentTitle from 'react-document-title';
 
 'use strict';
 
@@ -33,6 +34,7 @@ class CreateForm extends React.Component {
 
   render = () => {
     return (
+    <DocumentTitle title='Create a new 1poll'>
       <form action="#">
         <div className="row">
           <div className="user-signup__intro">
@@ -67,6 +69,7 @@ class CreateForm extends React.Component {
             onValidSubmit={this._submitNewPoll} />
         </div>
       </form>
+    </DocumentTitle>
     );
   }
 

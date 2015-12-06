@@ -1,3 +1,5 @@
+import DocumentTitle from 'react-document-title';
+
 'use strict';
 
 var React = require('react');
@@ -39,6 +41,7 @@ class ViewForm extends React.Component {
 
   render = () => {
     return (
+    <DocumentTitle title={(this.state.poll.title || '( loading )') + ' - 1poll'}>
       <form action="#">
         <div className="row">
           <div className="user-signup__intro">
@@ -60,6 +63,7 @@ class ViewForm extends React.Component {
             onValidSubmit={this._submitVote} />
         </div>
       </form>
+    </DocumentTitle>
     );
   }
 
