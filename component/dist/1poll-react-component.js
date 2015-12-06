@@ -81,6 +81,7 @@
 	    render: function() {
 	      return renderComponent(this.state.options.map(this._renderOption).concat([
 	        React.createElement(TextField, {
+	          autoFocus: true,
 	          hintText: 'Add an option',
 	          onBlur: this._handleEntryBlur,
 	          onEnterKeyDown: this._handleAddOption,
@@ -132,6 +133,7 @@
 	      this._handleAddOption(evt, true);
 	    },
 	    _handleAddOption: function(evt, notChecked) {
+	      evt.preventDefault(); // prevent form from being submitted
 	      var newOption = {
 	        name: evt.target.value,
 	        checked: notChecked ? false : true,
