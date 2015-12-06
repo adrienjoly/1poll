@@ -20,8 +20,12 @@ class ViewForm extends React.Component {
   componentWillMount = function() {
     this.props.pollStore.fetch(this.props.id, (err, poll) => {
       console.log('fetch =>', err, poll);
-      this.setState({ poll: poll });
-      // TODO: display message on error
+      if (err) {
+        alert('We cannot find this poll, sorry...');
+        this.props.history.push('/'); // redirects to home page
+      } else {
+        this.setState({ poll: poll });
+      }
     });
   }
 

@@ -53,6 +53,7 @@ import pollStore from './pollStore.js';
       return (
         <ViewForm
           id={this.props.params.id}
+          history={history}
           pollStore={pollStore}
           onUpdate={heightTransition}
         />
