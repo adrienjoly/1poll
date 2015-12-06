@@ -20,7 +20,6 @@ module.exports = (function(){
               ref='poll'
               disabled={this.props.disabled}
               options={this.props.options}
-              onNewOption={this._onNewOption}
               labelStyle={{ color: 'auto' }}
             />
             <RaisedButton
@@ -36,12 +35,6 @@ module.exports = (function(){
           </Paper>
         </div>
       );
-    }
-
-    _onNewOption = (newOption) => {
-      this.refs.poll.setState({
-        options: this.refs.poll.state.options.concat([ newOption ])
-      });
     }
 
     getOptions = () => {
