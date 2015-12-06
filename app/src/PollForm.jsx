@@ -16,8 +16,6 @@ module.exports = (function(){
       super(props);
       this.state = {
         disabled: false,
-        selectedOptions: [],
-        validEmail: false
       };
     }
 
@@ -52,6 +50,9 @@ module.exports = (function(){
         options: this.refs.poll.state.options.concat([ newOption ])
       });
     }
+
+    getOptions = () => {
+      return this.refs.poll.state.options;
     }
 
   }

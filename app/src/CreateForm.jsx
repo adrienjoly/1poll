@@ -75,6 +75,7 @@ class CreateForm extends React.Component {
     this.props.onSubmit({
       title: this.refs.title.getValue(),
       subtitle: this.refs.subtitle.getValue(),
+      options: this.refs.pollForm.getOptions()
     });
   }
 
