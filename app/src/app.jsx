@@ -8,11 +8,7 @@
   // Needed for React Developer Tools
   window.React = React;
 
-  var DEFAULT_ITEMS = [
-    { name: 'Tasks accumulate too much' },
-    { name: 'I don\'t know where to start' },
-    { name: 'I keep postponing my deadlines' }
-  ];
+  var DEFAULT_ITEMS = [ /* { name: 'Option 1' } */ ];
 
   // displays the loading animation if toggle == true
   function setLoading(toggle) {
@@ -23,7 +19,11 @@
   }
 
   // merges selected items into one field before mailchimp form submission
-  function submit(selectedItems) {
+  function submit(formData) {
+    setLoading(true);
+    console.log('form data:', formData);
+    //itemStore.storeNewPoll(formData) // TODO
+    return;
     // AJAX code for testing with devtools' network tab:
     var xhr = new XMLHttpRequest;
     xhr.open('POST', '/', true);
@@ -47,7 +47,6 @@
   var element =
     <CreateForm
       defaultItems={DEFAULT_ITEMS}
-      setLoading={setLoading}
       onSubmit={submit}
       onUpdate={heightTransition}
     />;

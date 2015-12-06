@@ -55,11 +55,12 @@
 	  var React = __webpack_require__(/*! react */ 1);
 	  var ReactDOM = __webpack_require__(/*! react-dom */ 158);
 	  var CreateForm = __webpack_require__(/*! ./CreateForm.jsx */ 159);
+	  //var itemStore = require('./itemStore.js'); // TODO
 	
 	  // Needed for React Developer Tools
 	  window.React = React;
 	
-	  var DEFAULT_ITEMS = [{ name: 'Tasks accumulate too much' }, { name: 'I don\'t know where to start' }, { name: 'I keep postponing my deadlines' }];
+	  var DEFAULT_ITEMS = [/* { name: 'Option 1' } */];
 	
 	  // displays the loading animation if toggle == true
 	  function setLoading(toggle) {
@@ -70,7 +71,12 @@
 	  }
 	
 	  // merges selected items into one field before mailchimp form submission
-	  function submit(selectedItems) {
+	  function submit(formData) {
+	    //appDiv.setAttribute('disabled', true);
+	    setLoading(true);
+	    console.log('form data:', formData);
+	    //itemStore.storeNewPoll(formData) // TODO
+	    return;
 	    // AJAX code for testing with devtools' network tab:
 	    var xhr = new XMLHttpRequest();
 	    xhr.open('POST', '/', true);
@@ -93,7 +99,6 @@
 	
 	  var element = React.createElement(CreateForm, {
 	    defaultItems: DEFAULT_ITEMS,
-	    setLoading: setLoading,
 	    onSubmit: submit,
 	    onUpdate: heightTransition
 	  });
@@ -20178,15 +20183,11 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 222);
-	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 160);
-	var itemStore = __webpack_require__(/*! ./itemStore.js */ 226);
+	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 160);
+	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 190);
 	
 	var CreateForm = (function (_React$Component) {
 	  _inherits(CreateForm, _React$Component);
-	
-	  //setLoading: null,
-	  //form: null
 	
 	  function CreateForm(props) {
 	    var _this = this,
@@ -20196,24 +20197,8 @@
 	
 	    _get(Object.getPrototypeOf(CreateForm.prototype), 'constructor', this).call(this, props);
 	
-	    this.componentWillMount = function () {
-	      /*
-	      console.log('Fetching options from Parse DB...');
-	      var _this = this;
-	      itemStore.fetchItems(function(error, items) {
-	        _this.props.setLoading(false);
-	        if (error) {
-	          console.error('Fetch error:', error);
-	        } else {
-	          console.log('=>', items);
-	          _this.setState({ options: items});
-	        }
-	      }, _this.props.defaultItems);
-	      */
-	    };
-	
 	    this.shouldComponentUpdate = function (nextProps, nextState) {
-	      return nextProps != _this.props || nextState.options != _this.state.options;
+	      return nextProps != _this.props || nextState.options.disabled !== _this.state.options.disabled;
 	    };
 	
 	    this.componentDidUpdate = function () {
@@ -20231,21 +20216,23 @@
 	            'div',
 	            { className: 'user-signup__intro' },
 	            React.createElement(TextField, {
+	              ref: 'title',
 	              name: 'title',
-	              hintText: 'Enter a title for your poll (hint)',
-	              errorText: 'Enter a title for your poll (error)',
-	              errorStyle: { color: 'gray' },
-	              style: _this.props.style || { textAlign: 'center', margin: '20px 0' }
+	              //disabled={this.props.disabled} // TODO
+	              hintText: 'Enter a title for your poll',
+	              hintStyle: { color: '#999' },
+	              inputStyle: { textAlign: 'center', color: 'white' },
+	              style: { fontSize: '22px', margin: '20px 0', width: '100%' }
 	            }),
-	            React.createElement(
-	              'p',
-	              { style: { textAlign: 'center' } },
-	              React.createElement(
-	                'span',
-	                { style: { fontSize: '14px' } },
-	                'Please tick the dates that are convenient for you, or add more below:'
-	              )
-	            )
+	            React.createElement(TextField, {
+	              ref: 'subtitle',
+	              name: 'subtitle',
+	              //disabled={this.props.disabled} // TODO
+	              hintText: 'Enter a description / call to action (optional)',
+	              hintStyle: { color: '#999' },
+	              inputStyle: { textAlign: 'center', color: 'white' },
+	              style: { fontSize: '14px', margin: '20px 0', width: '100%' }
+	            })
 	          )
 	        ),
 	        React.createElement(
@@ -20253,32 +20240,21 @@
 	          { className: 'row' },
 	          React.createElement(PollForm, {
 	            ref: 'pollForm',
+	            //disabled={this.props.disabled} // TODO
 	            options: _this.state.options,
-	            onNewOption: _this.onNewOption,
 	            onValidSubmit: _this.onValidSubmit })
 	        )
 	      );
 	    };
 	
-	    this.onNewOption = function (newOption) {
-	      _this.setState({
-	        options: _this.state.options.concat([newOption])
-	      });
-	    };
-	
 	    this.onValidSubmit = function () {
 	      // UI action feedback
-	      _this.refs.pollForm.setState({ disabled: true });
-	      _this.props.setLoading(true);
-	      // submitting data
-	      console.log('Saving new selected items...');
-	      var selectedItems = _this.refs.pollForm.state.selectedOptions.map(function (opt) {
-	        return opt.name;
-	      });
-	      console.log('Selected items:', selectedItems);
-	      itemStore.syncItems(selectedItems, function () {
-	        console.log('=>', _arguments2);
-	        _this.props.onSubmit(selectedItems);
+	      _this.setState({ disabled: true });
+	      // Submitting data
+	      _this.props.onSubmit({
+	        title: _this.refs.title.getValue(),
+	        subtitle: _this.refs.subtitle.getValue(),
+	        options: _this.refs.pollForm.getOptions()
 	      });
 	    };
 	
@@ -20296,91 +20272,12 @@
 
 /***/ },
 /* 160 */
-/*!**************************!*\
-  !*** ./src/PollForm.jsx ***!
-  \**************************/
+/*!*****************************************!*\
+  !*** ./~/material-ui/lib/text-field.js ***!
+  \*****************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-	
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	module.exports = (function () {
-	  'use strict';
-	  var React = __webpack_require__(/*! react */ 1);
-	  var RaisedButton = __webpack_require__(/*! material-ui/lib/raised-button */ 161);
-	  var injectTapEventPlugin = __webpack_require__(/*! react-tap-event-plugin */ 208);
-	  var Poll = __webpack_require__(/*! react-1poll */ 212);
-	
-	  // Needed for onTouchTap
-	  // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
-	  injectTapEventPlugin();
-	
-	  return (function (_React$Component) {
-	    _inherits(PollForm, _React$Component);
-	
-	    function PollForm(props) {
-	      var _this = this;
-	
-	      _classCallCheck(this, PollForm);
-	
-	      _get(Object.getPrototypeOf(PollForm.prototype), 'constructor', this).call(this, props);
-	
-	      this.render = function () {
-	        return React.createElement(
-	          'div',
-	          { className: 'react-poll-form' },
-	          React.createElement(
-	            'p',
-	            null,
-	            'Enter a question'
-	          ),
-	          React.createElement(Poll, {
-	            options: _this.props.options,
-	            labelStyle: { color: 'auto' },
-	            onNewOption: _this.props.onNewOption,
-	            onSelectionChange: _this.onSelectionChange
-	          }),
-	          React.createElement(RaisedButton, {
-	            disabled: _this.state.disabled,
-	            label: 'Submit',
-	            primary: true,
-	            backgroundColor: '#00a651',
-	            style: {
-	              display: 'block' },
-	            // to fill the parent div's width
-	            onTouchTap: _this.props.onValidSubmit
-	          })
-	        );
-	      };
-	
-	      this.onSelectionChange = function (selectedOptions) {
-	        _this.setState({ selectedOptions: selectedOptions });
-	      };
-	
-	      this.state = {
-	        disabled: false,
-	        selectedOptions: [],
-	        validEmail: false
-	      };
-	    }
-	
-	    return PollForm;
-	  })(React.Component);
-	})();
-
-/***/ },
-/* 161 */
-/*!********************************************!*\
-  !*** ./~/material-ui/lib/raised-button.js ***!
-  \********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
@@ -20388,29 +20285,60 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
+	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 161);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
 	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
-	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 181);
-	var Children = __webpack_require__(/*! ./utils/children */ 182);
-	var Typography = __webpack_require__(/*! ./styles/typography */ 185);
-	var EnhancedButton = __webpack_require__(/*! ./enhanced-button */ 187);
-	var Paper = __webpack_require__(/*! ./paper */ 206);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 181);
+	var EnhancedTextarea = __webpack_require__(/*! ./enhanced-textarea */ 182);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
+	var ContextPure = __webpack_require__(/*! ./mixins/context-pure */ 188);
 	
-	function validateLabel(props, propName, componentName) {
-	  if (!props.children && !props.label) {
-	    return new Error('Required prop label or children was not ' + 'specified in ' + componentName + '.');
-	  }
+	/**
+	 * Check if a value is valid to be displayed inside an input.
+	 *
+	 * @param The value to check.
+	 * @returns True if the string provided is valid, false otherwise.
+	 */
+	function isValid(value) {
+	  return Boolean(value || value === 0);
 	}
 	
-	var RaisedButton = React.createClass({
-	  displayName: 'RaisedButton',
+	var TextField = React.createClass({
+	  displayName: 'TextField',
 	
-	  mixins: [StylePropable],
+	  mixins: [ContextPure, StylePropable],
 	
 	  contextTypes: {
 	    muiTheme: React.PropTypes.object
+	  },
+	
+	  propTypes: {
+	    errorStyle: React.PropTypes.object,
+	    errorText: React.PropTypes.node,
+	    floatingLabelStyle: React.PropTypes.object,
+	    floatingLabelText: React.PropTypes.node,
+	    fullWidth: React.PropTypes.bool,
+	    hintText: React.PropTypes.node,
+	    hintStyle: React.PropTypes.object,
+	    id: React.PropTypes.string,
+	    inputStyle: React.PropTypes.object,
+	    multiLine: React.PropTypes.bool,
+	    onBlur: React.PropTypes.func,
+	    onChange: React.PropTypes.func,
+	    onEnterKeyDown: React.PropTypes.func,
+	    onFocus: React.PropTypes.func,
+	    onKeyDown: React.PropTypes.func,
+	    rows: React.PropTypes.number,
+	    rowsMax: React.PropTypes.number,
+	    type: React.PropTypes.string,
+	    underlineStyle: React.PropTypes.object,
+	    underlineFocusStyle: React.PropTypes.object,
+	    underlineDisabledStyle: React.PropTypes.object,
+	    style: React.PropTypes.object,
+	    disabled: React.PropTypes.bool,
+	    defaultValue: React.PropTypes.string,
+	    value: React.PropTypes.string
 	  },
 	
 	  //for passing default theme context to children
@@ -20424,239 +20352,564 @@
 	    };
 	  },
 	
-	  propTypes: {
-	    className: React.PropTypes.string,
-	    disabled: React.PropTypes.bool,
-	    label: validateLabel,
-	    labelPosition: React.PropTypes.oneOf(['before', 'after']),
-	    onMouseDown: React.PropTypes.func,
-	    onMouseUp: React.PropTypes.func,
-	    onMouseLeave: React.PropTypes.func,
-	    onTouchEnd: React.PropTypes.func,
-	    onTouchStart: React.PropTypes.func,
-	    primary: React.PropTypes.bool,
-	    secondary: React.PropTypes.bool,
-	    labelStyle: React.PropTypes.object,
-	    backgroundColor: React.PropTypes.string,
-	    labelColor: React.PropTypes.string,
-	    disabledBackgroundColor: React.PropTypes.string,
-	    disabledLabelColor: React.PropTypes.string,
-	    fullWidth: React.PropTypes.bool,
-	    style: React.PropTypes.object,
-	    onMouseEnter: React.PropTypes.func
-	  },
-	
 	  getDefaultProps: function getDefaultProps() {
 	    return {
-	      labelPosition: 'before' };
+	      fullWidth: false,
+	      type: 'text',
+	      rows: 1
+	    };
 	  },
 	
-	  // Should be after but we keep it like for now (prevent breaking changes)
+	  statics: {
+	    getRelevantContextKeys: function getRelevantContextKeys(muiTheme) {
+	      var textFieldTheme = muiTheme.textField;
+	
+	      return {
+	        floatingLabelColor: textFieldTheme.floatingLabelColor,
+	        focusColor: textFieldTheme.focusColor,
+	        borderColor: textFieldTheme.borderColor,
+	        textColor: textFieldTheme.textColor,
+	        disabledTextColor: textFieldTheme.disabledTextColor,
+	        backgroundColor: textFieldTheme.backgroundColor,
+	        hintColor: textFieldTheme.hintColor,
+	        errorColor: textFieldTheme.errorColor
+	      };
+	    },
+	    getChildrenClasses: function getChildrenClasses() {
+	      return [EnhancedTextarea];
+	    }
+	  },
+	
 	  getInitialState: function getInitialState() {
-	    var zDepth = this.props.disabled ? 0 : 1;
+	    var props = this.props.children ? this.props.children.props : this.props;
+	
 	    return {
-	      hovered: false,
-	      touched: false,
-	      initialZDepth: zDepth,
-	      zDepth: zDepth,
+	      errorText: this.props.errorText,
+	      hasValue: isValid(props.value) || isValid(props.defaultValue) || props.valueLink && isValid(props.valueLink.value),
 	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
 	    };
 	  },
 	
+	  componentDidMount: function componentDidMount() {
+	    this._uniqueId = UniqueId.generate();
+	  },
+	
 	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
-	    var zDepth = nextProps.disabled ? 0 : 1;
-	    var newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
-	    this.setState({
-	      zDepth: zDepth,
-	      initialZDepth: zDepth,
-	      muiTheme: newMuiTheme
-	    });
-	  },
+	    var newState = {};
+	    newState.muiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
 	
-	  _getBackgroundColor: function _getBackgroundColor() {
-	    var disabledColor = this.props.disabledBackgroundColor ? this.props.disabledBackgroundColor : this.getTheme().disabledColor;
+	    newState.errorText = nextProps.errorText;
+	    if (nextProps.children && nextProps.children.props) {
+	      nextProps = nextProps.children.props;
+	    }
 	
-	    return this.props.disabled ? disabledColor : this.props.backgroundColor ? this.props.backgroundColor : this.props.primary ? this.getTheme().primaryColor : this.props.secondary ? this.getTheme().secondaryColor : this.getTheme().color;
-	  },
+	    var hasValueLinkProp = nextProps.hasOwnProperty('valueLink');
+	    var hasValueProp = nextProps.hasOwnProperty('value');
+	    var hasNewDefaultValue = nextProps.defaultValue !== this.props.defaultValue;
 	
-	  _getLabelColor: function _getLabelColor() {
-	    var disabledColor = this.props.disabledLabelColor ? this.props.disabledLabelColor : this.getTheme().disabledTextColor;
+	    if (hasValueLinkProp) {
+	      newState.hasValue = isValid(nextProps.valueLink.value);
+	    } else if (hasValueProp) {
+	      newState.hasValue = isValid(nextProps.value);
+	    } else if (hasNewDefaultValue) {
+	      newState.hasValue = isValid(nextProps.defaultValue);
+	    }
 	
-	    return this.props.disabled ? disabledColor : this.props.labelColor ? this.props.labelColor : this.props.primary ? this.getTheme().primaryTextColor : this.props.secondary ? this.getTheme().secondaryTextColor : this.getTheme().textColor;
-	  },
-	
-	  getThemeButton: function getThemeButton() {
-	    return this.state.muiTheme.button;
-	  },
-	
-	  getTheme: function getTheme() {
-	    return this.state.muiTheme.raisedButton;
+	    if (newState) this.setState(newState);
 	  },
 	
 	  getStyles: function getStyles() {
+	    var props = this.props;
 	
-	    var amount = this.props.primary || this.props.secondary ? 0.4 : 0.08;
+	    var _constructor$getRelevantContextKeys = this.constructor.getRelevantContextKeys(this.state.muiTheme);
+	
+	    var floatingLabelColor = _constructor$getRelevantContextKeys.floatingLabelColor;
+	    var focusColor = _constructor$getRelevantContextKeys.focusColor;
+	    var borderColor = _constructor$getRelevantContextKeys.borderColor;
+	    var textColor = _constructor$getRelevantContextKeys.textColor;
+	    var disabledTextColor = _constructor$getRelevantContextKeys.disabledTextColor;
+	    var backgroundColor = _constructor$getRelevantContextKeys.backgroundColor;
+	    var hintColor = _constructor$getRelevantContextKeys.hintColor;
+	    var errorColor = _constructor$getRelevantContextKeys.errorColor;
+	
 	    var styles = {
 	      root: {
+	        fontSize: 16,
+	        lineHeight: '24px',
+	        width: props.fullWidth ? '100%' : 256,
+	        height: (props.rows - 1) * 24 + (props.floatingLabelText ? 72 : 48),
 	        display: 'inline-block',
-	        minWidth: this.props.fullWidth ? '100%' : this.getThemeButton().minWidth,
-	        height: this.getThemeButton().height,
+	        position: 'relative',
+	        backgroundColor: backgroundColor,
+	        fontFamily: this.state.muiTheme.rawTheme.fontFamily,
+	        transition: Transitions.easeOut('200ms', 'height')
+	      },
+	      error: {
+	        position: 'relative',
+	        bottom: 5,
+	        fontSize: 12,
+	        lineHeight: '12px',
+	        color: errorColor,
 	        transition: Transitions.easeOut()
 	      },
-	      container: {
-	        position: 'relative',
-	        height: '100%',
-	        width: '100%',
-	        padding: 0,
-	        overflow: 'hidden',
-	        borderRadius: 2,
-	        transition: Transitions.easeOut(),
-	        backgroundColor: this._getBackgroundColor(),
-	
-	        //This is need so that ripples do not bleed
-	        //past border radius.
-	        //See: http://stackoverflow.com/questions/17298739/css-overflow-hidden-not-working-in-chrome-when-parent-has-border-radius-and-chil
-	        transform: 'translate3d(0, 0, 0)'
-	      },
-	      label: {
-	        position: 'relative',
+	      hint: {
+	        position: 'absolute',
+	        lineHeight: '22px',
 	        opacity: 1,
-	        fontSize: '14px',
-	        letterSpacing: 0,
-	        textTransform: this.getTheme().textTransform ? this.getTheme().textTransform : this.getThemeButton().textTransform ? this.getThemeButton().textTransform : 'uppercase',
-	        fontWeight: Typography.fontWeightMedium,
-	        margin: 0,
-	        padding: '0px ' + this.state.muiTheme.rawTheme.spacing.desktopGutterLess + 'px',
-	        userSelect: 'none',
-	        lineHeight: this.props.style && this.props.style.height ? this.props.style.height : this.getThemeButton().height + 'px',
-	        color: this._getLabelColor()
-	      },
-	      overlay: {
+	        color: hintColor,
 	        transition: Transitions.easeOut(),
-	        top: 0
+	        bottom: 12
 	      },
-	      overlayWhenHovered: {
-	        backgroundColor: ColorManipulator.fade(this._getLabelColor(), amount)
+	      input: {
+	        tapHighlightColor: 'rgba(0,0,0,0)',
+	        padding: 0,
+	        position: 'relative',
+	        width: '100%',
+	        height: '100%',
+	        border: 'none',
+	        outline: 'none',
+	        backgroundColor: 'transparent',
+	        color: props.disabled ? disabledTextColor : textColor,
+	        font: 'inherit'
+	      },
+	      underline: {
+	        border: 'none',
+	        borderBottom: 'solid 1px ' + borderColor,
+	        position: 'absolute',
+	        width: '100%',
+	        bottom: 8,
+	        margin: 0,
+	        MozBoxSizing: 'content-box',
+	        boxSizing: 'content-box',
+	        height: 0
+	      },
+	      underlineAfter: {
+	        position: 'absolute',
+	        width: '100%',
+	        overflow: 'hidden',
+	        userSelect: 'none',
+	        cursor: 'default',
+	        bottom: 8,
+	        borderBottom: 'dotted 2px ' + disabledTextColor
+	      },
+	      underlineFocus: {
+	        borderBottom: 'solid 2px',
+	        borderColor: focusColor,
+	        transform: 'scaleX(0)',
+	        transition: Transitions.easeOut()
 	      }
 	    };
+	
+	    styles.error = this.mergeAndPrefix(styles.error, props.errorStyle);
+	    styles.underline = this.mergeAndPrefix(styles.underline, props.underlineStyle);
+	    styles.underlineAfter = this.mergeAndPrefix(styles.underlineAfter, props.underlineDisabledStyle);
+	
+	    styles.floatingLabel = this.mergeStyles(styles.hint, {
+	      lineHeight: '22px',
+	      top: 38,
+	      bottom: 'none',
+	      opacity: 1,
+	      zIndex: 1, // Needed to display label above Chrome's autocomplete field background
+	      cursor: 'text',
+	      transform: 'scale(1) translate3d(0, 0, 0)',
+	      transformOrigin: 'left top'
+	    });
+	
+	    styles.textarea = this.mergeStyles(styles.input, {
+	      marginTop: props.floatingLabelText ? 36 : 12,
+	      marginBottom: props.floatingLabelText ? -36 : -12,
+	      boxSizing: 'border-box',
+	      font: 'inherit'
+	    });
+	
+	    styles.focusUnderline = this.mergeStyles(styles.underline, styles.underlineFocus, props.underlineFocusStyle);
+	
+	    if (this.state.isFocused) {
+	      styles.floatingLabel.color = focusColor;
+	      styles.floatingLabel.transform = 'perspective(1px) scale(0.75) translate3d(2px, -28px, 0)';
+	      styles.focusUnderline.transform = 'scaleX(1)';
+	    }
+	
+	    if (this.state.hasValue) {
+	      styles.floatingLabel.color = ColorManipulator.fade(props.disabled ? disabledTextColor : floatingLabelColor, 0.5);
+	      styles.floatingLabel.transform = 'perspective(1px) scale(0.75) translate3d(2px, -28px, 0)';
+	      styles.hint.opacity = 0;
+	    }
+	
+	    if (props.floatingLabelText) {
+	      styles.hint.opacity = 0;
+	      styles.input.boxSizing = 'border-box';
+	      if (this.state.isFocused && !this.state.hasValue) styles.hint.opacity = 1;
+	    }
+	
+	    if (props.style && props.style.height) {
+	      styles.hint.lineHeight = props.style.height;
+	    }
+	
+	    if (this.state.errorText && this.state.isFocused) styles.floatingLabel.color = styles.error.color;
+	    if (props.floatingLabelText && !props.multiLine) styles.input.marginTop = 14;
+	
+	    if (this.state.errorText) {
+	      styles.focusUnderline.borderColor = styles.error.color;
+	      styles.focusUnderline.transform = 'scaleX(1)';
+	    }
+	
 	    return styles;
 	  },
 	
 	  render: function render() {
 	    var _props = this.props;
-	    var children = _props.children;
-	    var disabled = _props.disabled;
-	    var label = _props.label;
-	    var labelPosition = _props.labelPosition;
-	    var labelStyle = _props.labelStyle;
-	    var primary = _props.primary;
-	    var secondary = _props.secondary;
+	    var className = _props.className;
+	    var errorStyle = _props.errorStyle;
+	    var errorText = _props.errorText;
+	    var floatingLabelText = _props.floatingLabelText;
+	    var fullWidth = _props.fullWidth;
+	    var hintText = _props.hintText;
+	    var hintStyle = _props.hintStyle;
+	    var id = _props.id;
+	    var multiLine = _props.multiLine;
+	    var onBlur = _props.onBlur;
+	    var onChange = _props.onChange;
+	    var onFocus = _props.onFocus;
+	    var type = _props.type;
+	    var rows = _props.rows;
+	    var rowsMax = _props.rowsMax;
 	
-	    var other = _objectWithoutProperties(_props, ['children', 'disabled', 'label', 'labelPosition', 'labelStyle', 'primary', 'secondary']);
+	    var other = _objectWithoutProperties(_props, ['className', 'errorStyle', 'errorText', 'floatingLabelText', 'fullWidth', 'hintText', 'hintStyle', 'id', 'multiLine', 'onBlur', 'onChange', 'onFocus', 'type', 'rows', 'rowsMax']);
 	
 	    var styles = this.getStyles();
 	
-	    var labelElement = undefined;
-	    if (label) {
-	      labelElement = React.createElement(
-	        'span',
-	        { style: this.prepareStyles(styles.label, labelStyle) },
-	        label
-	      );
+	    var inputId = id || this._uniqueId;
+	
+	    var errorTextElement = this.state.errorText ? React.createElement(
+	      'div',
+	      { style: this.prepareStyles(styles.error) },
+	      this.state.errorText
+	    ) : null;
+	
+	    var hintTextElement = hintText ? React.createElement(
+	      'div',
+	      { style: this.prepareStyles(styles.hint, hintStyle) },
+	      hintText
+	    ) : null;
+	
+	    var floatingLabelTextElement = floatingLabelText ? React.createElement(
+	      'label',
+	      {
+	        style: this.prepareStyles(styles.floatingLabel, this.props.floatingLabelStyle),
+	        htmlFor: inputId,
+	        onTouchTap: this.focus },
+	      floatingLabelText
+	    ) : null;
+	
+	    var inputProps = undefined;
+	    var inputElement = undefined;
+	
+	    inputProps = {
+	      id: inputId,
+	      ref: this._getRef(),
+	      onBlur: this._handleInputBlur,
+	      onFocus: this._handleInputFocus,
+	      disabled: this.props.disabled,
+	      onKeyDown: this._handleInputKeyDown
+	    };
+	    var inputStyle = this.mergeStyles(styles.input, this.props.inputStyle);
+	
+	    if (!this.props.hasOwnProperty('valueLink')) {
+	      inputProps.onChange = this._handleInputChange;
+	    }
+	    if (this.props.children) {
+	      var childInputStyle = this.mergeStyles(inputStyle, this.props.children.style);
+	      inputElement = React.cloneElement(this.props.children, _extends({}, inputProps, this.props.children.props, { style: childInputStyle }));
+	    } else {
+	      inputElement = multiLine ? React.createElement(EnhancedTextarea, _extends({}, other, inputProps, {
+	        style: inputStyle,
+	        rows: rows,
+	        rowsMax: rowsMax,
+	        onHeightChange: this._handleTextAreaHeightChange,
+	        textareaStyle: this.mergeAndPrefix(styles.textarea) })) : React.createElement('input', _extends({}, other, inputProps, {
+	        style: this.prepareStyles(inputStyle),
+	        type: type }));
 	    }
 	
-	    var rippleColor = styles.label.color;
-	    var rippleOpacity = !(primary || secondary) ? 0.1 : 0.16;
-	
-	    var buttonEventHandlers = disabled ? null : {
-	      onMouseDown: this._handleMouseDown,
-	      onMouseUp: this._handleMouseUp,
-	      onMouseLeave: this._handleMouseLeave,
-	      onMouseEnter: this._handleMouseEnter,
-	      onTouchStart: this._handleTouchStart,
-	      onTouchEnd: this._handleTouchEnd,
-	      onKeyboardFocus: this._handleKeyboardFocus
-	    };
-	
-	    // Place label before or after children.
-	    var childrenFragment = labelPosition === 'before' ? { labelElement: labelElement, children: children } : { children: children, labelElement: labelElement };
-	    var enhancedButtonChildren = Children.create(childrenFragment);
+	    var underlineElement = this.props.disabled ? React.createElement('div', { style: this.prepareStyles(styles.underlineAfter) }) : React.createElement('hr', { style: this.prepareStyles(styles.underline) });
+	    var focusUnderlineElement = React.createElement('hr', { style: this.prepareStyles(styles.focusUnderline) });
 	
 	    return React.createElement(
-	      Paper,
-	      {
-	        style: this.mergeStyles(styles.root, this.props.style),
-	        zDepth: this.state.zDepth },
-	      React.createElement(
-	        EnhancedButton,
-	        _extends({}, other, buttonEventHandlers, {
-	          ref: 'container',
-	          disabled: disabled,
-	          style: this.mergeStyles(styles.container),
-	          focusRippleColor: rippleColor,
-	          touchRippleColor: rippleColor,
-	          focusRippleOpacity: rippleOpacity,
-	          touchRippleOpacity: rippleOpacity }),
-	        React.createElement(
-	          'div',
-	          { ref: 'overlay', style: this.prepareStyles(styles.overlay, this.state.hovered && !this.props.disabled && styles.overlayWhenHovered) },
-	          enhancedButtonChildren
-	        )
-	      )
+	      'div',
+	      { className: className, style: this.prepareStyles(styles.root, this.props.style) },
+	      floatingLabelTextElement,
+	      hintTextElement,
+	      inputElement,
+	      underlineElement,
+	      focusUnderlineElement,
+	      errorTextElement
 	    );
 	  },
 	
-	  _handleMouseDown: function _handleMouseDown(e) {
-	    //only listen to left clicks
-	    if (e.button === 0) {
-	      this.setState({ zDepth: this.state.initialZDepth + 1 });
+	  blur: function blur() {
+	    if (this.isMounted()) this._getInputNode().blur();
+	  },
+	
+	  clearValue: function clearValue() {
+	    this.setValue('');
+	  },
+	
+	  focus: function focus() {
+	    if (this.isMounted()) this._getInputNode().focus();
+	  },
+	
+	  getValue: function getValue() {
+	    return this.isMounted() ? this._getInputNode().value : undefined;
+	  },
+	
+	  setErrorText: function setErrorText(newErrorText) {
+	    if (process.env.NODE_ENV !== 'production' && this.props.hasOwnProperty('errorText')) {
+	      console.error('Cannot call TextField.setErrorText when errorText is defined as a property.');
+	    } else if (this.isMounted()) {
+	      this.setState({ errorText: newErrorText });
 	    }
-	    if (this.props.onMouseDown) this.props.onMouseDown(e);
 	  },
 	
-	  _handleMouseUp: function _handleMouseUp(e) {
-	    this.setState({ zDepth: this.state.initialZDepth });
-	    if (this.props.onMouseUp) this.props.onMouseUp(e);
-	  },
+	  setValue: function setValue(newValue) {
+	    if (process.env.NODE_ENV !== 'production' && this._isControlled()) {
+	      console.error('Cannot call TextField.setValue when value or valueLink is defined as a property.');
+	    } else if (this.isMounted()) {
+	      if (this.props.multiLine) {
+	        this.refs[this._getRef()].setValue(newValue);
+	      } else {
+	        this._getInputNode().value = newValue;
+	      }
 	
-	  _handleMouseLeave: function _handleMouseLeave(e) {
-	    if (!this.refs.container.isKeyboardFocused()) this.setState({ zDepth: this.state.initialZDepth, hovered: false });
-	    if (this.props.onMouseLeave) this.props.onMouseLeave(e);
-	  },
-	
-	  _handleMouseEnter: function _handleMouseEnter(e) {
-	    if (!this.refs.container.isKeyboardFocused() && !this.state.touch) {
-	      this.setState({ hovered: true });
+	      this.setState({ hasValue: isValid(newValue) });
 	    }
-	    if (this.props.onMouseEnter) this.props.onMouseEnter(e);
 	  },
 	
-	  _handleTouchStart: function _handleTouchStart(e) {
-	    this.setState({
-	      touch: true,
-	      zDepth: this.state.initialZDepth + 1
-	    });
-	    if (this.props.onTouchStart) this.props.onTouchStart(e);
+	  _getRef: function _getRef() {
+	    return this.props.ref ? this.props.ref : 'input';
 	  },
 	
-	  _handleTouchEnd: function _handleTouchEnd(e) {
-	    this.setState({ zDepth: this.state.initialZDepth });
-	    if (this.props.onTouchEnd) this.props.onTouchEnd(e);
+	  _getInputNode: function _getInputNode() {
+	    return this.props.children || this.props.multiLine ? this.refs[this._getRef()].getInputNode() : ReactDOM.findDOMNode(this.refs[this._getRef()]);
 	  },
 	
-	  _handleKeyboardFocus: function _handleKeyboardFocus(e, keyboardFocused) {
-	    if (keyboardFocused && !this.props.disabled) {
-	      this.setState({ zDepth: this.state.initialZDepth + 1 });
-	      var amount = this.props.primary || this.props.secondary ? 0.4 : 0.08;
-	      ReactDOM.findDOMNode(this.refs.overlay).style.backgroundColor = ColorManipulator.fade(this.prepareStyles(this.getStyles().label, this.props.labelStyle).color, amount);
-	    } else if (!this.state.hovered) {
-	      this.setState({ zDepth: this.state.initialZDepth });
-	      ReactDOM.findDOMNode(this.refs.overlay).style.backgroundColor = 'transparent';
-	    }
+	  _handleInputBlur: function _handleInputBlur(e) {
+	    this.setState({ isFocused: false });
+	    if (this.props.onBlur) this.props.onBlur(e);
+	  },
+	
+	  _handleInputChange: function _handleInputChange(e) {
+	    this.setState({ hasValue: isValid(e.target.value) });
+	    if (this.props.onChange) this.props.onChange(e);
+	  },
+	
+	  _handleInputFocus: function _handleInputFocus(e) {
+	    if (this.props.disabled) return;
+	    this.setState({ isFocused: true });
+	    if (this.props.onFocus) this.props.onFocus(e);
+	  },
+	
+	  _handleInputKeyDown: function _handleInputKeyDown(e) {
+	    if (e.keyCode === 13 && this.props.onEnterKeyDown) this.props.onEnterKeyDown(e);
+	    if (this.props.onKeyDown) this.props.onKeyDown(e);
+	  },
+	
+	  _handleTextAreaHeightChange: function _handleTextAreaHeightChange(e, height) {
+	    var newHeight = height + 24;
+	    if (this.props.floatingLabelText) newHeight += 24;
+	    ReactDOM.findDOMNode(this).style.height = newHeight + 'px';
+	  },
+	
+	  _isControlled: function _isControlled() {
+	    return this.props.hasOwnProperty('value') || this.props.hasOwnProperty('valueLink');
 	  }
+	
 	});
 	
-	module.exports = RaisedButton;
+	module.exports = TextField;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
+
+/***/ },
+/* 161 */
+/*!******************************************************!*\
+  !*** ./~/material-ui/lib/utils/color-manipulator.js ***!
+  \******************************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	
+	  /**
+	   * The relative brightness of any point in a colorspace, normalized to 0 for
+	   * darkest black and 1 for lightest white. RGB colors only. Does not take
+	   * into account alpha values.
+	   *
+	   * TODO:
+	   * - Take into account alpha values.
+	   * - Identify why there are minor discrepancies for some use cases
+	   *   (i.e. #F0F & #FFF). Note that these cases rarely occur.
+	   *
+	   * Formula: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+	   */
+	  _luminance: function _luminance(color) {
+	    color = this._decomposeColor(color);
+	
+	    if (color.type.indexOf('rgb') > -1) {
+	      var rgb = color.values.map(function (val) {
+	        val /= 255; // normalized
+	        return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+	      });
+	
+	      return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+	    } else {
+	      var message = 'Calculating the relative luminance is not available for ' + 'HSL and HSLA.';
+	      console.error(message);
+	      return -1;
+	    }
+	  },
+	
+	  /**
+	   * @params:
+	   * additionalValue = An extra value that has been calculated but not included
+	   *                   with the original color object, such as an alpha value.
+	   */
+	  _convertColorToString: function _convertColorToString(color, additonalValue) {
+	    var str = color.type + '(' + parseInt(color.values[0]) + ',' + parseInt(color.values[1]) + ',' + parseInt(color.values[2]);
+	
+	    if (additonalValue !== undefined) {
+	      str += ',' + additonalValue + ')';
+	    } else if (color.values.length === 4) {
+	      str += ',' + color.values[3] + ')';
+	    } else {
+	      str += ')';
+	    }
+	
+	    return str;
+	  },
+	
+	  // Converts a color from hex format to rgb format.
+	  _convertHexToRGB: function _convertHexToRGB(color) {
+	    if (color.length === 4) {
+	      var extendedColor = '#';
+	      for (var i = 1; i < color.length; i++) {
+	        extendedColor += color.charAt(i) + color.charAt(i);
+	      }
+	      color = extendedColor;
+	    }
+	
+	    var values = {
+	      r: parseInt(color.substr(1, 2), 16),
+	      g: parseInt(color.substr(3, 2), 16),
+	      b: parseInt(color.substr(5, 2), 16)
+	    };
+	
+	    return 'rgb(' + values.r + ',' + values.g + ',' + values.b + ')';
+	  },
+	
+	  // Returns the type and values of a color of any given type.
+	  _decomposeColor: function _decomposeColor(color) {
+	    if (color.charAt(0) === '#') {
+	      return this._decomposeColor(this._convertHexToRGB(color));
+	    }
+	
+	    var marker = color.indexOf('(');
+	    var type = color.substring(0, marker);
+	    var values = color.substring(marker + 1, color.length - 1).split(',');
+	
+	    return { type: type, values: values };
+	  },
+	
+	  // Set the absolute transparency of a color.
+	  // Any existing alpha values are overwritten.
+	  fade: function fade(color, amount) {
+	    color = this._decomposeColor(color);
+	    if (color.type === 'rgb' || color.type === 'hsl') color.type += 'a';
+	    return this._convertColorToString(color, amount);
+	  },
+	
+	  // Desaturates rgb and sets opacity to 0.15
+	  lighten: function lighten(color, amount) {
+	    color = this._decomposeColor(color);
+	
+	    if (color.type.indexOf('hsl') > -1) {
+	      color.values[2] += amount;
+	      return this._decomposeColor(this._convertColorToString(color));
+	    } else if (color.type.indexOf('rgb') > -1) {
+	      for (var i = 0; i < 3; i++) {
+	        color.values[i] *= 1 + amount;
+	        if (color.values[i] > 255) color.values[i] = 255;
+	      }
+	    }
+	
+	    if (color.type.indexOf('a') <= -1) color.type += 'a';
+	
+	    return this._convertColorToString(color, '0.15');
+	  },
+	
+	  darken: function darken(color, amount) {
+	    color = this._decomposeColor(color);
+	
+	    if (color.type.indexOf('hsl') > -1) {
+	      color.values[2] += amount;
+	      return this._decomposeColor(this._convertColorToString(color));
+	    } else if (color.type.indexOf('rgb') > -1) {
+	      for (var i = 0; i < 3; i++) {
+	        color.values[i] *= 1 - amount;
+	        if (color.values[i] < 0) color.values[i] = 0;
+	      }
+	    }
+	
+	    return this._convertColorToString(color);
+	  },
+	
+	  // Calculates the contrast ratio between two colors.
+	  //
+	  // Formula: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+	  contrastRatio: function contrastRatio(background, foreground) {
+	    var lumA = this._luminance(background);
+	    var lumB = this._luminance(foreground);
+	
+	    if (lumA >= lumB) {
+	      return ((lumA + 0.05) / (lumB + 0.05)).toFixed(2);
+	    } else {
+	      return ((lumB + 0.05) / (lumA + 0.05)).toFixed(2);
+	    }
+	  },
+	
+	  /**
+	   * Determines how readable a color combination is based on its level.
+	   * Levels are defined from @LeaVerou:
+	   * https://github.com/LeaVerou/contrast-ratio/blob/gh-pages/contrast-ratio.js
+	   */
+	  contrastRatioLevel: function contrastRatioLevel(background, foreground) {
+	    var levels = {
+	      'fail': {
+	        range: [0, 3],
+	        color: 'hsl(0, 100%, 40%)'
+	      },
+	      'aa-large': {
+	        range: [3, 4.5],
+	        color: 'hsl(40, 100%, 45%)'
+	      },
+	      'aa': {
+	        range: [4.5, 7],
+	        color: 'hsl(80, 60%, 45%)'
+	      },
+	      'aaa': {
+	        range: [7, 22],
+	        color: 'hsl(95, 60%, 41%)'
+	      }
+	    };
+	
+	    var ratio = this.contrastRatio(background, foreground);
+	
+	    for (var level in levels) {
+	      var range = levels[level].range;
+	      if (ratio >= range[0] && ratio <= range[1]) return level;
+	    }
+	  }
+	};
 
 /***/ },
 /* 162 */
@@ -22144,354 +22397,252 @@
 
 /***/ },
 /* 181 */
-/*!******************************************************!*\
-  !*** ./~/material-ui/lib/utils/color-manipulator.js ***!
-  \******************************************************/
+/*!**********************************************!*\
+  !*** ./~/material-ui/lib/utils/unique-id.js ***!
+  \**********************************************/
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
+	
+	var index = 0;
 	
 	module.exports = {
-	
-	  /**
-	   * The relative brightness of any point in a colorspace, normalized to 0 for
-	   * darkest black and 1 for lightest white. RGB colors only. Does not take
-	   * into account alpha values.
-	   *
-	   * TODO:
-	   * - Take into account alpha values.
-	   * - Identify why there are minor discrepancies for some use cases
-	   *   (i.e. #F0F & #FFF). Note that these cases rarely occur.
-	   *
-	   * Formula: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-	   */
-	  _luminance: function _luminance(color) {
-	    color = this._decomposeColor(color);
-	
-	    if (color.type.indexOf('rgb') > -1) {
-	      var rgb = color.values.map(function (val) {
-	        val /= 255; // normalized
-	        return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
-	      });
-	
-	      return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-	    } else {
-	      var message = 'Calculating the relative luminance is not available for ' + 'HSL and HSLA.';
-	      console.error(message);
-	      return -1;
-	    }
-	  },
-	
-	  /**
-	   * @params:
-	   * additionalValue = An extra value that has been calculated but not included
-	   *                   with the original color object, such as an alpha value.
-	   */
-	  _convertColorToString: function _convertColorToString(color, additonalValue) {
-	    var str = color.type + '(' + parseInt(color.values[0]) + ',' + parseInt(color.values[1]) + ',' + parseInt(color.values[2]);
-	
-	    if (additonalValue !== undefined) {
-	      str += ',' + additonalValue + ')';
-	    } else if (color.values.length === 4) {
-	      str += ',' + color.values[3] + ')';
-	    } else {
-	      str += ')';
-	    }
-	
-	    return str;
-	  },
-	
-	  // Converts a color from hex format to rgb format.
-	  _convertHexToRGB: function _convertHexToRGB(color) {
-	    if (color.length === 4) {
-	      var extendedColor = '#';
-	      for (var i = 1; i < color.length; i++) {
-	        extendedColor += color.charAt(i) + color.charAt(i);
-	      }
-	      color = extendedColor;
-	    }
-	
-	    var values = {
-	      r: parseInt(color.substr(1, 2), 16),
-	      g: parseInt(color.substr(3, 2), 16),
-	      b: parseInt(color.substr(5, 2), 16)
-	    };
-	
-	    return 'rgb(' + values.r + ',' + values.g + ',' + values.b + ')';
-	  },
-	
-	  // Returns the type and values of a color of any given type.
-	  _decomposeColor: function _decomposeColor(color) {
-	    if (color.charAt(0) === '#') {
-	      return this._decomposeColor(this._convertHexToRGB(color));
-	    }
-	
-	    var marker = color.indexOf('(');
-	    var type = color.substring(0, marker);
-	    var values = color.substring(marker + 1, color.length - 1).split(',');
-	
-	    return { type: type, values: values };
-	  },
-	
-	  // Set the absolute transparency of a color.
-	  // Any existing alpha values are overwritten.
-	  fade: function fade(color, amount) {
-	    color = this._decomposeColor(color);
-	    if (color.type === 'rgb' || color.type === 'hsl') color.type += 'a';
-	    return this._convertColorToString(color, amount);
-	  },
-	
-	  // Desaturates rgb and sets opacity to 0.15
-	  lighten: function lighten(color, amount) {
-	    color = this._decomposeColor(color);
-	
-	    if (color.type.indexOf('hsl') > -1) {
-	      color.values[2] += amount;
-	      return this._decomposeColor(this._convertColorToString(color));
-	    } else if (color.type.indexOf('rgb') > -1) {
-	      for (var i = 0; i < 3; i++) {
-	        color.values[i] *= 1 + amount;
-	        if (color.values[i] > 255) color.values[i] = 255;
-	      }
-	    }
-	
-	    if (color.type.indexOf('a') <= -1) color.type += 'a';
-	
-	    return this._convertColorToString(color, '0.15');
-	  },
-	
-	  darken: function darken(color, amount) {
-	    color = this._decomposeColor(color);
-	
-	    if (color.type.indexOf('hsl') > -1) {
-	      color.values[2] += amount;
-	      return this._decomposeColor(this._convertColorToString(color));
-	    } else if (color.type.indexOf('rgb') > -1) {
-	      for (var i = 0; i < 3; i++) {
-	        color.values[i] *= 1 - amount;
-	        if (color.values[i] < 0) color.values[i] = 0;
-	      }
-	    }
-	
-	    return this._convertColorToString(color);
-	  },
-	
-	  // Calculates the contrast ratio between two colors.
-	  //
-	  // Formula: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
-	  contrastRatio: function contrastRatio(background, foreground) {
-	    var lumA = this._luminance(background);
-	    var lumB = this._luminance(foreground);
-	
-	    if (lumA >= lumB) {
-	      return ((lumA + 0.05) / (lumB + 0.05)).toFixed(2);
-	    } else {
-	      return ((lumB + 0.05) / (lumA + 0.05)).toFixed(2);
-	    }
-	  },
-	
-	  /**
-	   * Determines how readable a color combination is based on its level.
-	   * Levels are defined from @LeaVerou:
-	   * https://github.com/LeaVerou/contrast-ratio/blob/gh-pages/contrast-ratio.js
-	   */
-	  contrastRatioLevel: function contrastRatioLevel(background, foreground) {
-	    var levels = {
-	      'fail': {
-	        range: [0, 3],
-	        color: 'hsl(0, 100%, 40%)'
-	      },
-	      'aa-large': {
-	        range: [3, 4.5],
-	        color: 'hsl(40, 100%, 45%)'
-	      },
-	      'aa': {
-	        range: [4.5, 7],
-	        color: 'hsl(80, 60%, 45%)'
-	      },
-	      'aaa': {
-	        range: [7, 22],
-	        color: 'hsl(95, 60%, 41%)'
-	      }
-	    };
-	
-	    var ratio = this.contrastRatio(background, foreground);
-	
-	    for (var level in levels) {
-	      var range = levels[level].range;
-	      if (ratio >= range[0] && ratio <= range[1]) return level;
-	    }
+	  generate: function generate() {
+	    return "mui-id-" + index++;
 	  }
 	};
 
 /***/ },
 /* 182 */
-/*!*********************************************!*\
-  !*** ./~/material-ui/lib/utils/children.js ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(/*! react */ 1);
-	var createFragment = __webpack_require__(/*! react-addons-create-fragment */ 183);
-	
-	module.exports = {
-	
-	  create: function create(fragments) {
-	    var newFragments = {};
-	    var validChildrenCount = 0;
-	    var firstKey = undefined;
-	
-	    //Only create non-empty key fragments
-	    for (var key in fragments) {
-	      var currentChild = fragments[key];
-	
-	      if (currentChild) {
-	        if (validChildrenCount === 0) firstKey = key;
-	        newFragments[key] = currentChild;
-	        validChildrenCount++;
-	      }
-	    }
-	
-	    if (validChildrenCount === 0) return undefined;
-	    if (validChildrenCount === 1) return newFragments[firstKey];
-	    return createFragment(newFragments);
-	  },
-	
-	  extend: function extend(children, extendedProps, extendedChildren) {
-	
-	    return React.isValidElement(children) ? React.Children.map(children, function (child) {
-	
-	      var newProps = typeof extendedProps === 'function' ? extendedProps(child) : extendedProps;
-	
-	      var newChildren = typeof extendedChildren === 'function' ? extendedChildren(child) : extendedChildren ? extendedChildren : child.props.children;
-	
-	      return React.cloneElement(child, newProps, newChildren);
-	    }) : children;
-	  }
-	
-	};
-
-/***/ },
-/* 183 */
-/*!*************************************************!*\
-  !*** ./~/react-addons-create-fragment/index.js ***!
-  \*************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(/*! react/lib/ReactFragment */ 184).create;
-
-/***/ },
-/* 184 */
-/*!**************************************!*\
-  !*** ./~/react/lib/ReactFragment.js ***!
-  \**************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright 2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactFragment
-	 */
-	
-	'use strict';
-	
-	var ReactChildren = __webpack_require__(/*! ./ReactChildren */ 110);
-	var ReactElement = __webpack_require__(/*! ./ReactElement */ 42);
-	
-	var emptyFunction = __webpack_require__(/*! fbjs/lib/emptyFunction */ 15);
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 13);
-	var warning = __webpack_require__(/*! fbjs/lib/warning */ 25);
-	
-	/**
-	 * We used to allow keyed objects to serve as a collection of ReactElements,
-	 * or nested sets. This allowed us a way to explicitly key a set a fragment of
-	 * components. This is now being replaced with an opaque data structure.
-	 * The upgrade path is to call React.addons.createFragment({ key: value }) to
-	 * create a keyed fragment. The resulting data structure is an array.
-	 */
-	
-	var numericPropertyRegex = /^\d+$/;
-	
-	var warnedAboutNumeric = false;
-	
-	var ReactFragment = {
-	  // Wrap a keyed object in an opaque proxy that warns you if you access any
-	  // of its properties.
-	  create: function (object) {
-	    if (typeof object !== 'object' || !object || Array.isArray(object)) {
-	      process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment only accepts a single object. Got: %s', object) : undefined;
-	      return object;
-	    }
-	    if (ReactElement.isValidElement(object)) {
-	      process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment does not accept a ReactElement ' + 'without a wrapper object.') : undefined;
-	      return object;
-	    }
-	
-	    !(object.nodeType !== 1) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'React.addons.createFragment(...): Encountered an invalid child; DOM ' + 'elements are not valid children of React components.') : invariant(false) : undefined;
-	
-	    var result = [];
-	
-	    for (var key in object) {
-	      if (process.env.NODE_ENV !== 'production') {
-	        if (!warnedAboutNumeric && numericPropertyRegex.test(key)) {
-	          process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment(...): Child objects should have ' + 'non-numeric keys so ordering is preserved.') : undefined;
-	          warnedAboutNumeric = true;
-	        }
-	      }
-	      ReactChildren.mapIntoWithKeyPrefixInternal(object[key], result, key, emptyFunction.thatReturnsArgument);
-	    }
-	
-	    return result;
-	  }
-	};
-	
-	module.exports = ReactFragment;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
-
-/***/ },
-/* 185 */
 /*!************************************************!*\
-  !*** ./~/material-ui/lib/styles/typography.js ***!
+  !*** ./~/material-ui/lib/enhanced-textarea.js ***!
   \************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
-	var Colors = __webpack_require__(/*! ./colors */ 186);
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
-	var Typography = function Typography() {
-	  _classCallCheck(this, Typography);
+	var React = __webpack_require__(/*! react */ 1);
+	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
-	  // text colors
-	  this.textFullBlack = Colors.fullBlack;
-	  this.textDarkBlack = Colors.darkBlack;
-	  this.textLightBlack = Colors.lightBlack;
-	  this.textMinBlack = Colors.minBlack;
-	  this.textFullWhite = Colors.fullWhite;
-	  this.textDarkWhite = Colors.darkWhite;
-	  this.textLightWhite = Colors.lightWhite;
+	var rowsHeight = 24;
 	
-	  // font weight
-	  this.fontWeightLight = 300;
-	  this.fontWeightNormal = 400;
-	  this.fontWeightMedium = 500;
-	
-	  this.fontStyleButtonFontSize = 14;
+	var styles = {
+	  textarea: {
+	    width: '100%',
+	    resize: 'none',
+	    font: 'inherit',
+	    padding: 0
+	  },
+	  shadow: {
+	    width: '100%',
+	    resize: 'none',
+	    // Overflow also needed to here to remove the extra row
+	    // added to textareas in Firefox.
+	    overflow: 'hidden',
+	    // Visibility needed to hide the extra text area on ipads
+	    visibility: 'hidden',
+	    font: 'inherit',
+	    padding: 0,
+	    position: 'absolute'
+	  }
 	};
 	
-	module.exports = new Typography();
+	var EnhancedTextarea = React.createClass({
+	  displayName: 'EnhancedTextarea',
+	
+	  mixins: [StylePropable],
+	
+	  contextTypes: {
+	    muiTheme: React.PropTypes.object
+	  },
+	
+	  //for passing default theme context to children
+	  childContextTypes: {
+	    muiTheme: React.PropTypes.object
+	  },
+	
+	  getChildContext: function getChildContext() {
+	    return {
+	      muiTheme: this.state.muiTheme
+	    };
+	  },
+	
+	  propTypes: {
+	    onChange: React.PropTypes.func,
+	    onHeightChange: React.PropTypes.func,
+	    textareaStyle: React.PropTypes.object,
+	    rows: React.PropTypes.number,
+	    rowsMax: React.PropTypes.number,
+	    style: React.PropTypes.object,
+	    value: React.PropTypes.string
+	  },
+	
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      rows: 1
+	    };
+	  },
+	
+	  getInitialState: function getInitialState() {
+	    return {
+	      height: this.props.rows * rowsHeight,
+	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
+	    };
+	  },
+	
+	  componentDidMount: function componentDidMount() {
+	    this._syncHeightWithShadow();
+	  },
+	
+	  render: function render() {
+	    var _props = this.props;
+	    var onChange = _props.onChange;
+	    var onHeightChange = _props.onHeightChange;
+	    var rows = _props.rows;
+	    var style = _props.style;
+	    var textareaStyle = _props.textareaStyle;
+	    var valueLink = _props.valueLink;
+	
+	    var other = _objectWithoutProperties(_props, ['onChange', 'onHeightChange', 'rows', 'style', 'textareaStyle', 'valueLink']);
+	
+	    var textareaStyles = this.mergeStyles(styles.textarea, textareaStyle, {
+	      height: this.state.height
+	    });
+	
+	    var shadowStyles = styles.shadow;
+	
+	    if (this.props.hasOwnProperty('valueLink')) {
+	      other.value = this.props.valueLink.value;
+	    }
+	
+	    if (this.props.disabled) {
+	      style.cursor = 'default';
+	    }
+	
+	    return React.createElement(
+	      'div',
+	      { style: this.prepareStyles(this.props.style) },
+	      React.createElement('textarea', {
+	        ref: 'shadow',
+	        style: this.prepareStyles(shadowStyles),
+	        tabIndex: '-1',
+	        rows: this.props.rows,
+	        defaultValue: this.props.defaultValue,
+	        readOnly: true,
+	        value: this.props.value,
+	        valueLink: this.props.valueLink }),
+	      React.createElement('textarea', _extends({}, other, {
+	        ref: 'input',
+	        rows: this.props.rows,
+	        style: this.prepareStyles(textareaStyles),
+	        onChange: this._handleChange }))
+	    );
+	  },
+	
+	  getInputNode: function getInputNode() {
+	    return ReactDOM.findDOMNode(this.refs.input);
+	  },
+	
+	  setValue: function setValue(value) {
+	    this.getInputNode().value = value;
+	    this._syncHeightWithShadow(value);
+	  },
+	
+	  _syncHeightWithShadow: function _syncHeightWithShadow(newValue, e) {
+	    var shadow = ReactDOM.findDOMNode(this.refs.shadow);
+	
+	    if (newValue !== undefined) {
+	      shadow.value = newValue;
+	    }
+	
+	    var newHeight = shadow.scrollHeight;
+	
+	    if (this.props.rowsMax > this.props.rows) {
+	      newHeight = Math.min(this.props.rowsMax * rowsHeight, newHeight);
+	    }
+	
+	    newHeight = Math.max(newHeight, rowsHeight);
+	
+	    if (this.state.height !== newHeight) {
+	      this.setState({
+	        height: newHeight
+	      });
+	
+	      if (this.props.onHeightChange) {
+	        this.props.onHeightChange(e, newHeight);
+	      }
+	    }
+	  },
+	
+	  _handleChange: function _handleChange(e) {
+	    this._syncHeightWithShadow(e.target.value);
+	
+	    if (this.props.hasOwnProperty('valueLink')) {
+	      this.props.valueLink.requestChange(e.target.value);
+	    }
+	
+	    if (this.props.onChange) {
+	      this.props.onChange(e);
+	    }
+	  },
+	
+	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
+	    if (nextProps.value !== this.props.value) {
+	      this._syncHeightWithShadow(nextProps.value);
+	    }
+	    var newState = {};
+	    newState.muiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+	  }
+	});
+	
+	module.exports = EnhancedTextarea;
 
 /***/ },
-/* 186 */
+/* 183 */
+/*!****************************************************************!*\
+  !*** ./~/material-ui/lib/styles/raw-themes/light-raw-theme.js ***!
+  \****************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Colors = __webpack_require__(/*! ../colors */ 184);
+	var ColorManipulator = __webpack_require__(/*! ../../utils/color-manipulator */ 161);
+	var Spacing = __webpack_require__(/*! ../spacing */ 185);
+	
+	/*
+	 *  Light Theme is the default theme used in material-ui. It is guaranteed to
+	 *  have all theme variables needed for every component. Variables not defined
+	 *  in a custom theme will default to these values.
+	 */
+	
+	module.exports = {
+	  spacing: Spacing,
+	  fontFamily: 'Roboto, sans-serif',
+	  palette: {
+	    primary1Color: Colors.cyan500,
+	    primary2Color: Colors.cyan700,
+	    primary3Color: Colors.grey400,
+	    accent1Color: Colors.pinkA200,
+	    accent2Color: Colors.grey100,
+	    accent3Color: Colors.grey500,
+	    textColor: Colors.darkBlack,
+	    alternateTextColor: Colors.white,
+	    canvasColor: Colors.white,
+	    borderColor: Colors.grey300,
+	    disabledColor: ColorManipulator.fade(Colors.darkBlack, 0.3)
+	  }
+	};
+
+/***/ },
+/* 184 */
 /*!********************************************!*\
   !*** ./~/material-ui/lib/styles/colors.js ***!
   \********************************************/
@@ -22794,7 +22945,1231 @@
 	};
 
 /***/ },
+/* 185 */
+/*!*********************************************!*\
+  !*** ./~/material-ui/lib/styles/spacing.js ***!
+  \*********************************************/
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	module.exports = {
+	  iconSize: 24,
+	
+	  desktopGutter: 24,
+	  desktopGutterMore: 32,
+	  desktopGutterLess: 16,
+	  desktopGutterMini: 8,
+	  desktopKeylineIncrement: 64,
+	  desktopDropDownMenuItemHeight: 32,
+	  desktopDropDownMenuFontSize: 15,
+	  desktopLeftNavMenuItemHeight: 48,
+	  desktopSubheaderHeight: 48,
+	  desktopToolbarHeight: 56
+	};
+
+/***/ },
+/* 186 */
+/*!***************************************************!*\
+  !*** ./~/material-ui/lib/styles/theme-manager.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Colors = __webpack_require__(/*! ./colors */ 184);
+	var ColorManipulator = __webpack_require__(/*! ../utils/color-manipulator */ 161);
+	var Extend = __webpack_require__(/*! ../utils/extend */ 187);
+	var update = __webpack_require__(/*! react-addons-update */ 164);
+	
+	module.exports = {
+	
+	  //get the MUI theme corresponding to a raw theme
+	  getMuiTheme: function getMuiTheme(rawTheme) {
+	    var returnObj = {
+	      appBar: {
+	        color: rawTheme.palette.primary1Color,
+	        textColor: rawTheme.palette.alternateTextColor,
+	        height: rawTheme.spacing.desktopKeylineIncrement
+	      },
+	      avatar: {
+	        borderColor: 'rgba(0, 0, 0, 0.08)'
+	      },
+	      badge: {
+	        color: rawTheme.palette.alternateTextColor,
+	        textColor: rawTheme.palette.textColor,
+	        primaryColor: rawTheme.palette.accent1Color,
+	        primaryTextColor: rawTheme.palette.alternateTextColor,
+	        secondaryColor: rawTheme.palette.primary1Color,
+	        secondaryTextColor: rawTheme.palette.alternateTextColor
+	      },
+	      button: {
+	        height: 36,
+	        minWidth: 88,
+	        iconButtonSize: rawTheme.spacing.iconSize * 2
+	      },
+	      cardText: {
+	        textColor: rawTheme.palette.textColor
+	      },
+	      checkbox: {
+	        boxColor: rawTheme.palette.textColor,
+	        checkedColor: rawTheme.palette.primary1Color,
+	        requiredColor: rawTheme.palette.primary1Color,
+	        disabledColor: rawTheme.palette.disabledColor,
+	        labelColor: rawTheme.palette.textColor,
+	        labelDisabledColor: rawTheme.palette.disabledColor
+	      },
+	      datePicker: {
+	        color: rawTheme.palette.primary1Color,
+	        textColor: rawTheme.palette.alternateTextColor,
+	        calendarTextColor: rawTheme.palette.textColor,
+	        selectColor: rawTheme.palette.primary2Color,
+	        selectTextColor: rawTheme.palette.alternateTextColor
+	      },
+	      dropDownMenu: {
+	        accentColor: rawTheme.palette.borderColor
+	      },
+	      flatButton: {
+	        color: rawTheme.palette.alternateTextColor,
+	        textColor: rawTheme.palette.textColor,
+	        primaryTextColor: rawTheme.palette.accent1Color,
+	        secondaryTextColor: rawTheme.palette.primary1Color
+	      },
+	      floatingActionButton: {
+	        buttonSize: 56,
+	        miniSize: 40,
+	        color: rawTheme.palette.accent1Color,
+	        iconColor: rawTheme.palette.alternateTextColor,
+	        secondaryColor: rawTheme.palette.primary1Color,
+	        secondaryIconColor: rawTheme.palette.alternateTextColor,
+	        disabledTextColor: rawTheme.palette.disabledColor
+	      },
+	      gridTile: {
+	        textColor: Colors.white
+	      },
+	      inkBar: {
+	        backgroundColor: rawTheme.palette.accent1Color
+	      },
+	      leftNav: {
+	        width: rawTheme.spacing.desktopKeylineIncrement * 4,
+	        color: rawTheme.palette.canvasColor
+	      },
+	      listItem: {
+	        nestedLevelDepth: 18
+	      },
+	      menu: {
+	        backgroundColor: rawTheme.palette.canvasColor,
+	        containerBackgroundColor: rawTheme.palette.canvasColor
+	      },
+	      menuItem: {
+	        dataHeight: 32,
+	        height: 48,
+	        hoverColor: 'rgba(0, 0, 0, .035)',
+	        padding: rawTheme.spacing.desktopGutter,
+	        selectedTextColor: rawTheme.palette.accent1Color
+	      },
+	      menuSubheader: {
+	        padding: rawTheme.spacing.desktopGutter,
+	        borderColor: rawTheme.palette.borderColor,
+	        textColor: rawTheme.palette.primary1Color
+	      },
+	      paper: {
+	        backgroundColor: rawTheme.palette.canvasColor
+	      },
+	      radioButton: {
+	        borderColor: rawTheme.palette.textColor,
+	        backgroundColor: rawTheme.palette.alternateTextColor,
+	        checkedColor: rawTheme.palette.primary1Color,
+	        requiredColor: rawTheme.palette.primary1Color,
+	        disabledColor: rawTheme.palette.disabledColor,
+	        size: 24,
+	        labelColor: rawTheme.palette.textColor,
+	        labelDisabledColor: rawTheme.palette.disabledColor
+	      },
+	      raisedButton: {
+	        color: rawTheme.palette.alternateTextColor,
+	        textColor: rawTheme.palette.textColor,
+	        primaryColor: rawTheme.palette.accent1Color,
+	        primaryTextColor: rawTheme.palette.alternateTextColor,
+	        secondaryColor: rawTheme.palette.primary1Color,
+	        secondaryTextColor: rawTheme.palette.alternateTextColor
+	      },
+	      refreshIndicator: {
+	        strokeColor: rawTheme.palette.borderColor,
+	        loadingStrokeColor: rawTheme.palette.primary1Color
+	      },
+	      slider: {
+	        trackSize: 2,
+	        trackColor: rawTheme.palette.primary3Color,
+	        trackColorSelected: rawTheme.palette.accent3Color,
+	        handleSize: 12,
+	        handleSizeDisabled: 8,
+	        handleSizeActive: 18,
+	        handleColorZero: rawTheme.palette.primary3Color,
+	        handleFillColor: rawTheme.palette.alternateTextColor,
+	        selectionColor: rawTheme.palette.primary1Color,
+	        rippleColor: rawTheme.palette.primary1Color
+	      },
+	      snackbar: {
+	        textColor: rawTheme.palette.alternateTextColor,
+	        backgroundColor: rawTheme.palette.textColor,
+	        actionColor: rawTheme.palette.accent1Color
+	      },
+	      table: {
+	        backgroundColor: rawTheme.palette.canvasColor
+	      },
+	      tableHeader: {
+	        borderColor: rawTheme.palette.borderColor
+	      },
+	      tableHeaderColumn: {
+	        textColor: rawTheme.palette.accent3Color,
+	        height: 56,
+	        spacing: 24
+	      },
+	      tableFooter: {
+	        borderColor: rawTheme.palette.borderColor,
+	        textColor: rawTheme.palette.accent3Color
+	      },
+	      tableRow: {
+	        hoverColor: rawTheme.palette.accent2Color,
+	        stripeColor: ColorManipulator.lighten(rawTheme.palette.primary1Color, 0.55),
+	        selectedColor: rawTheme.palette.borderColor,
+	        textColor: rawTheme.palette.textColor,
+	        borderColor: rawTheme.palette.borderColor
+	      },
+	      tableRowColumn: {
+	        height: 48,
+	        spacing: 24
+	      },
+	      timePicker: {
+	        color: rawTheme.palette.alternateTextColor,
+	        textColor: rawTheme.palette.accent3Color,
+	        accentColor: rawTheme.palette.primary1Color,
+	        clockColor: rawTheme.palette.textColor,
+	        selectColor: rawTheme.palette.primary2Color,
+	        selectTextColor: rawTheme.palette.alternateTextColor
+	      },
+	      toggle: {
+	        thumbOnColor: rawTheme.palette.primary1Color,
+	        thumbOffColor: rawTheme.palette.accent2Color,
+	        thumbDisabledColor: rawTheme.palette.borderColor,
+	        thumbRequiredColor: rawTheme.palette.primary1Color,
+	        trackOnColor: ColorManipulator.fade(rawTheme.palette.primary1Color, 0.5),
+	        trackOffColor: rawTheme.palette.primary3Color,
+	        trackDisabledColor: rawTheme.palette.primary3Color,
+	        labelColor: rawTheme.palette.textColor,
+	        labelDisabledColor: rawTheme.palette.disabledColor
+	      },
+	      toolbar: {
+	        backgroundColor: ColorManipulator.darken(rawTheme.palette.accent2Color, 0.05),
+	        height: 56,
+	        titleFontSize: 20,
+	        iconColor: 'rgba(0, 0, 0, .40)',
+	        separatorColor: 'rgba(0, 0, 0, .175)',
+	        menuHoverColor: 'rgba(0, 0, 0, .10)'
+	      },
+	      tabs: {
+	        backgroundColor: rawTheme.palette.primary1Color,
+	        textColor: ColorManipulator.fade(rawTheme.palette.alternateTextColor, 0.6),
+	        selectedTextColor: rawTheme.palette.alternateTextColor
+	      },
+	      textField: {
+	        textColor: rawTheme.palette.textColor,
+	        hintColor: rawTheme.palette.disabledColor,
+	        floatingLabelColor: rawTheme.palette.textColor,
+	        disabledTextColor: rawTheme.palette.disabledColor,
+	        errorColor: Colors.red500,
+	        focusColor: rawTheme.palette.primary1Color,
+	        backgroundColor: 'transparent',
+	        borderColor: rawTheme.palette.borderColor
+	      },
+	      isRtl: false
+	    };
+	
+	    //add properties to objects inside 'returnObj' that depend on existing properties
+	    returnObj.flatButton.disabledTextColor = ColorManipulator.fade(returnObj.flatButton.textColor, 0.3);
+	    returnObj.raisedButton.disabledColor = ColorManipulator.darken(returnObj.raisedButton.color, 0.1);
+	    returnObj.raisedButton.disabledTextColor = ColorManipulator.fade(returnObj.raisedButton.textColor, 0.3);
+	    returnObj.toggle.trackRequiredColor = ColorManipulator.fade(returnObj.toggle.thumbRequiredColor, 0.5);
+	
+	    //append the raw theme object to 'returnObj'
+	    returnObj.rawTheme = rawTheme;
+	
+	    //set 'static' key as true (by default) on return object. This is to support the ContextPure mixin.
+	    returnObj['static'] = true;
+	
+	    return returnObj;
+	  },
+	
+	  //functions to modify properties of raw theme, namely spacing, palette
+	  //and font family. These functions use the React update immutability helper
+	  //to create a new object for the raw theme, and return a new MUI theme object
+	
+	  //function to modify the spacing of the raw theme. This function recomputes
+	  //the MUI theme and returns it based on the new theme.
+	  modifyRawThemeSpacing: function modifyRawThemeSpacing(muiTheme, newSpacing) {
+	    var newRawTheme = update(muiTheme.rawTheme, { spacing: { $set: newSpacing } });
+	    return this.getMuiTheme(newRawTheme);
+	  },
+	
+	  //function to modify the palette of the raw theme. This function recomputes
+	  //the MUI theme and returns it based on the new raw theme.
+	  //keys inside 'newPalette' override values for existing keys in palette
+	  modifyRawThemePalette: function modifyRawThemePalette(muiTheme, newPaletteKeys) {
+	    var newPalette = Extend(muiTheme.rawTheme.palette, newPaletteKeys);
+	    var newRawTheme = update(muiTheme.rawTheme, { palette: { $set: newPalette } });
+	    return this.getMuiTheme(newRawTheme);
+	  },
+	
+	  //function to modify the font family of the raw theme. This function recomputes
+	  //the MUI theme and returns it based on the new raw theme.
+	  modifyRawThemeFontFamily: function modifyRawThemeFontFamily(muiTheme, newFontFamily) {
+	    var newRawTheme = update(muiTheme.rawTheme, { fontFamily: { $set: newFontFamily } });
+	    return this.getMuiTheme(newRawTheme);
+	  }
+	
+	};
+
+/***/ },
 /* 187 */
+/*!*******************************************!*\
+  !*** ./~/material-ui/lib/utils/extend.js ***!
+  \*******************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	function isObject(obj) {
+	  return typeof obj === 'object' && obj !== null;
+	}
+	
+	/**
+	*  A recursive merge between two objects.
+	*
+	*  @param base     - the object whose properties are to be overwritten. It
+	*                    should be either the root level or some nested level.
+	*  @param override - an object containing properties to be overwritten. It
+	*                    should have the same structure as the object object.
+	*/
+	var extend = function extend(base, override) {
+	
+	  var mergedObject = {};
+	
+	  //Loop through each key in the base object
+	  Object.keys(base).forEach(function (key) {
+	
+	    var baseProp = base[key];
+	    var overrideProp = undefined;
+	
+	    if (isObject(override)) overrideProp = override[key];
+	
+	    //Recursive call extend if the prop is another object, else just copy it over
+	    mergedObject[key] = isObject(baseProp) && !Array.isArray(baseProp) ? extend(baseProp, overrideProp) : baseProp;
+	  });
+	
+	  //Loop through each override key and override the props in the
+	  //base object
+	  if (isObject(override)) {
+	
+	    Object.keys(override).forEach(function (overrideKey) {
+	
+	      var overrideProp = override[overrideKey];
+	
+	      //Only copy over props that are not objects
+	      if (!isObject(overrideProp) || Array.isArray(overrideProp)) {
+	        mergedObject[overrideKey] = overrideProp;
+	      }
+	    });
+	  }
+	
+	  return mergedObject;
+	};
+	
+	module.exports = extend;
+
+/***/ },
+/* 188 */
+/*!**************************************************!*\
+  !*** ./~/material-ui/lib/mixins/context-pure.js ***!
+  \**************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var shallowEqual = __webpack_require__(/*! ../utils/shallow-equal */ 189);
+	
+	function relevantContextKeysEqual(classObject, currentContext, nextContext) {
+	
+	  //Get those keys from current object's context that we care
+	  //about and check whether those keys have changed or not
+	  if (classObject.getRelevantContextKeys) {
+	    var currentContextKeys = classObject.getRelevantContextKeys(currentContext);
+	    var nextContextKeys = classObject.getRelevantContextKeys(nextContext);
+	
+	    if (!shallowEqual(currentContextKeys, nextContextKeys)) {
+	      return false;
+	    }
+	  }
+	
+	  //Check if children context keys changed
+	  if (classObject.getChildrenClasses) {
+	    var childrenArray = classObject.getChildrenClasses();
+	    for (var i = 0; i < childrenArray.length; i++) {
+	      if (!relevantContextKeysEqual(childrenArray[i], currentContext, nextContext)) {
+	        return false;
+	      }
+	    }
+	  }
+	
+	  //context keys are equal
+	  return true;
+	}
+	
+	module.exports = {
+	
+	  //Don't update if state, prop, and context are equal
+	  shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState, nextContext) {
+	
+	    //If either the props or state have changed, component should update
+	    if (!shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState)) {
+	      return true;
+	    }
+	
+	    //If current theme and next theme are both undefined, do not update
+	    if (!this.context.muiTheme && !nextContext.muiTheme) {
+	      return false;
+	    }
+	
+	    //If both themes exist, compare keys only if current theme is not static
+	    if (this.context.muiTheme && nextContext.muiTheme) {
+	      return !this.context.muiTheme['static'] && !relevantContextKeysEqual(this.constructor, this.context.muiTheme, nextContext.muiTheme);
+	    }
+	
+	    //At this point it is guaranteed that exactly one theme is undefined so simply update
+	    return true;
+	  }
+	
+	};
+
+/***/ },
+/* 189 */
+/*!**************************************************!*\
+  !*** ./~/material-ui/lib/utils/shallow-equal.js ***!
+  \**************************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	exports['default'] = shallowEqual;
+	
+	function shallowEqual(objA, objB) {
+	  if (objA === objB) {
+	    return true;
+	  }
+	
+	  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+	    return false;
+	  }
+	
+	  var keysA = Object.keys(objA);
+	  var keysB = Object.keys(objB);
+	
+	  if (keysA.length !== keysB.length) {
+	    return false;
+	  }
+	
+	  // Test for A's keys different from B.
+	  var bHasOwnProperty = Object.prototype.hasOwnProperty.bind(objB);
+	  for (var i = 0; i < keysA.length; i++) {
+	    if (!bHasOwnProperty(keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
+	      return false;
+	    }
+	  }
+	
+	  return true;
+	}
+	
+	module.exports = exports['default'];
+
+/***/ },
+/* 190 */
+/*!**************************!*\
+  !*** ./src/PollForm.jsx ***!
+  \**************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	module.exports = (function () {
+	  'use strict';
+	  var React = __webpack_require__(/*! react */ 1);
+	  var Paper = __webpack_require__(/*! material-ui/lib/paper */ 191);
+	  var RaisedButton = __webpack_require__(/*! material-ui/lib/raised-button */ 196);
+	  var injectTapEventPlugin = __webpack_require__(/*! react-tap-event-plugin */ 213);
+	  var Poll = __webpack_require__(/*! react-1poll */ 217);
+	
+	  // Needed for onTouchTap
+	  // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
+	  injectTapEventPlugin();
+	
+	  return (function (_React$Component) {
+	    _inherits(PollForm, _React$Component);
+	
+	    function PollForm(props) {
+	      var _this = this;
+	
+	      _classCallCheck(this, PollForm);
+	
+	      _get(Object.getPrototypeOf(PollForm.prototype), 'constructor', this).call(this, props);
+	
+	      this.render = function () {
+	        return React.createElement(
+	          'div',
+	          { className: 'react-poll-form' },
+	          React.createElement(
+	            Paper,
+	            { style: { padding: '16px', paddingTop: '1px', color: '#333' } },
+	            React.createElement(Poll, {
+	              ref: 'poll',
+	              disabled: _this.state.disabled,
+	              options: _this.props.options,
+	              onNewOption: _this._onNewOption,
+	              labelStyle: { color: 'auto' }
+	            }),
+	            React.createElement(RaisedButton, {
+	              disabled: _this.state.disabled,
+	              label: 'Submit',
+	              primary: true,
+	              backgroundColor: '#00a651',
+	              style: {
+	                display: 'block' },
+	              // to fill the parent div's width
+	              onTouchTap: _this.props.onValidSubmit
+	            })
+	          )
+	        );
+	      };
+	
+	      this._onNewOption = function (newOption) {
+	        _this.refs.poll.setState({
+	          options: _this.refs.poll.state.options.concat([newOption])
+	        });
+	      };
+	
+	      this.getOptions = function () {
+	        return _this.refs.poll.state.options;
+	      };
+	
+	      this.state = {
+	        disabled: false
+	      };
+	    }
+	
+	    return PollForm;
+	  })(React.Component);
+	})();
+
+/***/ },
+/* 191 */
+/*!************************************!*\
+  !*** ./~/material-ui/lib/paper.js ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+	
+	var React = __webpack_require__(/*! react */ 1);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
+	var PropTypes = __webpack_require__(/*! ./utils/prop-types */ 195);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
+	
+	var Paper = React.createClass({
+	  displayName: 'Paper',
+	
+	  mixins: [PureRenderMixin, StylePropable],
+	
+	  contextTypes: {
+	    muiTheme: React.PropTypes.object
+	  },
+	
+	  //for passing default theme context to children
+	  childContextTypes: {
+	    muiTheme: React.PropTypes.object
+	  },
+	
+	  getChildContext: function getChildContext() {
+	    return {
+	      muiTheme: this.state.muiTheme
+	    };
+	  },
+	
+	  getInitialState: function getInitialState() {
+	    return {
+	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
+	    };
+	  },
+	
+	  //to update theme inside state whenever a new theme is passed down
+	  //from the parent / owner using context
+	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
+	    var newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+	    this.setState({ muiTheme: newMuiTheme });
+	  },
+	
+	  propTypes: {
+	    circle: React.PropTypes.bool,
+	    rounded: React.PropTypes.bool,
+	    transitionEnabled: React.PropTypes.bool,
+	    zDepth: PropTypes.zDepth,
+	    style: React.PropTypes.object
+	  },
+	
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      circle: false,
+	      rounded: true,
+	      transitionEnabled: true,
+	      zDepth: 1
+	    };
+	  },
+	
+	  render: function render() {
+	    var _props = this.props;
+	    var children = _props.children;
+	    var circle = _props.circle;
+	    var rounded = _props.rounded;
+	    var style = _props.style;
+	    var transitionEnabled = _props.transitionEnabled;
+	    var zDepth = _props.zDepth;
+	
+	    var other = _objectWithoutProperties(_props, ['children', 'circle', 'rounded', 'style', 'transitionEnabled', 'zDepth']);
+	
+	    var styles = {
+	      backgroundColor: this.state.muiTheme.paper.backgroundColor,
+	      transition: transitionEnabled && Transitions.easeOut(),
+	      boxSizing: 'border-box',
+	      fontFamily: this.state.muiTheme.rawTheme.fontFamily,
+	      WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+	      boxShadow: this._getZDepthShadows(zDepth),
+	      borderRadius: circle ? '50%' : rounded ? '2px' : '0px'
+	    };
+	
+	    return React.createElement(
+	      'div',
+	      _extends({}, other, { style: this.prepareStyles(styles, style) }),
+	      children
+	    );
+	  },
+	
+	  _getZDepthShadows: function _getZDepthShadows(zDepth) {
+	    var shadows = [null, '0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24)', '0 3px 10px rgba(0, 0, 0, 0.16), 0 3px 10px rgba(0, 0, 0, 0.23)', '0 10px 30px rgba(0, 0, 0, 0.19), 0 6px 10px rgba(0, 0, 0, 0.23)', '0 14px 45px rgba(0, 0, 0, 0.25), 0 10px 18px rgba(0, 0, 0, 0.22)', '0 19px 60px rgba(0, 0, 0, 0.30), 0 15px 20px rgba(0, 0, 0, 0.22)'];
+	
+	    return shadows[zDepth];
+	  }
+	
+	});
+	
+	module.exports = Paper;
+
+/***/ },
+/* 192 */
+/*!***************************************************!*\
+  !*** ./~/react-addons-pure-render-mixin/index.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(/*! react/lib/ReactComponentWithPureRenderMixin */ 193);
+
+/***/ },
+/* 193 */
+/*!**********************************************************!*\
+  !*** ./~/react/lib/ReactComponentWithPureRenderMixin.js ***!
+  \**********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ReactComponentWithPureRenderMixin
+	 */
+	
+	'use strict';
+	
+	var shallowCompare = __webpack_require__(/*! ./shallowCompare */ 194);
+	
+	/**
+	 * If your React component's render function is "pure", e.g. it will render the
+	 * same result given the same props and state, provide this Mixin for a
+	 * considerable performance boost.
+	 *
+	 * Most React components have pure render functions.
+	 *
+	 * Example:
+	 *
+	 *   var ReactComponentWithPureRenderMixin =
+	 *     require('ReactComponentWithPureRenderMixin');
+	 *   React.createClass({
+	 *     mixins: [ReactComponentWithPureRenderMixin],
+	 *
+	 *     render: function() {
+	 *       return <div className={this.props.className}>foo</div>;
+	 *     }
+	 *   });
+	 *
+	 * Note: This only checks shallow equality for props and state. If these contain
+	 * complex data structures this mixin may have false-negatives for deeper
+	 * differences. Only mixin to components which have simple props and state, or
+	 * use `forceUpdate()` when you know deep data structures have changed.
+	 */
+	var ReactComponentWithPureRenderMixin = {
+	  shouldComponentUpdate: function (nextProps, nextState) {
+	    return shallowCompare(this, nextProps, nextState);
+	  }
+	};
+	
+	module.exports = ReactComponentWithPureRenderMixin;
+
+/***/ },
+/* 194 */
+/*!***************************************!*\
+  !*** ./~/react/lib/shallowCompare.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	* @providesModule shallowCompare
+	*/
+	
+	'use strict';
+	
+	var shallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 117);
+	
+	/**
+	 * Does a shallow comparison for props and state.
+	 * See ReactComponentWithPureRenderMixin
+	 */
+	function shallowCompare(instance, nextProps, nextState) {
+	  return !shallowEqual(instance.props, nextProps) || !shallowEqual(instance.state, nextState);
+	}
+	
+	module.exports = shallowCompare;
+
+/***/ },
+/* 195 */
+/*!***********************************************!*\
+  !*** ./~/material-ui/lib/utils/prop-types.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 1);
+	
+	var horizontal = React.PropTypes.oneOf(['left', 'middle', 'right']);
+	var vertical = React.PropTypes.oneOf(['top', 'center', 'bottom']);
+	
+	module.exports = {
+	
+	  corners: React.PropTypes.oneOf(['bottom-left', 'bottom-right', 'top-left', 'top-right']),
+	
+	  horizontal: horizontal,
+	
+	  vertical: vertical,
+	
+	  origin: React.PropTypes.shape({
+	    horizontal: horizontal,
+	    vertical: vertical
+	  }),
+	
+	  cornersAndCenter: React.PropTypes.oneOf(['bottom-center', 'bottom-left', 'bottom-right', 'top-center', 'top-left', 'top-right']),
+	
+	  stringOrNumber: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
+	
+	  zDepth: React.PropTypes.oneOf([0, 1, 2, 3, 4, 5])
+	
+	};
+
+/***/ },
+/* 196 */
+/*!********************************************!*\
+  !*** ./~/material-ui/lib/raised-button.js ***!
+  \********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+	
+	var React = __webpack_require__(/*! react */ 1);
+	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
+	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 161);
+	var Children = __webpack_require__(/*! ./utils/children */ 197);
+	var Typography = __webpack_require__(/*! ./styles/typography */ 200);
+	var EnhancedButton = __webpack_require__(/*! ./enhanced-button */ 201);
+	var Paper = __webpack_require__(/*! ./paper */ 191);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
+	
+	function validateLabel(props, propName, componentName) {
+	  if (!props.children && !props.label) {
+	    return new Error('Required prop label or children was not ' + 'specified in ' + componentName + '.');
+	  }
+	}
+	
+	var RaisedButton = React.createClass({
+	  displayName: 'RaisedButton',
+	
+	  mixins: [StylePropable],
+	
+	  contextTypes: {
+	    muiTheme: React.PropTypes.object
+	  },
+	
+	  //for passing default theme context to children
+	  childContextTypes: {
+	    muiTheme: React.PropTypes.object
+	  },
+	
+	  getChildContext: function getChildContext() {
+	    return {
+	      muiTheme: this.state.muiTheme
+	    };
+	  },
+	
+	  propTypes: {
+	    className: React.PropTypes.string,
+	    disabled: React.PropTypes.bool,
+	    label: validateLabel,
+	    labelPosition: React.PropTypes.oneOf(['before', 'after']),
+	    onMouseDown: React.PropTypes.func,
+	    onMouseUp: React.PropTypes.func,
+	    onMouseLeave: React.PropTypes.func,
+	    onTouchEnd: React.PropTypes.func,
+	    onTouchStart: React.PropTypes.func,
+	    primary: React.PropTypes.bool,
+	    secondary: React.PropTypes.bool,
+	    labelStyle: React.PropTypes.object,
+	    backgroundColor: React.PropTypes.string,
+	    labelColor: React.PropTypes.string,
+	    disabledBackgroundColor: React.PropTypes.string,
+	    disabledLabelColor: React.PropTypes.string,
+	    fullWidth: React.PropTypes.bool,
+	    style: React.PropTypes.object,
+	    onMouseEnter: React.PropTypes.func
+	  },
+	
+	  getDefaultProps: function getDefaultProps() {
+	    return {
+	      labelPosition: 'before' };
+	  },
+	
+	  // Should be after but we keep it like for now (prevent breaking changes)
+	  getInitialState: function getInitialState() {
+	    var zDepth = this.props.disabled ? 0 : 1;
+	    return {
+	      hovered: false,
+	      touched: false,
+	      initialZDepth: zDepth,
+	      zDepth: zDepth,
+	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
+	    };
+	  },
+	
+	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
+	    var zDepth = nextProps.disabled ? 0 : 1;
+	    var newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
+	    this.setState({
+	      zDepth: zDepth,
+	      initialZDepth: zDepth,
+	      muiTheme: newMuiTheme
+	    });
+	  },
+	
+	  _getBackgroundColor: function _getBackgroundColor() {
+	    var disabledColor = this.props.disabledBackgroundColor ? this.props.disabledBackgroundColor : this.getTheme().disabledColor;
+	
+	    return this.props.disabled ? disabledColor : this.props.backgroundColor ? this.props.backgroundColor : this.props.primary ? this.getTheme().primaryColor : this.props.secondary ? this.getTheme().secondaryColor : this.getTheme().color;
+	  },
+	
+	  _getLabelColor: function _getLabelColor() {
+	    var disabledColor = this.props.disabledLabelColor ? this.props.disabledLabelColor : this.getTheme().disabledTextColor;
+	
+	    return this.props.disabled ? disabledColor : this.props.labelColor ? this.props.labelColor : this.props.primary ? this.getTheme().primaryTextColor : this.props.secondary ? this.getTheme().secondaryTextColor : this.getTheme().textColor;
+	  },
+	
+	  getThemeButton: function getThemeButton() {
+	    return this.state.muiTheme.button;
+	  },
+	
+	  getTheme: function getTheme() {
+	    return this.state.muiTheme.raisedButton;
+	  },
+	
+	  getStyles: function getStyles() {
+	
+	    var amount = this.props.primary || this.props.secondary ? 0.4 : 0.08;
+	    var styles = {
+	      root: {
+	        display: 'inline-block',
+	        minWidth: this.props.fullWidth ? '100%' : this.getThemeButton().minWidth,
+	        height: this.getThemeButton().height,
+	        transition: Transitions.easeOut()
+	      },
+	      container: {
+	        position: 'relative',
+	        height: '100%',
+	        width: '100%',
+	        padding: 0,
+	        overflow: 'hidden',
+	        borderRadius: 2,
+	        transition: Transitions.easeOut(),
+	        backgroundColor: this._getBackgroundColor(),
+	
+	        //This is need so that ripples do not bleed
+	        //past border radius.
+	        //See: http://stackoverflow.com/questions/17298739/css-overflow-hidden-not-working-in-chrome-when-parent-has-border-radius-and-chil
+	        transform: 'translate3d(0, 0, 0)'
+	      },
+	      label: {
+	        position: 'relative',
+	        opacity: 1,
+	        fontSize: '14px',
+	        letterSpacing: 0,
+	        textTransform: this.getTheme().textTransform ? this.getTheme().textTransform : this.getThemeButton().textTransform ? this.getThemeButton().textTransform : 'uppercase',
+	        fontWeight: Typography.fontWeightMedium,
+	        margin: 0,
+	        padding: '0px ' + this.state.muiTheme.rawTheme.spacing.desktopGutterLess + 'px',
+	        userSelect: 'none',
+	        lineHeight: this.props.style && this.props.style.height ? this.props.style.height : this.getThemeButton().height + 'px',
+	        color: this._getLabelColor()
+	      },
+	      overlay: {
+	        transition: Transitions.easeOut(),
+	        top: 0
+	      },
+	      overlayWhenHovered: {
+	        backgroundColor: ColorManipulator.fade(this._getLabelColor(), amount)
+	      }
+	    };
+	    return styles;
+	  },
+	
+	  render: function render() {
+	    var _props = this.props;
+	    var children = _props.children;
+	    var disabled = _props.disabled;
+	    var label = _props.label;
+	    var labelPosition = _props.labelPosition;
+	    var labelStyle = _props.labelStyle;
+	    var primary = _props.primary;
+	    var secondary = _props.secondary;
+	
+	    var other = _objectWithoutProperties(_props, ['children', 'disabled', 'label', 'labelPosition', 'labelStyle', 'primary', 'secondary']);
+	
+	    var styles = this.getStyles();
+	
+	    var labelElement = undefined;
+	    if (label) {
+	      labelElement = React.createElement(
+	        'span',
+	        { style: this.prepareStyles(styles.label, labelStyle) },
+	        label
+	      );
+	    }
+	
+	    var rippleColor = styles.label.color;
+	    var rippleOpacity = !(primary || secondary) ? 0.1 : 0.16;
+	
+	    var buttonEventHandlers = disabled ? null : {
+	      onMouseDown: this._handleMouseDown,
+	      onMouseUp: this._handleMouseUp,
+	      onMouseLeave: this._handleMouseLeave,
+	      onMouseEnter: this._handleMouseEnter,
+	      onTouchStart: this._handleTouchStart,
+	      onTouchEnd: this._handleTouchEnd,
+	      onKeyboardFocus: this._handleKeyboardFocus
+	    };
+	
+	    // Place label before or after children.
+	    var childrenFragment = labelPosition === 'before' ? { labelElement: labelElement, children: children } : { children: children, labelElement: labelElement };
+	    var enhancedButtonChildren = Children.create(childrenFragment);
+	
+	    return React.createElement(
+	      Paper,
+	      {
+	        style: this.mergeStyles(styles.root, this.props.style),
+	        zDepth: this.state.zDepth },
+	      React.createElement(
+	        EnhancedButton,
+	        _extends({}, other, buttonEventHandlers, {
+	          ref: 'container',
+	          disabled: disabled,
+	          style: this.mergeStyles(styles.container),
+	          focusRippleColor: rippleColor,
+	          touchRippleColor: rippleColor,
+	          focusRippleOpacity: rippleOpacity,
+	          touchRippleOpacity: rippleOpacity }),
+	        React.createElement(
+	          'div',
+	          { ref: 'overlay', style: this.prepareStyles(styles.overlay, this.state.hovered && !this.props.disabled && styles.overlayWhenHovered) },
+	          enhancedButtonChildren
+	        )
+	      )
+	    );
+	  },
+	
+	  _handleMouseDown: function _handleMouseDown(e) {
+	    //only listen to left clicks
+	    if (e.button === 0) {
+	      this.setState({ zDepth: this.state.initialZDepth + 1 });
+	    }
+	    if (this.props.onMouseDown) this.props.onMouseDown(e);
+	  },
+	
+	  _handleMouseUp: function _handleMouseUp(e) {
+	    this.setState({ zDepth: this.state.initialZDepth });
+	    if (this.props.onMouseUp) this.props.onMouseUp(e);
+	  },
+	
+	  _handleMouseLeave: function _handleMouseLeave(e) {
+	    if (!this.refs.container.isKeyboardFocused()) this.setState({ zDepth: this.state.initialZDepth, hovered: false });
+	    if (this.props.onMouseLeave) this.props.onMouseLeave(e);
+	  },
+	
+	  _handleMouseEnter: function _handleMouseEnter(e) {
+	    if (!this.refs.container.isKeyboardFocused() && !this.state.touch) {
+	      this.setState({ hovered: true });
+	    }
+	    if (this.props.onMouseEnter) this.props.onMouseEnter(e);
+	  },
+	
+	  _handleTouchStart: function _handleTouchStart(e) {
+	    this.setState({
+	      touch: true,
+	      zDepth: this.state.initialZDepth + 1
+	    });
+	    if (this.props.onTouchStart) this.props.onTouchStart(e);
+	  },
+	
+	  _handleTouchEnd: function _handleTouchEnd(e) {
+	    this.setState({ zDepth: this.state.initialZDepth });
+	    if (this.props.onTouchEnd) this.props.onTouchEnd(e);
+	  },
+	
+	  _handleKeyboardFocus: function _handleKeyboardFocus(e, keyboardFocused) {
+	    if (keyboardFocused && !this.props.disabled) {
+	      this.setState({ zDepth: this.state.initialZDepth + 1 });
+	      var amount = this.props.primary || this.props.secondary ? 0.4 : 0.08;
+	      ReactDOM.findDOMNode(this.refs.overlay).style.backgroundColor = ColorManipulator.fade(this.prepareStyles(this.getStyles().label, this.props.labelStyle).color, amount);
+	    } else if (!this.state.hovered) {
+	      this.setState({ zDepth: this.state.initialZDepth });
+	      ReactDOM.findDOMNode(this.refs.overlay).style.backgroundColor = 'transparent';
+	    }
+	  }
+	});
+	
+	module.exports = RaisedButton;
+
+/***/ },
+/* 197 */
+/*!*********************************************!*\
+  !*** ./~/material-ui/lib/utils/children.js ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 1);
+	var createFragment = __webpack_require__(/*! react-addons-create-fragment */ 198);
+	
+	module.exports = {
+	
+	  create: function create(fragments) {
+	    var newFragments = {};
+	    var validChildrenCount = 0;
+	    var firstKey = undefined;
+	
+	    //Only create non-empty key fragments
+	    for (var key in fragments) {
+	      var currentChild = fragments[key];
+	
+	      if (currentChild) {
+	        if (validChildrenCount === 0) firstKey = key;
+	        newFragments[key] = currentChild;
+	        validChildrenCount++;
+	      }
+	    }
+	
+	    if (validChildrenCount === 0) return undefined;
+	    if (validChildrenCount === 1) return newFragments[firstKey];
+	    return createFragment(newFragments);
+	  },
+	
+	  extend: function extend(children, extendedProps, extendedChildren) {
+	
+	    return React.isValidElement(children) ? React.Children.map(children, function (child) {
+	
+	      var newProps = typeof extendedProps === 'function' ? extendedProps(child) : extendedProps;
+	
+	      var newChildren = typeof extendedChildren === 'function' ? extendedChildren(child) : extendedChildren ? extendedChildren : child.props.children;
+	
+	      return React.cloneElement(child, newProps, newChildren);
+	    }) : children;
+	  }
+	
+	};
+
+/***/ },
+/* 198 */
+/*!*************************************************!*\
+  !*** ./~/react-addons-create-fragment/index.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(/*! react/lib/ReactFragment */ 199).create;
+
+/***/ },
+/* 199 */
+/*!**************************************!*\
+  !*** ./~/react/lib/ReactFragment.js ***!
+  \**************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ReactFragment
+	 */
+	
+	'use strict';
+	
+	var ReactChildren = __webpack_require__(/*! ./ReactChildren */ 110);
+	var ReactElement = __webpack_require__(/*! ./ReactElement */ 42);
+	
+	var emptyFunction = __webpack_require__(/*! fbjs/lib/emptyFunction */ 15);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 13);
+	var warning = __webpack_require__(/*! fbjs/lib/warning */ 25);
+	
+	/**
+	 * We used to allow keyed objects to serve as a collection of ReactElements,
+	 * or nested sets. This allowed us a way to explicitly key a set a fragment of
+	 * components. This is now being replaced with an opaque data structure.
+	 * The upgrade path is to call React.addons.createFragment({ key: value }) to
+	 * create a keyed fragment. The resulting data structure is an array.
+	 */
+	
+	var numericPropertyRegex = /^\d+$/;
+	
+	var warnedAboutNumeric = false;
+	
+	var ReactFragment = {
+	  // Wrap a keyed object in an opaque proxy that warns you if you access any
+	  // of its properties.
+	  create: function (object) {
+	    if (typeof object !== 'object' || !object || Array.isArray(object)) {
+	      process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment only accepts a single object. Got: %s', object) : undefined;
+	      return object;
+	    }
+	    if (ReactElement.isValidElement(object)) {
+	      process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment does not accept a ReactElement ' + 'without a wrapper object.') : undefined;
+	      return object;
+	    }
+	
+	    !(object.nodeType !== 1) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'React.addons.createFragment(...): Encountered an invalid child; DOM ' + 'elements are not valid children of React components.') : invariant(false) : undefined;
+	
+	    var result = [];
+	
+	    for (var key in object) {
+	      if (process.env.NODE_ENV !== 'production') {
+	        if (!warnedAboutNumeric && numericPropertyRegex.test(key)) {
+	          process.env.NODE_ENV !== 'production' ? warning(false, 'React.addons.createFragment(...): Child objects should have ' + 'non-numeric keys so ordering is preserved.') : undefined;
+	          warnedAboutNumeric = true;
+	        }
+	      }
+	      ReactChildren.mapIntoWithKeyPrefixInternal(object[key], result, key, emptyFunction.thatReturnsArgument);
+	    }
+	
+	    return result;
+	  }
+	};
+	
+	module.exports = ReactFragment;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
+
+/***/ },
+/* 200 */
+/*!************************************************!*\
+  !*** ./~/material-ui/lib/styles/typography.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	var Colors = __webpack_require__(/*! ./colors */ 184);
+	
+	var Typography = function Typography() {
+	  _classCallCheck(this, Typography);
+	
+	  // text colors
+	  this.textFullBlack = Colors.fullBlack;
+	  this.textDarkBlack = Colors.darkBlack;
+	  this.textLightBlack = Colors.lightBlack;
+	  this.textMinBlack = Colors.minBlack;
+	  this.textFullWhite = Colors.fullWhite;
+	  this.textDarkWhite = Colors.darkWhite;
+	  this.textLightWhite = Colors.lightWhite;
+	
+	  // font weight
+	  this.fontWeightLight = 300;
+	  this.fontWeightNormal = 400;
+	  this.fontWeightMedium = 500;
+	
+	  this.fontStyleButtonFontSize = 14;
+	};
+	
+	module.exports = new Typography();
+
+/***/ },
+/* 201 */
 /*!**********************************************!*\
   !*** ./~/material-ui/lib/enhanced-button.js ***!
   \**********************************************/
@@ -22807,16 +24182,16 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
-	var Colors = __webpack_require__(/*! ./styles/colors */ 186);
-	var Children = __webpack_require__(/*! ./utils/children */ 182);
-	var Events = __webpack_require__(/*! ./utils/events */ 191);
-	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 192);
-	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 193);
-	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 203);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var Colors = __webpack_require__(/*! ./styles/colors */ 184);
+	var Children = __webpack_require__(/*! ./utils/children */ 197);
+	var Events = __webpack_require__(/*! ./utils/events */ 202);
+	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 203);
+	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 204);
+	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 210);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
 	var styleInjected = false;
 	var listening = false;
@@ -23103,102 +24478,7 @@
 	module.exports = EnhancedButton;
 
 /***/ },
-/* 188 */
-/*!***************************************************!*\
-  !*** ./~/react-addons-pure-render-mixin/index.js ***!
-  \***************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(/*! react/lib/ReactComponentWithPureRenderMixin */ 189);
-
-/***/ },
-/* 189 */
-/*!**********************************************************!*\
-  !*** ./~/react/lib/ReactComponentWithPureRenderMixin.js ***!
-  \**********************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ReactComponentWithPureRenderMixin
-	 */
-	
-	'use strict';
-	
-	var shallowCompare = __webpack_require__(/*! ./shallowCompare */ 190);
-	
-	/**
-	 * If your React component's render function is "pure", e.g. it will render the
-	 * same result given the same props and state, provide this Mixin for a
-	 * considerable performance boost.
-	 *
-	 * Most React components have pure render functions.
-	 *
-	 * Example:
-	 *
-	 *   var ReactComponentWithPureRenderMixin =
-	 *     require('ReactComponentWithPureRenderMixin');
-	 *   React.createClass({
-	 *     mixins: [ReactComponentWithPureRenderMixin],
-	 *
-	 *     render: function() {
-	 *       return <div className={this.props.className}>foo</div>;
-	 *     }
-	 *   });
-	 *
-	 * Note: This only checks shallow equality for props and state. If these contain
-	 * complex data structures this mixin may have false-negatives for deeper
-	 * differences. Only mixin to components which have simple props and state, or
-	 * use `forceUpdate()` when you know deep data structures have changed.
-	 */
-	var ReactComponentWithPureRenderMixin = {
-	  shouldComponentUpdate: function (nextProps, nextState) {
-	    return shallowCompare(this, nextProps, nextState);
-	  }
-	};
-	
-	module.exports = ReactComponentWithPureRenderMixin;
-
-/***/ },
-/* 190 */
-/*!***************************************!*\
-  !*** ./~/react/lib/shallowCompare.js ***!
-  \***************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	* @providesModule shallowCompare
-	*/
-	
-	'use strict';
-	
-	var shallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 117);
-	
-	/**
-	 * Does a shallow comparison for props and state.
-	 * See ReactComponentWithPureRenderMixin
-	 */
-	function shallowCompare(instance, nextProps, nextState) {
-	  return !shallowEqual(instance.props, nextProps) || !shallowEqual(instance.state, nextState);
-	}
-	
-	module.exports = shallowCompare;
-
-/***/ },
-/* 191 */
+/* 202 */
 /*!*******************************************!*\
   !*** ./~/material-ui/lib/utils/events.js ***!
   \*******************************************/
@@ -23246,7 +24526,7 @@
 	};
 
 /***/ },
-/* 192 */
+/* 203 */
 /*!*********************************************!*\
   !*** ./~/material-ui/lib/utils/key-code.js ***!
   \*********************************************/
@@ -23266,7 +24546,7 @@
 	};
 
 /***/ },
-/* 193 */
+/* 204 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/ripples/focus-ripple.js ***!
   \***************************************************/
@@ -23276,12 +24556,12 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
 	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 162);
 	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 167);
-	var Colors = __webpack_require__(/*! ../styles/colors */ 186);
+	var Colors = __webpack_require__(/*! ../styles/colors */ 184);
 	var Transitions = __webpack_require__(/*! ../styles/transitions */ 180);
-	var ScaleInTransitionGroup = __webpack_require__(/*! ../transition-groups/scale-in */ 194);
+	var ScaleInTransitionGroup = __webpack_require__(/*! ../transition-groups/scale-in */ 205);
 	
 	var pulsateDuration = 750;
 	
@@ -23400,7 +24680,7 @@
 	module.exports = FocusRipple;
 
 /***/ },
-/* 194 */
+/* 205 */
 /*!*********************************************************!*\
   !*** ./~/material-ui/lib/transition-groups/scale-in.js ***!
   \*********************************************************/
@@ -23413,12 +24693,12 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
-	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 195);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
+	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 206);
 	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 162);
-	var ScaleInChild = __webpack_require__(/*! ./scale-in-child */ 198);
-	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 201);
+	var ScaleInChild = __webpack_require__(/*! ./scale-in-child */ 209);
+	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 186);
 	
 	var ScaleIn = React.createClass({
 	  displayName: 'ScaleIn',
@@ -23511,16 +24791,16 @@
 	module.exports = ScaleIn;
 
 /***/ },
-/* 195 */
+/* 206 */
 /*!**************************************************!*\
   !*** ./~/react-addons-transition-group/index.js ***!
   \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! react/lib/ReactTransitionGroup */ 196);
+	module.exports = __webpack_require__(/*! react/lib/ReactTransitionGroup */ 207);
 
 /***/ },
-/* 196 */
+/* 207 */
 /*!*********************************************!*\
   !*** ./~/react/lib/ReactTransitionGroup.js ***!
   \*********************************************/
@@ -23540,7 +24820,7 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! ./React */ 2);
-	var ReactTransitionChildMapping = __webpack_require__(/*! ./ReactTransitionChildMapping */ 197);
+	var ReactTransitionChildMapping = __webpack_require__(/*! ./ReactTransitionChildMapping */ 208);
 	
 	var assign = __webpack_require__(/*! ./Object.assign */ 39);
 	var emptyFunction = __webpack_require__(/*! fbjs/lib/emptyFunction */ 15);
@@ -23733,7 +25013,7 @@
 	module.exports = ReactTransitionGroup;
 
 /***/ },
-/* 197 */
+/* 208 */
 /*!****************************************************!*\
   !*** ./~/react/lib/ReactTransitionChildMapping.js ***!
   \****************************************************/
@@ -23839,7 +25119,7 @@
 	module.exports = ReactTransitionChildMapping;
 
 /***/ },
-/* 198 */
+/* 209 */
 /*!***************************************************************!*\
   !*** ./~/material-ui/lib/transition-groups/scale-in-child.js ***!
   \***************************************************************/
@@ -23853,12 +25133,12 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
 	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 162);
 	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 167);
 	var Transitions = __webpack_require__(/*! ../styles/transitions */ 180);
-	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 201);
+	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 186);
 	
 	var ScaleInChild = React.createClass({
 	  displayName: 'ScaleInChild',
@@ -23986,387 +25266,7 @@
 	module.exports = ScaleInChild;
 
 /***/ },
-/* 199 */
-/*!****************************************************************!*\
-  !*** ./~/material-ui/lib/styles/raw-themes/light-raw-theme.js ***!
-  \****************************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var Colors = __webpack_require__(/*! ../colors */ 186);
-	var ColorManipulator = __webpack_require__(/*! ../../utils/color-manipulator */ 181);
-	var Spacing = __webpack_require__(/*! ../spacing */ 200);
-	
-	/*
-	 *  Light Theme is the default theme used in material-ui. It is guaranteed to
-	 *  have all theme variables needed for every component. Variables not defined
-	 *  in a custom theme will default to these values.
-	 */
-	
-	module.exports = {
-	  spacing: Spacing,
-	  fontFamily: 'Roboto, sans-serif',
-	  palette: {
-	    primary1Color: Colors.cyan500,
-	    primary2Color: Colors.cyan700,
-	    primary3Color: Colors.grey400,
-	    accent1Color: Colors.pinkA200,
-	    accent2Color: Colors.grey100,
-	    accent3Color: Colors.grey500,
-	    textColor: Colors.darkBlack,
-	    alternateTextColor: Colors.white,
-	    canvasColor: Colors.white,
-	    borderColor: Colors.grey300,
-	    disabledColor: ColorManipulator.fade(Colors.darkBlack, 0.3)
-	  }
-	};
-
-/***/ },
-/* 200 */
-/*!*********************************************!*\
-  !*** ./~/material-ui/lib/styles/spacing.js ***!
-  \*********************************************/
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	module.exports = {
-	  iconSize: 24,
-	
-	  desktopGutter: 24,
-	  desktopGutterMore: 32,
-	  desktopGutterLess: 16,
-	  desktopGutterMini: 8,
-	  desktopKeylineIncrement: 64,
-	  desktopDropDownMenuItemHeight: 32,
-	  desktopDropDownMenuFontSize: 15,
-	  desktopLeftNavMenuItemHeight: 48,
-	  desktopSubheaderHeight: 48,
-	  desktopToolbarHeight: 56
-	};
-
-/***/ },
-/* 201 */
-/*!***************************************************!*\
-  !*** ./~/material-ui/lib/styles/theme-manager.js ***!
-  \***************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var Colors = __webpack_require__(/*! ./colors */ 186);
-	var ColorManipulator = __webpack_require__(/*! ../utils/color-manipulator */ 181);
-	var Extend = __webpack_require__(/*! ../utils/extend */ 202);
-	var update = __webpack_require__(/*! react-addons-update */ 164);
-	
-	module.exports = {
-	
-	  //get the MUI theme corresponding to a raw theme
-	  getMuiTheme: function getMuiTheme(rawTheme) {
-	    var returnObj = {
-	      appBar: {
-	        color: rawTheme.palette.primary1Color,
-	        textColor: rawTheme.palette.alternateTextColor,
-	        height: rawTheme.spacing.desktopKeylineIncrement
-	      },
-	      avatar: {
-	        borderColor: 'rgba(0, 0, 0, 0.08)'
-	      },
-	      badge: {
-	        color: rawTheme.palette.alternateTextColor,
-	        textColor: rawTheme.palette.textColor,
-	        primaryColor: rawTheme.palette.accent1Color,
-	        primaryTextColor: rawTheme.palette.alternateTextColor,
-	        secondaryColor: rawTheme.palette.primary1Color,
-	        secondaryTextColor: rawTheme.palette.alternateTextColor
-	      },
-	      button: {
-	        height: 36,
-	        minWidth: 88,
-	        iconButtonSize: rawTheme.spacing.iconSize * 2
-	      },
-	      cardText: {
-	        textColor: rawTheme.palette.textColor
-	      },
-	      checkbox: {
-	        boxColor: rawTheme.palette.textColor,
-	        checkedColor: rawTheme.palette.primary1Color,
-	        requiredColor: rawTheme.palette.primary1Color,
-	        disabledColor: rawTheme.palette.disabledColor,
-	        labelColor: rawTheme.palette.textColor,
-	        labelDisabledColor: rawTheme.palette.disabledColor
-	      },
-	      datePicker: {
-	        color: rawTheme.palette.primary1Color,
-	        textColor: rawTheme.palette.alternateTextColor,
-	        calendarTextColor: rawTheme.palette.textColor,
-	        selectColor: rawTheme.palette.primary2Color,
-	        selectTextColor: rawTheme.palette.alternateTextColor
-	      },
-	      dropDownMenu: {
-	        accentColor: rawTheme.palette.borderColor
-	      },
-	      flatButton: {
-	        color: rawTheme.palette.alternateTextColor,
-	        textColor: rawTheme.palette.textColor,
-	        primaryTextColor: rawTheme.palette.accent1Color,
-	        secondaryTextColor: rawTheme.palette.primary1Color
-	      },
-	      floatingActionButton: {
-	        buttonSize: 56,
-	        miniSize: 40,
-	        color: rawTheme.palette.accent1Color,
-	        iconColor: rawTheme.palette.alternateTextColor,
-	        secondaryColor: rawTheme.palette.primary1Color,
-	        secondaryIconColor: rawTheme.palette.alternateTextColor,
-	        disabledTextColor: rawTheme.palette.disabledColor
-	      },
-	      gridTile: {
-	        textColor: Colors.white
-	      },
-	      inkBar: {
-	        backgroundColor: rawTheme.palette.accent1Color
-	      },
-	      leftNav: {
-	        width: rawTheme.spacing.desktopKeylineIncrement * 4,
-	        color: rawTheme.palette.canvasColor
-	      },
-	      listItem: {
-	        nestedLevelDepth: 18
-	      },
-	      menu: {
-	        backgroundColor: rawTheme.palette.canvasColor,
-	        containerBackgroundColor: rawTheme.palette.canvasColor
-	      },
-	      menuItem: {
-	        dataHeight: 32,
-	        height: 48,
-	        hoverColor: 'rgba(0, 0, 0, .035)',
-	        padding: rawTheme.spacing.desktopGutter,
-	        selectedTextColor: rawTheme.palette.accent1Color
-	      },
-	      menuSubheader: {
-	        padding: rawTheme.spacing.desktopGutter,
-	        borderColor: rawTheme.palette.borderColor,
-	        textColor: rawTheme.palette.primary1Color
-	      },
-	      paper: {
-	        backgroundColor: rawTheme.palette.canvasColor
-	      },
-	      radioButton: {
-	        borderColor: rawTheme.palette.textColor,
-	        backgroundColor: rawTheme.palette.alternateTextColor,
-	        checkedColor: rawTheme.palette.primary1Color,
-	        requiredColor: rawTheme.palette.primary1Color,
-	        disabledColor: rawTheme.palette.disabledColor,
-	        size: 24,
-	        labelColor: rawTheme.palette.textColor,
-	        labelDisabledColor: rawTheme.palette.disabledColor
-	      },
-	      raisedButton: {
-	        color: rawTheme.palette.alternateTextColor,
-	        textColor: rawTheme.palette.textColor,
-	        primaryColor: rawTheme.palette.accent1Color,
-	        primaryTextColor: rawTheme.palette.alternateTextColor,
-	        secondaryColor: rawTheme.palette.primary1Color,
-	        secondaryTextColor: rawTheme.palette.alternateTextColor
-	      },
-	      refreshIndicator: {
-	        strokeColor: rawTheme.palette.borderColor,
-	        loadingStrokeColor: rawTheme.palette.primary1Color
-	      },
-	      slider: {
-	        trackSize: 2,
-	        trackColor: rawTheme.palette.primary3Color,
-	        trackColorSelected: rawTheme.palette.accent3Color,
-	        handleSize: 12,
-	        handleSizeDisabled: 8,
-	        handleSizeActive: 18,
-	        handleColorZero: rawTheme.palette.primary3Color,
-	        handleFillColor: rawTheme.palette.alternateTextColor,
-	        selectionColor: rawTheme.palette.primary1Color,
-	        rippleColor: rawTheme.palette.primary1Color
-	      },
-	      snackbar: {
-	        textColor: rawTheme.palette.alternateTextColor,
-	        backgroundColor: rawTheme.palette.textColor,
-	        actionColor: rawTheme.palette.accent1Color
-	      },
-	      table: {
-	        backgroundColor: rawTheme.palette.canvasColor
-	      },
-	      tableHeader: {
-	        borderColor: rawTheme.palette.borderColor
-	      },
-	      tableHeaderColumn: {
-	        textColor: rawTheme.palette.accent3Color,
-	        height: 56,
-	        spacing: 24
-	      },
-	      tableFooter: {
-	        borderColor: rawTheme.palette.borderColor,
-	        textColor: rawTheme.palette.accent3Color
-	      },
-	      tableRow: {
-	        hoverColor: rawTheme.palette.accent2Color,
-	        stripeColor: ColorManipulator.lighten(rawTheme.palette.primary1Color, 0.55),
-	        selectedColor: rawTheme.palette.borderColor,
-	        textColor: rawTheme.palette.textColor,
-	        borderColor: rawTheme.palette.borderColor
-	      },
-	      tableRowColumn: {
-	        height: 48,
-	        spacing: 24
-	      },
-	      timePicker: {
-	        color: rawTheme.palette.alternateTextColor,
-	        textColor: rawTheme.palette.accent3Color,
-	        accentColor: rawTheme.palette.primary1Color,
-	        clockColor: rawTheme.palette.textColor,
-	        selectColor: rawTheme.palette.primary2Color,
-	        selectTextColor: rawTheme.palette.alternateTextColor
-	      },
-	      toggle: {
-	        thumbOnColor: rawTheme.palette.primary1Color,
-	        thumbOffColor: rawTheme.palette.accent2Color,
-	        thumbDisabledColor: rawTheme.palette.borderColor,
-	        thumbRequiredColor: rawTheme.palette.primary1Color,
-	        trackOnColor: ColorManipulator.fade(rawTheme.palette.primary1Color, 0.5),
-	        trackOffColor: rawTheme.palette.primary3Color,
-	        trackDisabledColor: rawTheme.palette.primary3Color,
-	        labelColor: rawTheme.palette.textColor,
-	        labelDisabledColor: rawTheme.palette.disabledColor
-	      },
-	      toolbar: {
-	        backgroundColor: ColorManipulator.darken(rawTheme.palette.accent2Color, 0.05),
-	        height: 56,
-	        titleFontSize: 20,
-	        iconColor: 'rgba(0, 0, 0, .40)',
-	        separatorColor: 'rgba(0, 0, 0, .175)',
-	        menuHoverColor: 'rgba(0, 0, 0, .10)'
-	      },
-	      tabs: {
-	        backgroundColor: rawTheme.palette.primary1Color,
-	        textColor: ColorManipulator.fade(rawTheme.palette.alternateTextColor, 0.6),
-	        selectedTextColor: rawTheme.palette.alternateTextColor
-	      },
-	      textField: {
-	        textColor: rawTheme.palette.textColor,
-	        hintColor: rawTheme.palette.disabledColor,
-	        floatingLabelColor: rawTheme.palette.textColor,
-	        disabledTextColor: rawTheme.palette.disabledColor,
-	        errorColor: Colors.red500,
-	        focusColor: rawTheme.palette.primary1Color,
-	        backgroundColor: 'transparent',
-	        borderColor: rawTheme.palette.borderColor
-	      },
-	      isRtl: false
-	    };
-	
-	    //add properties to objects inside 'returnObj' that depend on existing properties
-	    returnObj.flatButton.disabledTextColor = ColorManipulator.fade(returnObj.flatButton.textColor, 0.3);
-	    returnObj.raisedButton.disabledColor = ColorManipulator.darken(returnObj.raisedButton.color, 0.1);
-	    returnObj.raisedButton.disabledTextColor = ColorManipulator.fade(returnObj.raisedButton.textColor, 0.3);
-	    returnObj.toggle.trackRequiredColor = ColorManipulator.fade(returnObj.toggle.thumbRequiredColor, 0.5);
-	
-	    //append the raw theme object to 'returnObj'
-	    returnObj.rawTheme = rawTheme;
-	
-	    //set 'static' key as true (by default) on return object. This is to support the ContextPure mixin.
-	    returnObj['static'] = true;
-	
-	    return returnObj;
-	  },
-	
-	  //functions to modify properties of raw theme, namely spacing, palette
-	  //and font family. These functions use the React update immutability helper
-	  //to create a new object for the raw theme, and return a new MUI theme object
-	
-	  //function to modify the spacing of the raw theme. This function recomputes
-	  //the MUI theme and returns it based on the new theme.
-	  modifyRawThemeSpacing: function modifyRawThemeSpacing(muiTheme, newSpacing) {
-	    var newRawTheme = update(muiTheme.rawTheme, { spacing: { $set: newSpacing } });
-	    return this.getMuiTheme(newRawTheme);
-	  },
-	
-	  //function to modify the palette of the raw theme. This function recomputes
-	  //the MUI theme and returns it based on the new raw theme.
-	  //keys inside 'newPalette' override values for existing keys in palette
-	  modifyRawThemePalette: function modifyRawThemePalette(muiTheme, newPaletteKeys) {
-	    var newPalette = Extend(muiTheme.rawTheme.palette, newPaletteKeys);
-	    var newRawTheme = update(muiTheme.rawTheme, { palette: { $set: newPalette } });
-	    return this.getMuiTheme(newRawTheme);
-	  },
-	
-	  //function to modify the font family of the raw theme. This function recomputes
-	  //the MUI theme and returns it based on the new raw theme.
-	  modifyRawThemeFontFamily: function modifyRawThemeFontFamily(muiTheme, newFontFamily) {
-	    var newRawTheme = update(muiTheme.rawTheme, { fontFamily: { $set: newFontFamily } });
-	    return this.getMuiTheme(newRawTheme);
-	  }
-	
-	};
-
-/***/ },
-/* 202 */
-/*!*******************************************!*\
-  !*** ./~/material-ui/lib/utils/extend.js ***!
-  \*******************************************/
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	function isObject(obj) {
-	  return typeof obj === 'object' && obj !== null;
-	}
-	
-	/**
-	*  A recursive merge between two objects.
-	*
-	*  @param base     - the object whose properties are to be overwritten. It
-	*                    should be either the root level or some nested level.
-	*  @param override - an object containing properties to be overwritten. It
-	*                    should have the same structure as the object object.
-	*/
-	var extend = function extend(base, override) {
-	
-	  var mergedObject = {};
-	
-	  //Loop through each key in the base object
-	  Object.keys(base).forEach(function (key) {
-	
-	    var baseProp = base[key];
-	    var overrideProp = undefined;
-	
-	    if (isObject(override)) overrideProp = override[key];
-	
-	    //Recursive call extend if the prop is another object, else just copy it over
-	    mergedObject[key] = isObject(baseProp) && !Array.isArray(baseProp) ? extend(baseProp, overrideProp) : baseProp;
-	  });
-	
-	  //Loop through each override key and override the props in the
-	  //base object
-	  if (isObject(override)) {
-	
-	    Object.keys(override).forEach(function (overrideKey) {
-	
-	      var overrideProp = override[overrideKey];
-	
-	      //Only copy over props that are not objects
-	      if (!isObject(overrideProp) || Array.isArray(overrideProp)) {
-	        mergedObject[overrideKey] = overrideProp;
-	      }
-	    });
-	  }
-	
-	  return mergedObject;
-	};
-	
-	module.exports = extend;
-
-/***/ },
-/* 203 */
+/* 210 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/ripples/touch-ripple.js ***!
   \***************************************************/
@@ -24376,12 +25276,12 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
-	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 195);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
+	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 206);
 	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 162);
-	var Dom = __webpack_require__(/*! ../utils/dom */ 204);
+	var Dom = __webpack_require__(/*! ../utils/dom */ 211);
 	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 163);
-	var CircleRipple = __webpack_require__(/*! ./circle-ripple */ 205);
+	var CircleRipple = __webpack_require__(/*! ./circle-ripple */ 212);
 	
 	var TouchRipple = React.createClass({
 	  displayName: 'TouchRipple',
@@ -24540,7 +25440,7 @@
 	module.exports = TouchRipple;
 
 /***/ },
-/* 204 */
+/* 211 */
 /*!****************************************!*\
   !*** ./~/material-ui/lib/utils/dom.js ***!
   \****************************************/
@@ -24620,7 +25520,7 @@
 	};
 
 /***/ },
-/* 205 */
+/* 212 */
 /*!****************************************************!*\
   !*** ./~/material-ui/lib/ripples/circle-ripple.js ***!
   \****************************************************/
@@ -24634,11 +25534,11 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
 	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 162);
 	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 167);
 	var Transitions = __webpack_require__(/*! ../styles/transitions */ 180);
-	var Colors = __webpack_require__(/*! ../styles/colors */ 186);
+	var Colors = __webpack_require__(/*! ../styles/colors */ 184);
 	
 	var CircleRipple = React.createClass({
 	  displayName: 'CircleRipple',
@@ -24728,151 +25628,7 @@
 	module.exports = CircleRipple;
 
 /***/ },
-/* 206 */
-/*!************************************!*\
-  !*** ./~/material-ui/lib/paper.js ***!
-  \************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
-	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
-	var PropTypes = __webpack_require__(/*! ./utils/prop-types */ 207);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
-	
-	var Paper = React.createClass({
-	  displayName: 'Paper',
-	
-	  mixins: [PureRenderMixin, StylePropable],
-	
-	  contextTypes: {
-	    muiTheme: React.PropTypes.object
-	  },
-	
-	  //for passing default theme context to children
-	  childContextTypes: {
-	    muiTheme: React.PropTypes.object
-	  },
-	
-	  getChildContext: function getChildContext() {
-	    return {
-	      muiTheme: this.state.muiTheme
-	    };
-	  },
-	
-	  getInitialState: function getInitialState() {
-	    return {
-	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
-	    };
-	  },
-	
-	  //to update theme inside state whenever a new theme is passed down
-	  //from the parent / owner using context
-	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
-	    var newMuiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
-	    this.setState({ muiTheme: newMuiTheme });
-	  },
-	
-	  propTypes: {
-	    circle: React.PropTypes.bool,
-	    rounded: React.PropTypes.bool,
-	    transitionEnabled: React.PropTypes.bool,
-	    zDepth: PropTypes.zDepth,
-	    style: React.PropTypes.object
-	  },
-	
-	  getDefaultProps: function getDefaultProps() {
-	    return {
-	      circle: false,
-	      rounded: true,
-	      transitionEnabled: true,
-	      zDepth: 1
-	    };
-	  },
-	
-	  render: function render() {
-	    var _props = this.props;
-	    var children = _props.children;
-	    var circle = _props.circle;
-	    var rounded = _props.rounded;
-	    var style = _props.style;
-	    var transitionEnabled = _props.transitionEnabled;
-	    var zDepth = _props.zDepth;
-	
-	    var other = _objectWithoutProperties(_props, ['children', 'circle', 'rounded', 'style', 'transitionEnabled', 'zDepth']);
-	
-	    var styles = {
-	      backgroundColor: this.state.muiTheme.paper.backgroundColor,
-	      transition: transitionEnabled && Transitions.easeOut(),
-	      boxSizing: 'border-box',
-	      fontFamily: this.state.muiTheme.rawTheme.fontFamily,
-	      WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-	      boxShadow: this._getZDepthShadows(zDepth),
-	      borderRadius: circle ? '50%' : rounded ? '2px' : '0px'
-	    };
-	
-	    return React.createElement(
-	      'div',
-	      _extends({}, other, { style: this.prepareStyles(styles, style) }),
-	      children
-	    );
-	  },
-	
-	  _getZDepthShadows: function _getZDepthShadows(zDepth) {
-	    var shadows = [null, '0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24)', '0 3px 10px rgba(0, 0, 0, 0.16), 0 3px 10px rgba(0, 0, 0, 0.23)', '0 10px 30px rgba(0, 0, 0, 0.19), 0 6px 10px rgba(0, 0, 0, 0.23)', '0 14px 45px rgba(0, 0, 0, 0.25), 0 10px 18px rgba(0, 0, 0, 0.22)', '0 19px 60px rgba(0, 0, 0, 0.30), 0 15px 20px rgba(0, 0, 0, 0.22)'];
-	
-	    return shadows[zDepth];
-	  }
-	
-	});
-	
-	module.exports = Paper;
-
-/***/ },
-/* 207 */
-/*!***********************************************!*\
-  !*** ./~/material-ui/lib/utils/prop-types.js ***!
-  \***********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(/*! react */ 1);
-	
-	var horizontal = React.PropTypes.oneOf(['left', 'middle', 'right']);
-	var vertical = React.PropTypes.oneOf(['top', 'center', 'bottom']);
-	
-	module.exports = {
-	
-	  corners: React.PropTypes.oneOf(['bottom-left', 'bottom-right', 'top-left', 'top-right']),
-	
-	  horizontal: horizontal,
-	
-	  vertical: vertical,
-	
-	  origin: React.PropTypes.shape({
-	    horizontal: horizontal,
-	    vertical: vertical
-	  }),
-	
-	  cornersAndCenter: React.PropTypes.oneOf(['bottom-center', 'bottom-left', 'bottom-right', 'top-center', 'top-left', 'top-right']),
-	
-	  stringOrNumber: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
-	
-	  zDepth: React.PropTypes.oneOf([0, 1, 2, 3, 4, 5])
-	
-	};
-
-/***/ },
-/* 208 */
+/* 213 */
 /*!**************************************************************!*\
   !*** ./~/react-tap-event-plugin/src/injectTapEventPlugin.js ***!
   \**************************************************************/
@@ -24880,13 +25636,13 @@
 
 	module.exports = function injectTapEventPlugin () {
 	  __webpack_require__(/*! react/lib/EventPluginHub */ 31).injection.injectEventPluginsByName({
-	    "TapEventPlugin":       __webpack_require__(/*! ./TapEventPlugin.js */ 209)
+	    "TapEventPlugin":       __webpack_require__(/*! ./TapEventPlugin.js */ 214)
 	  });
 	};
 
 
 /***/ },
-/* 209 */
+/* 214 */
 /*!********************************************************!*\
   !*** ./~/react-tap-event-plugin/src/TapEventPlugin.js ***!
   \********************************************************/
@@ -24917,10 +25673,10 @@
 	var EventPluginUtils = __webpack_require__(/*! react/lib/EventPluginUtils */ 33);
 	var EventPropagators = __webpack_require__(/*! react/lib/EventPropagators */ 73);
 	var SyntheticUIEvent = __webpack_require__(/*! react/lib/SyntheticUIEvent */ 87);
-	var TouchEventUtils = __webpack_require__(/*! ./TouchEventUtils */ 210);
+	var TouchEventUtils = __webpack_require__(/*! ./TouchEventUtils */ 215);
 	var ViewportMetrics = __webpack_require__(/*! react/lib/ViewportMetrics */ 38);
 	
-	var keyOf = __webpack_require__(/*! fbjs/lib/keyOf */ 211);
+	var keyOf = __webpack_require__(/*! fbjs/lib/keyOf */ 216);
 	var topLevelTypes = EventConstants.topLevelTypes;
 	
 	var isStartish = EventPluginUtils.isStartish;
@@ -25064,7 +25820,7 @@
 
 
 /***/ },
-/* 210 */
+/* 215 */
 /*!*********************************************************!*\
   !*** ./~/react-tap-event-plugin/src/TouchEventUtils.js ***!
   \*********************************************************/
@@ -25115,7 +25871,7 @@
 
 
 /***/ },
-/* 211 */
+/* 216 */
 /*!******************************************************!*\
   !*** ./~/react-tap-event-plugin/~/fbjs/lib/keyOf.js ***!
   \******************************************************/
@@ -25158,7 +25914,7 @@
 	module.exports = keyOf;
 
 /***/ },
-/* 212 */
+/* 217 */
 /*!****************************************************!*\
   !*** ./~/react-1poll/src/1poll-react-component.js ***!
   \****************************************************/
@@ -25167,8 +25923,8 @@
 	module.exports = (function(){
 	  'use strict';
 	  var React = __webpack_require__(/*! react */ 1);
-	  var Checkbox = __webpack_require__(/*! material-ui/lib/checkbox */ 213);
-	  var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 222);
+	  var Checkbox = __webpack_require__(/*! material-ui/lib/checkbox */ 218);
+	  var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 160);
 	
 	  function renderComponent(children) {
 	    var divContainer = [ 'div', { className: '1poll-component' } ];
@@ -25274,7 +26030,7 @@
 
 
 /***/ },
-/* 213 */
+/* 218 */
 /*!***************************************!*\
   !*** ./~/material-ui/lib/checkbox.js ***!
   \***************************************/
@@ -25287,13 +26043,13 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var EnhancedSwitch = __webpack_require__(/*! ./enhanced-switch */ 214);
+	var EnhancedSwitch = __webpack_require__(/*! ./enhanced-switch */ 219);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
 	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
-	var CheckboxOutline = __webpack_require__(/*! ./svg-icons/toggle/check-box-outline-blank */ 219);
-	var CheckboxChecked = __webpack_require__(/*! ./svg-icons/toggle/check-box */ 221);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var CheckboxOutline = __webpack_require__(/*! ./svg-icons/toggle/check-box-outline-blank */ 223);
+	var CheckboxChecked = __webpack_require__(/*! ./svg-icons/toggle/check-box */ 225);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
 	var Checkbox = React.createClass({
 	  displayName: 'Checkbox',
@@ -25464,7 +26220,7 @@
 	module.exports = Checkbox;
 
 /***/ },
-/* 214 */
+/* 219 */
 /*!**********************************************!*\
   !*** ./~/material-ui/lib/enhanced-switch.js ***!
   \**********************************************/
@@ -25478,17 +26234,17 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 192);
+	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 203);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
 	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
-	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 215);
-	var WindowListenable = __webpack_require__(/*! ./mixins/window-listenable */ 216);
-	var ClearFix = __webpack_require__(/*! ./clearfix */ 217);
-	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 193);
-	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 203);
-	var Paper = __webpack_require__(/*! ./paper */ 206);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 181);
+	var WindowListenable = __webpack_require__(/*! ./mixins/window-listenable */ 220);
+	var ClearFix = __webpack_require__(/*! ./clearfix */ 221);
+	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 204);
+	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 210);
+	var Paper = __webpack_require__(/*! ./paper */ 191);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
 	var EnhancedSwitch = React.createClass({
 	  displayName: 'EnhancedSwitch',
@@ -25902,24 +26658,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 215 */
-/*!**********************************************!*\
-  !*** ./~/material-ui/lib/utils/unique-id.js ***!
-  \**********************************************/
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	var index = 0;
-	
-	module.exports = {
-	  generate: function generate() {
-	    return "mui-id-" + index++;
-	  }
-	};
-
-/***/ },
-/* 216 */
+/* 220 */
 /*!*******************************************************!*\
   !*** ./~/material-ui/lib/mixins/window-listenable.js ***!
   \*******************************************************/
@@ -25927,7 +26666,7 @@
 
 	'use strict';
 	
-	var Events = __webpack_require__(/*! ../utils/events */ 191);
+	var Events = __webpack_require__(/*! ../utils/events */ 202);
 	
 	module.exports = {
 	
@@ -25952,7 +26691,7 @@
 	};
 
 /***/ },
-/* 217 */
+/* 221 */
 /*!***************************************!*\
   !*** ./~/material-ui/lib/clearfix.js ***!
   \***************************************/
@@ -25965,10 +26704,10 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var BeforeAfterWrapper = __webpack_require__(/*! ./before-after-wrapper */ 218);
+	var BeforeAfterWrapper = __webpack_require__(/*! ./before-after-wrapper */ 222);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
 	var ClearFix = React.createClass({
 	  displayName: 'ClearFix',
@@ -26037,7 +26776,7 @@
 	module.exports = ClearFix;
 
 /***/ },
-/* 218 */
+/* 222 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/before-after-wrapper.js ***!
   \***************************************************/
@@ -26050,8 +26789,8 @@
 	var React = __webpack_require__(/*! react */ 1);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
 	var AutoPrefix = __webpack_require__(/*! ./styles/auto-prefix */ 167);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
 	/**
 	 *  BeforeAfterWrapper
@@ -26175,7 +26914,7 @@
 	module.exports = BeforeAfterWrapper;
 
 /***/ },
-/* 219 */
+/* 223 */
 /*!***********************************************************************!*\
   !*** ./~/material-ui/lib/svg-icons/toggle/check-box-outline-blank.js ***!
   \***********************************************************************/
@@ -26184,8 +26923,8 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
-	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 220);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
+	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 224);
 	
 	var ToggleCheckBoxOutlineBlank = React.createClass({
 	  displayName: 'ToggleCheckBoxOutlineBlank',
@@ -26205,7 +26944,7 @@
 	module.exports = ToggleCheckBoxOutlineBlank;
 
 /***/ },
-/* 220 */
+/* 224 */
 /*!***************************************!*\
   !*** ./~/material-ui/lib/svg-icon.js ***!
   \***************************************/
@@ -26220,8 +26959,8 @@
 	var React = __webpack_require__(/*! react */ 1);
 	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
 	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 183);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 186);
 	
 	var SvgIcon = React.createClass({
 	  displayName: 'SvgIcon',
@@ -26328,7 +27067,7 @@
 	module.exports = SvgIcon;
 
 /***/ },
-/* 221 */
+/* 225 */
 /*!*********************************************************!*\
   !*** ./~/material-ui/lib/svg-icons/toggle/check-box.js ***!
   \*********************************************************/
@@ -26337,8 +27076,8 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 188);
-	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 220);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 192);
+	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 224);
 	
 	var ToggleCheckBox = React.createClass({
 	  displayName: 'ToggleCheckBox',
@@ -26356,833 +27095,6 @@
 	});
 	
 	module.exports = ToggleCheckBox;
-
-/***/ },
-/* 222 */
-/*!*****************************************!*\
-  !*** ./~/material-ui/lib/text-field.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
-	var React = __webpack_require__(/*! react */ 1);
-	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 181);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 180);
-	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 215);
-	var EnhancedTextarea = __webpack_require__(/*! ./enhanced-textarea */ 223);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
-	var ContextPure = __webpack_require__(/*! ./mixins/context-pure */ 224);
-	
-	/**
-	 * Check if a value is valid to be displayed inside an input.
-	 *
-	 * @param The value to check.
-	 * @returns True if the string provided is valid, false otherwise.
-	 */
-	function isValid(value) {
-	  return Boolean(value || value === 0);
-	}
-	
-	var TextField = React.createClass({
-	  displayName: 'TextField',
-	
-	  mixins: [ContextPure, StylePropable],
-	
-	  contextTypes: {
-	    muiTheme: React.PropTypes.object
-	  },
-	
-	  propTypes: {
-	    errorStyle: React.PropTypes.object,
-	    errorText: React.PropTypes.node,
-	    floatingLabelStyle: React.PropTypes.object,
-	    floatingLabelText: React.PropTypes.node,
-	    fullWidth: React.PropTypes.bool,
-	    hintText: React.PropTypes.node,
-	    hintStyle: React.PropTypes.object,
-	    id: React.PropTypes.string,
-	    inputStyle: React.PropTypes.object,
-	    multiLine: React.PropTypes.bool,
-	    onBlur: React.PropTypes.func,
-	    onChange: React.PropTypes.func,
-	    onEnterKeyDown: React.PropTypes.func,
-	    onFocus: React.PropTypes.func,
-	    onKeyDown: React.PropTypes.func,
-	    rows: React.PropTypes.number,
-	    rowsMax: React.PropTypes.number,
-	    type: React.PropTypes.string,
-	    underlineStyle: React.PropTypes.object,
-	    underlineFocusStyle: React.PropTypes.object,
-	    underlineDisabledStyle: React.PropTypes.object,
-	    style: React.PropTypes.object,
-	    disabled: React.PropTypes.bool,
-	    defaultValue: React.PropTypes.string,
-	    value: React.PropTypes.string
-	  },
-	
-	  //for passing default theme context to children
-	  childContextTypes: {
-	    muiTheme: React.PropTypes.object
-	  },
-	
-	  getChildContext: function getChildContext() {
-	    return {
-	      muiTheme: this.state.muiTheme
-	    };
-	  },
-	
-	  getDefaultProps: function getDefaultProps() {
-	    return {
-	      fullWidth: false,
-	      type: 'text',
-	      rows: 1
-	    };
-	  },
-	
-	  statics: {
-	    getRelevantContextKeys: function getRelevantContextKeys(muiTheme) {
-	      var textFieldTheme = muiTheme.textField;
-	
-	      return {
-	        floatingLabelColor: textFieldTheme.floatingLabelColor,
-	        focusColor: textFieldTheme.focusColor,
-	        borderColor: textFieldTheme.borderColor,
-	        textColor: textFieldTheme.textColor,
-	        disabledTextColor: textFieldTheme.disabledTextColor,
-	        backgroundColor: textFieldTheme.backgroundColor,
-	        hintColor: textFieldTheme.hintColor,
-	        errorColor: textFieldTheme.errorColor
-	      };
-	    },
-	    getChildrenClasses: function getChildrenClasses() {
-	      return [EnhancedTextarea];
-	    }
-	  },
-	
-	  getInitialState: function getInitialState() {
-	    var props = this.props.children ? this.props.children.props : this.props;
-	
-	    return {
-	      errorText: this.props.errorText,
-	      hasValue: isValid(props.value) || isValid(props.defaultValue) || props.valueLink && isValid(props.valueLink.value),
-	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
-	    };
-	  },
-	
-	  componentDidMount: function componentDidMount() {
-	    this._uniqueId = UniqueId.generate();
-	  },
-	
-	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
-	    var newState = {};
-	    newState.muiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
-	
-	    newState.errorText = nextProps.errorText;
-	    if (nextProps.children && nextProps.children.props) {
-	      nextProps = nextProps.children.props;
-	    }
-	
-	    var hasValueLinkProp = nextProps.hasOwnProperty('valueLink');
-	    var hasValueProp = nextProps.hasOwnProperty('value');
-	    var hasNewDefaultValue = nextProps.defaultValue !== this.props.defaultValue;
-	
-	    if (hasValueLinkProp) {
-	      newState.hasValue = isValid(nextProps.valueLink.value);
-	    } else if (hasValueProp) {
-	      newState.hasValue = isValid(nextProps.value);
-	    } else if (hasNewDefaultValue) {
-	      newState.hasValue = isValid(nextProps.defaultValue);
-	    }
-	
-	    if (newState) this.setState(newState);
-	  },
-	
-	  getStyles: function getStyles() {
-	    var props = this.props;
-	
-	    var _constructor$getRelevantContextKeys = this.constructor.getRelevantContextKeys(this.state.muiTheme);
-	
-	    var floatingLabelColor = _constructor$getRelevantContextKeys.floatingLabelColor;
-	    var focusColor = _constructor$getRelevantContextKeys.focusColor;
-	    var borderColor = _constructor$getRelevantContextKeys.borderColor;
-	    var textColor = _constructor$getRelevantContextKeys.textColor;
-	    var disabledTextColor = _constructor$getRelevantContextKeys.disabledTextColor;
-	    var backgroundColor = _constructor$getRelevantContextKeys.backgroundColor;
-	    var hintColor = _constructor$getRelevantContextKeys.hintColor;
-	    var errorColor = _constructor$getRelevantContextKeys.errorColor;
-	
-	    var styles = {
-	      root: {
-	        fontSize: 16,
-	        lineHeight: '24px',
-	        width: props.fullWidth ? '100%' : 256,
-	        height: (props.rows - 1) * 24 + (props.floatingLabelText ? 72 : 48),
-	        display: 'inline-block',
-	        position: 'relative',
-	        backgroundColor: backgroundColor,
-	        fontFamily: this.state.muiTheme.rawTheme.fontFamily,
-	        transition: Transitions.easeOut('200ms', 'height')
-	      },
-	      error: {
-	        position: 'relative',
-	        bottom: 5,
-	        fontSize: 12,
-	        lineHeight: '12px',
-	        color: errorColor,
-	        transition: Transitions.easeOut()
-	      },
-	      hint: {
-	        position: 'absolute',
-	        lineHeight: '22px',
-	        opacity: 1,
-	        color: hintColor,
-	        transition: Transitions.easeOut(),
-	        bottom: 12
-	      },
-	      input: {
-	        tapHighlightColor: 'rgba(0,0,0,0)',
-	        padding: 0,
-	        position: 'relative',
-	        width: '100%',
-	        height: '100%',
-	        border: 'none',
-	        outline: 'none',
-	        backgroundColor: 'transparent',
-	        color: props.disabled ? disabledTextColor : textColor,
-	        font: 'inherit'
-	      },
-	      underline: {
-	        border: 'none',
-	        borderBottom: 'solid 1px ' + borderColor,
-	        position: 'absolute',
-	        width: '100%',
-	        bottom: 8,
-	        margin: 0,
-	        MozBoxSizing: 'content-box',
-	        boxSizing: 'content-box',
-	        height: 0
-	      },
-	      underlineAfter: {
-	        position: 'absolute',
-	        width: '100%',
-	        overflow: 'hidden',
-	        userSelect: 'none',
-	        cursor: 'default',
-	        bottom: 8,
-	        borderBottom: 'dotted 2px ' + disabledTextColor
-	      },
-	      underlineFocus: {
-	        borderBottom: 'solid 2px',
-	        borderColor: focusColor,
-	        transform: 'scaleX(0)',
-	        transition: Transitions.easeOut()
-	      }
-	    };
-	
-	    styles.error = this.mergeAndPrefix(styles.error, props.errorStyle);
-	    styles.underline = this.mergeAndPrefix(styles.underline, props.underlineStyle);
-	    styles.underlineAfter = this.mergeAndPrefix(styles.underlineAfter, props.underlineDisabledStyle);
-	
-	    styles.floatingLabel = this.mergeStyles(styles.hint, {
-	      lineHeight: '22px',
-	      top: 38,
-	      bottom: 'none',
-	      opacity: 1,
-	      zIndex: 1, // Needed to display label above Chrome's autocomplete field background
-	      cursor: 'text',
-	      transform: 'scale(1) translate3d(0, 0, 0)',
-	      transformOrigin: 'left top'
-	    });
-	
-	    styles.textarea = this.mergeStyles(styles.input, {
-	      marginTop: props.floatingLabelText ? 36 : 12,
-	      marginBottom: props.floatingLabelText ? -36 : -12,
-	      boxSizing: 'border-box',
-	      font: 'inherit'
-	    });
-	
-	    styles.focusUnderline = this.mergeStyles(styles.underline, styles.underlineFocus, props.underlineFocusStyle);
-	
-	    if (this.state.isFocused) {
-	      styles.floatingLabel.color = focusColor;
-	      styles.floatingLabel.transform = 'perspective(1px) scale(0.75) translate3d(2px, -28px, 0)';
-	      styles.focusUnderline.transform = 'scaleX(1)';
-	    }
-	
-	    if (this.state.hasValue) {
-	      styles.floatingLabel.color = ColorManipulator.fade(props.disabled ? disabledTextColor : floatingLabelColor, 0.5);
-	      styles.floatingLabel.transform = 'perspective(1px) scale(0.75) translate3d(2px, -28px, 0)';
-	      styles.hint.opacity = 0;
-	    }
-	
-	    if (props.floatingLabelText) {
-	      styles.hint.opacity = 0;
-	      styles.input.boxSizing = 'border-box';
-	      if (this.state.isFocused && !this.state.hasValue) styles.hint.opacity = 1;
-	    }
-	
-	    if (props.style && props.style.height) {
-	      styles.hint.lineHeight = props.style.height;
-	    }
-	
-	    if (this.state.errorText && this.state.isFocused) styles.floatingLabel.color = styles.error.color;
-	    if (props.floatingLabelText && !props.multiLine) styles.input.marginTop = 14;
-	
-	    if (this.state.errorText) {
-	      styles.focusUnderline.borderColor = styles.error.color;
-	      styles.focusUnderline.transform = 'scaleX(1)';
-	    }
-	
-	    return styles;
-	  },
-	
-	  render: function render() {
-	    var _props = this.props;
-	    var className = _props.className;
-	    var errorStyle = _props.errorStyle;
-	    var errorText = _props.errorText;
-	    var floatingLabelText = _props.floatingLabelText;
-	    var fullWidth = _props.fullWidth;
-	    var hintText = _props.hintText;
-	    var hintStyle = _props.hintStyle;
-	    var id = _props.id;
-	    var multiLine = _props.multiLine;
-	    var onBlur = _props.onBlur;
-	    var onChange = _props.onChange;
-	    var onFocus = _props.onFocus;
-	    var type = _props.type;
-	    var rows = _props.rows;
-	    var rowsMax = _props.rowsMax;
-	
-	    var other = _objectWithoutProperties(_props, ['className', 'errorStyle', 'errorText', 'floatingLabelText', 'fullWidth', 'hintText', 'hintStyle', 'id', 'multiLine', 'onBlur', 'onChange', 'onFocus', 'type', 'rows', 'rowsMax']);
-	
-	    var styles = this.getStyles();
-	
-	    var inputId = id || this._uniqueId;
-	
-	    var errorTextElement = this.state.errorText ? React.createElement(
-	      'div',
-	      { style: this.prepareStyles(styles.error) },
-	      this.state.errorText
-	    ) : null;
-	
-	    var hintTextElement = hintText ? React.createElement(
-	      'div',
-	      { style: this.prepareStyles(styles.hint, hintStyle) },
-	      hintText
-	    ) : null;
-	
-	    var floatingLabelTextElement = floatingLabelText ? React.createElement(
-	      'label',
-	      {
-	        style: this.prepareStyles(styles.floatingLabel, this.props.floatingLabelStyle),
-	        htmlFor: inputId,
-	        onTouchTap: this.focus },
-	      floatingLabelText
-	    ) : null;
-	
-	    var inputProps = undefined;
-	    var inputElement = undefined;
-	
-	    inputProps = {
-	      id: inputId,
-	      ref: this._getRef(),
-	      onBlur: this._handleInputBlur,
-	      onFocus: this._handleInputFocus,
-	      disabled: this.props.disabled,
-	      onKeyDown: this._handleInputKeyDown
-	    };
-	    var inputStyle = this.mergeStyles(styles.input, this.props.inputStyle);
-	
-	    if (!this.props.hasOwnProperty('valueLink')) {
-	      inputProps.onChange = this._handleInputChange;
-	    }
-	    if (this.props.children) {
-	      var childInputStyle = this.mergeStyles(inputStyle, this.props.children.style);
-	      inputElement = React.cloneElement(this.props.children, _extends({}, inputProps, this.props.children.props, { style: childInputStyle }));
-	    } else {
-	      inputElement = multiLine ? React.createElement(EnhancedTextarea, _extends({}, other, inputProps, {
-	        style: inputStyle,
-	        rows: rows,
-	        rowsMax: rowsMax,
-	        onHeightChange: this._handleTextAreaHeightChange,
-	        textareaStyle: this.mergeAndPrefix(styles.textarea) })) : React.createElement('input', _extends({}, other, inputProps, {
-	        style: this.prepareStyles(inputStyle),
-	        type: type }));
-	    }
-	
-	    var underlineElement = this.props.disabled ? React.createElement('div', { style: this.prepareStyles(styles.underlineAfter) }) : React.createElement('hr', { style: this.prepareStyles(styles.underline) });
-	    var focusUnderlineElement = React.createElement('hr', { style: this.prepareStyles(styles.focusUnderline) });
-	
-	    return React.createElement(
-	      'div',
-	      { className: className, style: this.prepareStyles(styles.root, this.props.style) },
-	      floatingLabelTextElement,
-	      hintTextElement,
-	      inputElement,
-	      underlineElement,
-	      focusUnderlineElement,
-	      errorTextElement
-	    );
-	  },
-	
-	  blur: function blur() {
-	    if (this.isMounted()) this._getInputNode().blur();
-	  },
-	
-	  clearValue: function clearValue() {
-	    this.setValue('');
-	  },
-	
-	  focus: function focus() {
-	    if (this.isMounted()) this._getInputNode().focus();
-	  },
-	
-	  getValue: function getValue() {
-	    return this.isMounted() ? this._getInputNode().value : undefined;
-	  },
-	
-	  setErrorText: function setErrorText(newErrorText) {
-	    if (process.env.NODE_ENV !== 'production' && this.props.hasOwnProperty('errorText')) {
-	      console.error('Cannot call TextField.setErrorText when errorText is defined as a property.');
-	    } else if (this.isMounted()) {
-	      this.setState({ errorText: newErrorText });
-	    }
-	  },
-	
-	  setValue: function setValue(newValue) {
-	    if (process.env.NODE_ENV !== 'production' && this._isControlled()) {
-	      console.error('Cannot call TextField.setValue when value or valueLink is defined as a property.');
-	    } else if (this.isMounted()) {
-	      if (this.props.multiLine) {
-	        this.refs[this._getRef()].setValue(newValue);
-	      } else {
-	        this._getInputNode().value = newValue;
-	      }
-	
-	      this.setState({ hasValue: isValid(newValue) });
-	    }
-	  },
-	
-	  _getRef: function _getRef() {
-	    return this.props.ref ? this.props.ref : 'input';
-	  },
-	
-	  _getInputNode: function _getInputNode() {
-	    return this.props.children || this.props.multiLine ? this.refs[this._getRef()].getInputNode() : ReactDOM.findDOMNode(this.refs[this._getRef()]);
-	  },
-	
-	  _handleInputBlur: function _handleInputBlur(e) {
-	    this.setState({ isFocused: false });
-	    if (this.props.onBlur) this.props.onBlur(e);
-	  },
-	
-	  _handleInputChange: function _handleInputChange(e) {
-	    this.setState({ hasValue: isValid(e.target.value) });
-	    if (this.props.onChange) this.props.onChange(e);
-	  },
-	
-	  _handleInputFocus: function _handleInputFocus(e) {
-	    if (this.props.disabled) return;
-	    this.setState({ isFocused: true });
-	    if (this.props.onFocus) this.props.onFocus(e);
-	  },
-	
-	  _handleInputKeyDown: function _handleInputKeyDown(e) {
-	    if (e.keyCode === 13 && this.props.onEnterKeyDown) this.props.onEnterKeyDown(e);
-	    if (this.props.onKeyDown) this.props.onKeyDown(e);
-	  },
-	
-	  _handleTextAreaHeightChange: function _handleTextAreaHeightChange(e, height) {
-	    var newHeight = height + 24;
-	    if (this.props.floatingLabelText) newHeight += 24;
-	    ReactDOM.findDOMNode(this).style.height = newHeight + 'px';
-	  },
-	
-	  _isControlled: function _isControlled() {
-	    return this.props.hasOwnProperty('value') || this.props.hasOwnProperty('valueLink');
-	  }
-	
-	});
-	
-	module.exports = TextField;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
-
-/***/ },
-/* 223 */
-/*!************************************************!*\
-  !*** ./~/material-ui/lib/enhanced-textarea.js ***!
-  \************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-	
-	var React = __webpack_require__(/*! react */ 1);
-	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 162);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 199);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 201);
-	
-	var rowsHeight = 24;
-	
-	var styles = {
-	  textarea: {
-	    width: '100%',
-	    resize: 'none',
-	    font: 'inherit',
-	    padding: 0
-	  },
-	  shadow: {
-	    width: '100%',
-	    resize: 'none',
-	    // Overflow also needed to here to remove the extra row
-	    // added to textareas in Firefox.
-	    overflow: 'hidden',
-	    // Visibility needed to hide the extra text area on ipads
-	    visibility: 'hidden',
-	    font: 'inherit',
-	    padding: 0,
-	    position: 'absolute'
-	  }
-	};
-	
-	var EnhancedTextarea = React.createClass({
-	  displayName: 'EnhancedTextarea',
-	
-	  mixins: [StylePropable],
-	
-	  contextTypes: {
-	    muiTheme: React.PropTypes.object
-	  },
-	
-	  //for passing default theme context to children
-	  childContextTypes: {
-	    muiTheme: React.PropTypes.object
-	  },
-	
-	  getChildContext: function getChildContext() {
-	    return {
-	      muiTheme: this.state.muiTheme
-	    };
-	  },
-	
-	  propTypes: {
-	    onChange: React.PropTypes.func,
-	    onHeightChange: React.PropTypes.func,
-	    textareaStyle: React.PropTypes.object,
-	    rows: React.PropTypes.number,
-	    rowsMax: React.PropTypes.number,
-	    style: React.PropTypes.object,
-	    value: React.PropTypes.string
-	  },
-	
-	  getDefaultProps: function getDefaultProps() {
-	    return {
-	      rows: 1
-	    };
-	  },
-	
-	  getInitialState: function getInitialState() {
-	    return {
-	      height: this.props.rows * rowsHeight,
-	      muiTheme: this.context.muiTheme ? this.context.muiTheme : ThemeManager.getMuiTheme(DefaultRawTheme)
-	    };
-	  },
-	
-	  componentDidMount: function componentDidMount() {
-	    this._syncHeightWithShadow();
-	  },
-	
-	  render: function render() {
-	    var _props = this.props;
-	    var onChange = _props.onChange;
-	    var onHeightChange = _props.onHeightChange;
-	    var rows = _props.rows;
-	    var style = _props.style;
-	    var textareaStyle = _props.textareaStyle;
-	    var valueLink = _props.valueLink;
-	
-	    var other = _objectWithoutProperties(_props, ['onChange', 'onHeightChange', 'rows', 'style', 'textareaStyle', 'valueLink']);
-	
-	    var textareaStyles = this.mergeStyles(styles.textarea, textareaStyle, {
-	      height: this.state.height
-	    });
-	
-	    var shadowStyles = styles.shadow;
-	
-	    if (this.props.hasOwnProperty('valueLink')) {
-	      other.value = this.props.valueLink.value;
-	    }
-	
-	    if (this.props.disabled) {
-	      style.cursor = 'default';
-	    }
-	
-	    return React.createElement(
-	      'div',
-	      { style: this.prepareStyles(this.props.style) },
-	      React.createElement('textarea', {
-	        ref: 'shadow',
-	        style: this.prepareStyles(shadowStyles),
-	        tabIndex: '-1',
-	        rows: this.props.rows,
-	        defaultValue: this.props.defaultValue,
-	        readOnly: true,
-	        value: this.props.value,
-	        valueLink: this.props.valueLink }),
-	      React.createElement('textarea', _extends({}, other, {
-	        ref: 'input',
-	        rows: this.props.rows,
-	        style: this.prepareStyles(textareaStyles),
-	        onChange: this._handleChange }))
-	    );
-	  },
-	
-	  getInputNode: function getInputNode() {
-	    return ReactDOM.findDOMNode(this.refs.input);
-	  },
-	
-	  setValue: function setValue(value) {
-	    this.getInputNode().value = value;
-	    this._syncHeightWithShadow(value);
-	  },
-	
-	  _syncHeightWithShadow: function _syncHeightWithShadow(newValue, e) {
-	    var shadow = ReactDOM.findDOMNode(this.refs.shadow);
-	
-	    if (newValue !== undefined) {
-	      shadow.value = newValue;
-	    }
-	
-	    var newHeight = shadow.scrollHeight;
-	
-	    if (this.props.rowsMax > this.props.rows) {
-	      newHeight = Math.min(this.props.rowsMax * rowsHeight, newHeight);
-	    }
-	
-	    newHeight = Math.max(newHeight, rowsHeight);
-	
-	    if (this.state.height !== newHeight) {
-	      this.setState({
-	        height: newHeight
-	      });
-	
-	      if (this.props.onHeightChange) {
-	        this.props.onHeightChange(e, newHeight);
-	      }
-	    }
-	  },
-	
-	  _handleChange: function _handleChange(e) {
-	    this._syncHeightWithShadow(e.target.value);
-	
-	    if (this.props.hasOwnProperty('valueLink')) {
-	      this.props.valueLink.requestChange(e.target.value);
-	    }
-	
-	    if (this.props.onChange) {
-	      this.props.onChange(e);
-	    }
-	  },
-	
-	  componentWillReceiveProps: function componentWillReceiveProps(nextProps, nextContext) {
-	    if (nextProps.value !== this.props.value) {
-	      this._syncHeightWithShadow(nextProps.value);
-	    }
-	    var newState = {};
-	    newState.muiTheme = nextContext.muiTheme ? nextContext.muiTheme : this.state.muiTheme;
-	  }
-	});
-	
-	module.exports = EnhancedTextarea;
-
-/***/ },
-/* 224 */
-/*!**************************************************!*\
-  !*** ./~/material-ui/lib/mixins/context-pure.js ***!
-  \**************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var shallowEqual = __webpack_require__(/*! ../utils/shallow-equal */ 225);
-	
-	function relevantContextKeysEqual(classObject, currentContext, nextContext) {
-	
-	  //Get those keys from current object's context that we care
-	  //about and check whether those keys have changed or not
-	  if (classObject.getRelevantContextKeys) {
-	    var currentContextKeys = classObject.getRelevantContextKeys(currentContext);
-	    var nextContextKeys = classObject.getRelevantContextKeys(nextContext);
-	
-	    if (!shallowEqual(currentContextKeys, nextContextKeys)) {
-	      return false;
-	    }
-	  }
-	
-	  //Check if children context keys changed
-	  if (classObject.getChildrenClasses) {
-	    var childrenArray = classObject.getChildrenClasses();
-	    for (var i = 0; i < childrenArray.length; i++) {
-	      if (!relevantContextKeysEqual(childrenArray[i], currentContext, nextContext)) {
-	        return false;
-	      }
-	    }
-	  }
-	
-	  //context keys are equal
-	  return true;
-	}
-	
-	module.exports = {
-	
-	  //Don't update if state, prop, and context are equal
-	  shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState, nextContext) {
-	
-	    //If either the props or state have changed, component should update
-	    if (!shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState)) {
-	      return true;
-	    }
-	
-	    //If current theme and next theme are both undefined, do not update
-	    if (!this.context.muiTheme && !nextContext.muiTheme) {
-	      return false;
-	    }
-	
-	    //If both themes exist, compare keys only if current theme is not static
-	    if (this.context.muiTheme && nextContext.muiTheme) {
-	      return !this.context.muiTheme['static'] && !relevantContextKeysEqual(this.constructor, this.context.muiTheme, nextContext.muiTheme);
-	    }
-	
-	    //At this point it is guaranteed that exactly one theme is undefined so simply update
-	    return true;
-	  }
-	
-	};
-
-/***/ },
-/* 225 */
-/*!**************************************************!*\
-  !*** ./~/material-ui/lib/utils/shallow-equal.js ***!
-  \**************************************************/
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, '__esModule', {
-	  value: true
-	});
-	exports['default'] = shallowEqual;
-	
-	function shallowEqual(objA, objB) {
-	  if (objA === objB) {
-	    return true;
-	  }
-	
-	  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
-	    return false;
-	  }
-	
-	  var keysA = Object.keys(objA);
-	  var keysB = Object.keys(objB);
-	
-	  if (keysA.length !== keysB.length) {
-	    return false;
-	  }
-	
-	  // Test for A's keys different from B.
-	  var bHasOwnProperty = Object.prototype.hasOwnProperty.bind(objB);
-	  for (var i = 0; i < keysA.length; i++) {
-	    if (!bHasOwnProperty(keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
-	      return false;
-	    }
-	  }
-	
-	  return true;
-	}
-	
-	module.exports = exports['default'];
-
-/***/ },
-/* 226 */
-/*!**************************!*\
-  !*** ./src/itemStore.js ***!
-  \**************************/
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	module.exports = (function () {
-	  Parse.initialize('HAvVzC6nFUCQDskxkOio2sdiFNuWNGi9wgmX6Nwa', 'jShePeIRlyKRj4S7lQ7uuktGEQn30b4DZxX7K1pb');
-	  var Item = Parse.Object.extend('Item');
-	  var _cache = []; // cache of items, as: [ { name: String } ]
-	
-	  function prepareDbItem(item) {
-	    var dbItem = new Item();
-	    dbItem.set('name', item.name);
-	    return dbItem;
-	  }
-	
-	  function storeItems(items, callback) {
-	    Parse.Object.saveAll((items || []).map(prepareDbItem), callback);
-	    return items;
-	  }
-	
-	  function renderDbItem(dbItem) {
-	    return { name: dbItem.get('name') };
-	  }
-	
-	  function fetchItems(callback, defaultItems) {
-	    new Parse.Query(Item).find({
-	      success: function success(dbItems) {
-	        _cache = dbItems.length ? dbItems.map(renderDbItem) : storeItems(defaultItems);
-	        callback(null, _cache);
-	      },
-	      error: function error(object, _error) {
-	        callback(_error);
-	      }
-	    });
-	  }
-	
-	  function syncItems(selectedItems, callback) {
-	    // we store in DB only the items that have been selected and submitted at least once.
-	    // and we make sure to prevent duplicates.
-	    var itemsToStore = [];
-	    var indexedNames = (function indexArrayByField(items, fieldName) {
-	      var index = {};
-	      for (var i = 0; i < items.length; ++i) {
-	        index[items[i][fieldName]] = true;
-	      }
-	      return index;
-	    })(_cache, 'name');
-	    for (var i = 0; i < selectedItems.length; ++i) {
-	      var itemName = selectedItems[i];
-	      var itemIsStored = indexedNames[itemName];
-	      if (!itemIsStored) {
-	        console.log('storing new item from selected options:', itemName);
-	        itemsToStore.push({ name: itemName });
-	      }
-	    }
-	    storeItems(itemsToStore, callback);
-	  }
-	
-	  return {
-	    fetchItems: fetchItems,
-	    syncItems: syncItems
-	  };
-	})();
 
 /***/ }
 /******/ ]);
