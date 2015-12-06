@@ -1,6 +1,7 @@
 module.exports = (function(){
   'use strict';
   var React = require('react');
+  var Paper = require('material-ui/lib/paper');
   var RaisedButton = require('material-ui/lib/raised-button');
   var injectTapEventPlugin = require('react-tap-event-plugin');
   var Poll = require('react-1poll');
@@ -23,29 +24,34 @@ module.exports = (function(){
     render = () => {
       return (
         <div className='react-poll-form'>
-          <p>Enter a question</p>
-          <Poll
-            options={this.props.options}
-            labelStyle={{ color: 'auto' }}
-            onNewOption={this.props.onNewOption}
-            onSelectionChange={this.onSelectionChange}
-          />
-          <RaisedButton
-            disabled={this.state.disabled}
-            label='Submit'
-            primary={true}
-            backgroundColor='#00a651'
-            style={{
-              display: 'block', // to fill the parent div's width
-            }}
-            onTouchTap={this.props.onValidSubmit}
-          />
+          <Paper style={{ padding: '16px', paddingTop: '1px', color: '#333' }}>
+            <Poll
+              ref='poll'
+              disabled={this.state.disabled}
+              options={this.props.options}
+              onNewOption={this._onNewOption}
+              labelStyle={{ color: 'auto' }}
+            />
+            <RaisedButton
+              disabled={this.state.disabled}
+              label='Submit'
+              primary={true}
+              backgroundColor='#00a651'
+              style={{
+                display: 'block', // to fill the parent div's width
+              }}
+              onTouchTap={this.props.onValidSubmit}
+            />
+          </Paper>
         </div>
       );
     }
 
-    onSelectionChange = (selectedOptions) => {
-      this.setState({ selectedOptions: selectedOptions });
+    _onNewOption = (newOption) => {
+      this.refs.poll.setState({
+        options: this.refs.poll.state.options.concat([ newOption ])
+      });
+    }
     }
 
   }
