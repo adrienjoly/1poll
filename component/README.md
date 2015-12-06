@@ -44,3 +44,4 @@ Then, integrate it in your javascript project:
 - `onNewOption`: (optional) Function({ name: String, defaultChecked: Boolean }) overrides the function that adds the new option to the `options` state Array.
 - `onSelectionChange`: (optional) Function([ { name: String, checked: true } ]) passes an Array of option Objects (as in the `options` property), which are currently selected (i.e. have their `checked` field set to true).
 - `labelStyle`: an optional Object to override the inline-style of the Checkbox labels.
+- `autoFocus`: (Boolean) if set to true, the option entry field will be focused (ready to type) by default.

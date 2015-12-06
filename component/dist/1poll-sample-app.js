@@ -23568,6 +23568,7 @@
 	  var Poll = React.createClass({
 	    getDefaultProps: function() {
 	      return {
+	        autoFocus: true,
 	        options: [],
 	        labelStyle: undefined,
 	        onSelectionChange: undefined, // function([ { name: String, defaultChecked: Boolean } ])
@@ -23591,7 +23592,7 @@
 	    render: function() {
 	      return renderComponent(this.state.options.map(this._renderOption).concat([
 	        React.createElement(TextField, {
-	          autoFocus: true,
+	          autoFocus: this.props.autoFocus,
 	          hintText: 'Add an option',
 	          onBlur: this._handleEntryBlur,
 	          onEnterKeyDown: this._handleAddOption,
