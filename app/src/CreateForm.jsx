@@ -55,17 +55,10 @@ class CreateForm extends React.Component {
             ref='pollForm'
             //disabled={this.props.disabled} // TODO
             options={this.state.options}
-            onNewOption={this.onNewOption}
             onValidSubmit={this.onValidSubmit} />
         </div>
       </form>
     );
-  }
-
-  onNewOption = (newOption) => {
-    this.setState({
-      options: this.state.options.concat([ newOption ])
-    });
   }
 
   onValidSubmit = () => {
