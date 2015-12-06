@@ -101,33 +101,14 @@
 	    }
 	  }
 	
-	  // store new poll in db
-	  function submitNewPoll(formData) {
-	    setLoading(true);
-	    _pollStoreJs2['default'].save({
-	      title: formData.title,
-	      subtitle: formData.subtitle,
-	      options: formData.options.map(function (opt) {
-	        return opt.name;
-	      })
-	    }, function (err, poll) {
-	      setLoading(false);
-	      if (err) {
-	        alert('Error: ' + JSON.stringify(err));
-	      } else {
-	        console.log('=> log', poll);
-	        history.push('/' + poll.objectId); // redirects to poll URL
-	        // TODO: display banner/toaster for sharing the poll URL
-	      }
-	    });
-	  };
-	
 	  var CreatePage = _react2['default'].createClass({
 	    displayName: 'CreatePage',
 	
 	    render: function render() {
 	      return _react2['default'].createElement(_CreateFormJsx2['default'], {
-	        onSubmit: submitNewPoll,
+	        history: history,
+	        pollStore: _pollStoreJs2['default'],
+	        setLoading: setLoading,
 	        onUpdate: heightTransition
 	      });
 	    }
@@ -24689,7 +24670,6 @@
 	            { className: 'user-signup__intro' },
 	            React.createElement(TextField, {
 	              ref: 'title',
-	              name: 'title',
 	              disabled: _this.state.disabled,
 	              hintText: 'Enter a title for your poll',
 	              hintStyle: { color: '#999' },
@@ -24698,7 +24678,6 @@
 	            }),
 	            React.createElement(TextField, {
 	              ref: 'subtitle',
-	              name: 'subtitle',
 	              disabled: _this.state.disabled,
 	              hintText: 'Enter a description / call to action (optional)',
 	              hintStyle: { color: '#999' },
@@ -24714,19 +24693,31 @@
 	            ref: 'pollForm',
 	            disabled: _this.state.disabled,
 	            options: _this.props.defaultItems,
-	            onValidSubmit: _this.onValidSubmit })
+	            onValidSubmit: _this._submitNewPoll })
 	        )
 	      );
 	    };
 	
-	    this.onValidSubmit = function () {
+	    this._submitNewPoll = function () {
 	      // UI action feedback
 	      _this.setState({ disabled: true });
+	      _this.props.setLoading(true);
 	      // Submitting data
-	      _this.props.onSubmit({
+	      _this.props.pollStore.save({
 	        title: _this.refs.title.getValue(),
 	        subtitle: _this.refs.subtitle.getValue(),
-	        options: _this.refs.pollForm.getOptions()
+	        options: _this.refs.pollForm.getOptions().map(function (opt) {
+	          return opt.name;
+	        })
+	      }, function (err, poll) {
+	        _this.props.setLoading(false);
+	        if (err) {
+	          alert('Error: ' + JSON.stringify(err));
+	        } else {
+	          console.log('=> log', poll);
+	          _this.props.history.push('/' + poll.objectId); // redirects to poll URL
+	          // TODO: display banner/toaster for sharing the poll URL
+	        }
 	      });
 	    };
 	
@@ -24741,6 +24732,8 @@
 	;
 	
 	module.exports = CreateForm;
+	
+	// store new poll in db
 
 /***/ },
 /* 207 */

@@ -35,30 +35,13 @@ import pollStore from './pollStore.js';
     }
   }
 
-  // store new poll in db
-  function submitNewPoll(formData) {
-    setLoading(true);
-    pollStore.save({
-      title: formData.title,
-      subtitle: formData.subtitle,
-      options: formData.options.map((opt) => { return opt.name; })
-    }, function(err, poll) {
-      setLoading(false);
-      if (err) {
-        alert('Error: ' + JSON.stringify(err));
-      } else {
-        console.log('=> log', poll);
-        history.push('/' + poll.objectId); // redirects to poll URL
-        // TODO: display banner/toaster for sharing the poll URL
-      }
-    });
-  };
-
   var CreatePage = React.createClass({
     render: function() {
       return (
         <CreateForm
-          onSubmit={submitNewPoll}
+          history={history}
+          pollStore={pollStore}
+          setLoading={setLoading}
           onUpdate={heightTransition}
         />
       );
