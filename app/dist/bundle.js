@@ -55,7 +55,7 @@
 	  var React = __webpack_require__(/*! react */ 1);
 	  var ReactDOM = __webpack_require__(/*! react-dom */ 158);
 	  var CreateForm = __webpack_require__(/*! ./CreateForm.jsx */ 159);
-	  //var itemStore = require('./itemStore.js'); // TODO
+	  var pollStore = __webpack_require__(/*! ./pollStore.js */ 227);
 	
 	  // Needed for React Developer Tools
 	  window.React = React;
@@ -70,17 +70,24 @@
 	    }
 	  }
 	
-	  // merges selected items into one field before mailchimp form submission
+	  // store new poll in db
 	  function submit(formData) {
-	    //appDiv.setAttribute('disabled', true);
 	    setLoading(true);
-	    console.log('form data:', formData);
-	    //itemStore.storeNewPoll(formData) // TODO
-	    return;
-	    // AJAX code for testing with devtools' network tab:
-	    var xhr = new XMLHttpRequest();
-	    xhr.open('POST', '/', true);
-	    xhr.send(new FormData(form));
+	    pollStore.save({
+	      title: formData.title,
+	      subtitle: formData.subtitle,
+	      options: formData.options.map(function (opt) {
+	        return opt.name;
+	      })
+	    }, function (err, result) {
+	      console.log('=>', arguments);
+	      setLoading(false);
+	      if (err) {
+	        alert('Error: ' + JSON.stringify(err));
+	      } else {
+	        alert('TODO: display poll + link to share');
+	      }
+	    });
 	  };
 	
 	  // ___
@@ -20198,7 +20205,7 @@
 	    _get(Object.getPrototypeOf(CreateForm.prototype), 'constructor', this).call(this, props);
 	
 	    this.shouldComponentUpdate = function (nextProps, nextState) {
-	      return nextProps != _this.props || nextState.options.disabled !== _this.state.options.disabled;
+	      return nextProps != _this.props || nextState != _this.state;
 	    };
 	
 	    this.componentDidUpdate = function () {
@@ -20218,7 +20225,7 @@
 	            React.createElement(TextField, {
 	              ref: 'title',
 	              name: 'title',
-	              //disabled={this.props.disabled} // TODO
+	              disabled: _this.state.disabled,
 	              hintText: 'Enter a title for your poll',
 	              hintStyle: { color: '#999' },
 	              inputStyle: { textAlign: 'center', color: 'white' },
@@ -20227,7 +20234,7 @@
 	            React.createElement(TextField, {
 	              ref: 'subtitle',
 	              name: 'subtitle',
-	              //disabled={this.props.disabled} // TODO
+	              disabled: _this.state.disabled,
 	              hintText: 'Enter a description / call to action (optional)',
 	              hintStyle: { color: '#999' },
 	              inputStyle: { textAlign: 'center', color: 'white' },
@@ -20240,8 +20247,8 @@
 	          { className: 'row' },
 	          React.createElement(PollForm, {
 	            ref: 'pollForm',
-	            //disabled={this.props.disabled} // TODO
-	            options: _this.state.options,
+	            disabled: _this.state.disabled,
+	            options: _this.props.defaultItems,
 	            onValidSubmit: _this.onValidSubmit })
 	        )
 	      );
@@ -20259,7 +20266,7 @@
 	    };
 	
 	    this.state = {
-	      options: this.props.defaultItems
+	      disabled: false
 	    };
 	  }
 	
@@ -23424,12 +23431,12 @@
 	  return (function (_React$Component) {
 	    _inherits(PollForm, _React$Component);
 	
-	    function PollForm(props) {
+	    function PollForm() {
 	      var _this = this;
 	
 	      _classCallCheck(this, PollForm);
 	
-	      _get(Object.getPrototypeOf(PollForm.prototype), 'constructor', this).call(this, props);
+	      _get(Object.getPrototypeOf(PollForm.prototype), 'constructor', this).apply(this, arguments);
 	
 	      this.render = function () {
 	        return React.createElement(
@@ -23440,13 +23447,13 @@
 	            { style: { padding: '16px', paddingTop: '1px', color: '#333' } },
 	            React.createElement(Poll, {
 	              ref: 'poll',
-	              disabled: _this.state.disabled,
+	              disabled: _this.props.disabled,
 	              options: _this.props.options,
 	              onNewOption: _this._onNewOption,
 	              labelStyle: { color: 'auto' }
 	            }),
 	            React.createElement(RaisedButton, {
-	              disabled: _this.state.disabled,
+	              disabled: _this.props.disabled,
 	              label: 'Submit',
 	              primary: true,
 	              backgroundColor: '#00a651',
@@ -23467,10 +23474,6 @@
 	
 	      this.getOptions = function () {
 	        return _this.refs.poll.state.options;
-	      };
-	
-	      this.state = {
-	        disabled: false
 	      };
 	    }
 	
@@ -27095,6 +27098,38 @@
 	});
 	
 	module.exports = ToggleCheckBox;
+
+/***/ },
+/* 226 */,
+/* 227 */
+/*!**************************!*\
+  !*** ./src/pollStore.js ***!
+  \**************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = (function () {
+	
+	  Parse.initialize('EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7', 'UTu46JdJfO7VrD30GkmMJHAL5TgqQysLgh24JZlf');
+	  var Poll = Parse.Object.extend('Poll');
+	
+	  function save(pollData, cb) {
+	    console.log('storing poll:', pollData);
+	    new Poll().save(pollData, {
+	      success: function success(poll) {
+	        cb(null, poll);
+	      },
+	      error: function error(poll, err) {
+	        cb(err, poll);
+	      }
+	    });
+	  }
+	
+	  return {
+	    save: save
+	  };
+	})();
 
 /***/ }
 /******/ ]);

@@ -4,6 +4,7 @@
   var React = require('react');
   var ReactDOM = require('react-dom');
   var CreateForm = require('./CreateForm.jsx');
+  var pollStore = require('./pollStore.js');
 
   // Needed for React Developer Tools
   window.React = React;
@@ -18,16 +19,22 @@
     }
   }
 
-  // merges selected items into one field before mailchimp form submission
+  // store new poll in db
   function submit(formData) {
     setLoading(true);
-    console.log('form data:', formData);
-    //itemStore.storeNewPoll(formData) // TODO
-    return;
-    // AJAX code for testing with devtools' network tab:
-    var xhr = new XMLHttpRequest;
-    xhr.open('POST', '/', true);
-    xhr.send(new FormData(form));
+    pollStore.save({
+      title: formData.title,
+      subtitle: formData.subtitle,
+      options: formData.options.map((opt) => { return opt.name; })
+    }, function(err, result) {
+      console.log('=>', arguments);
+      setLoading(false);
+      if (err) {
+        alert('Error: ' + JSON.stringify(err));
+      } else {
+        alert('TODO: display poll + link to share');
+      }
+    });
   };
 
   // ___
