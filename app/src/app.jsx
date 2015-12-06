@@ -67,12 +67,23 @@ import pollStore from './pollStore.js';
     }
   });
 
-  var PollPage = React.createClass({
+  var ViewPage = React.createClass({
+    getInitialState: function() {
+      return { poll: {} };
+    },
+    componentWillMount: function() {
+      pollStore.fetch(this.props.params.id, (err, poll) => {
+        console.log('fetch =>', err, poll);
+        this.setState({ poll: poll });
+      });
+    },
     render: function() {
       return (
-        <CreateForm
-          defaultItems={[{ name: 'coucou' + this.props.params.id }]}
-          onSubmit={submit}
+        <ViewForm
+          title={this.state.poll.title}
+          subtitle={this.state.poll.subtitle}
+          defaultItems={this.state.poll.options} // { name: 'id: ' + this.props.params.id }
+          onSubmit={submitVote}
           onUpdate={heightTransition}
         />
       );
@@ -94,7 +105,7 @@ import pollStore from './pollStore.js';
   var router = (
     <Router history={history}>
       <Route path='/' component={CreatePage}/>
-      <Route path='/:id' component={PollPage}/>
+      <Route path='/:id' component={ViewPage}/>
       <Route path='*' component={UnknownPage}/>
     </Router>
   );

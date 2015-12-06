@@ -49,22 +49,49 @@
 
 	'use strict';
 	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
+	var _react = __webpack_require__(/*! react */ 5);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 205);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
 	var _reactRouter = __webpack_require__(/*! react-router */ 1);
 	
 	var _history = __webpack_require__(/*! history */ 274);
 	
+	var _ViewFormJsx = __webpack_require__(/*! ./ViewForm.jsx */ 279);
+	
+	var _ViewFormJsx2 = _interopRequireDefault(_ViewFormJsx);
+	
+	var _CreateFormJsx = __webpack_require__(/*! ./CreateForm.jsx */ 206);
+	
+	var _CreateFormJsx2 = _interopRequireDefault(_CreateFormJsx);
+	
+	var _pollStoreJs = __webpack_require__(/*! ./pollStore.js */ 273);
+	
+	var _pollStoreJs2 = _interopRequireDefault(_pollStoreJs);
+	
 	(function () {
 	  'use strict';
 	
-	  var React = __webpack_require__(/*! react */ 5);
-	  var ReactDOM = __webpack_require__(/*! react-dom */ 205);
-	  var CreateForm = __webpack_require__(/*! ./CreateForm.jsx */ 206);
-	  var pollStore = __webpack_require__(/*! ./pollStore.js */ 273);
-	
 	  // Needed for React Developer Tools
-	  window.React = React;
+	  window.React = _react2['default'];
 	
-	  var DEFAULT_ITEMS = [/* { name: 'Option 1' } */];
+	  var appDiv = document.getElementById('app');
+	
+	  // animates the height of the options list
+	  function heightTransition() {
+	    setTimeout(function () {
+	      appDiv.style.maxHeight = appDiv.childNodes[0].clientHeight + 'px';
+	    });
+	    setTimeout(function () {
+	      appDiv.style.maxHeight = 'none';
+	    }, 1000);
+	  }
 	
 	  // displays the loading animation if toggle == true
 	  function setLoading(toggle) {
@@ -75,9 +102,9 @@
 	  }
 	
 	  // store new poll in db
-	  function submit(formData) {
+	  function submitNewPoll(formData) {
 	    setLoading(true);
-	    pollStore.save({
+	    _pollStoreJs2['default'].save({
 	      title: formData.title,
 	      subtitle: formData.subtitle,
 	      options: formData.options.map(function (opt) {
@@ -93,48 +120,51 @@
 	    });
 	  };
 	
-	  // ___
-	  // Main logic
-	
-	  var appDiv = document.getElementById('app');
-	
-	  function heightTransition() {
-	    setTimeout(function () {
-	      appDiv.style.maxHeight = appDiv.childNodes[0].clientHeight + 'px';
-	    });
-	    setTimeout(function () {
-	      appDiv.style.maxHeight = 'none';
-	    }, 1000);
+	  function submitVote() {
+	    console.log('submitvote', arguments);
 	  }
 	
-	  var CreatePage = React.createClass({
+	  var CreatePage = _react2['default'].createClass({
 	    displayName: 'CreatePage',
 	
 	    render: function render() {
-	      return React.createElement(CreateForm, {
-	        onSubmit: submit,
+	      return _react2['default'].createElement(_CreateFormJsx2['default'], {
+	        onSubmit: submitNewPoll,
 	        onUpdate: heightTransition
 	      });
 	    }
 	  });
 	
-	  var PollPage = React.createClass({
-	    displayName: 'PollPage',
+	  var ViewPage = _react2['default'].createClass({
+	    displayName: 'ViewPage',
 	
+	    getInitialState: function getInitialState() {
+	      return { poll: {} };
+	    },
+	    componentWillMount: function componentWillMount() {
+	      var _this = this;
+	
+	      _pollStoreJs2['default'].fetch(this.props.params.id, function (err, poll) {
+	        console.log('fetch =>', err, poll);
+	        _this.setState({ poll: poll });
+	      });
+	    },
 	    render: function render() {
-	      return React.createElement(CreateForm, {
-	        defaultItems: [{ name: 'coucou' + this.props.params.id }],
-	        onSubmit: submit,
+	      return _react2['default'].createElement(_ViewFormJsx2['default'], {
+	        title: this.state.poll.title,
+	        subtitle: this.state.poll.subtitle,
+	        defaultItems: this.state.poll.options, // { name: 'id: ' + this.props.params.id }
+	        onSubmit: submitVote,
 	        onUpdate: heightTransition
 	      });
 	    }
 	  });
 	
-	  var Unknown = React.createClass({
-	    displayName: 'Unknown',
+	  var UnknownPage = _react2['default'].createClass({
+	    displayName: 'UnknownPage',
 	
 	    render: function render() {
-	      return React.createElement(
+	      return _react2['default'].createElement(
 	        'p',
 	        null,
 	        'unknown route'
@@ -146,15 +176,15 @@
 	    queryKey: false // removes state hashes, cf https://github.com/rackt/react-router/blob/master/docs/guides/basics/Histories.md#what-is-that-_kckuvup-junk-in-the-url
 	  });
 	
-	  var router = React.createElement(
+	  var router = _react2['default'].createElement(
 	    _reactRouter.Router,
 	    { history: history },
-	    React.createElement(_reactRouter.Route, { path: '/', component: CreatePage }),
-	    React.createElement(_reactRouter.Route, { path: '/:id', component: PollPage }),
-	    React.createElement(_reactRouter.Route, { path: '*', component: Unknown })
+	    _react2['default'].createElement(_reactRouter.Route, { path: '/', component: CreatePage }),
+	    _react2['default'].createElement(_reactRouter.Route, { path: '/:id', component: ViewPage }),
+	    _react2['default'].createElement(_reactRouter.Route, { path: '*', component: UnknownPage })
 	  );
 	
-	  ReactDOM.render(router, appDiv);
+	  _reactDom2['default'].render(router, appDiv);
 	})();
 
 /***/ },
@@ -31575,7 +31605,30 @@
 	    });
 	  }
 	
+	  function render(obj) {
+	    return {
+	      title: obj.get('title'),
+	      subtitle: obj.get('subtitle'),
+	      options: obj.get('options').map(function (opt) {
+	        return { name: opt };
+	      })
+	    };
+	  }
+	
+	  function fetch(id, cb) {
+	    var query = new Parse.Query(Poll);
+	    query.get(id, {
+	      success: function success(obj) {
+	        cb(null, render(obj));
+	      },
+	      error: function error(obj, err) {
+	        cb(err, render(obj));
+	      }
+	    });
+	  }
+	
 	  return {
+	    fetch: fetch,
 	    save: save
 	  };
 	})();
@@ -32003,6 +32056,92 @@
 	
 	exports['default'] = _deprecate2['default'](_useQueries2['default'], 'enableQueries is deprecated, use useQueries instead');
 	module.exports = exports['default'];
+
+/***/ },
+/* 279 */
+/*!**************************!*\
+  !*** ./src/ViewForm.jsx ***!
+  \**************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var React = __webpack_require__(/*! react */ 5);
+	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 207);
+	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 237);
+	
+	var ViewForm = (function (_React$Component) {
+	  _inherits(ViewForm, _React$Component);
+	
+	  function ViewForm() {
+	    var _this = this,
+	        _arguments2 = arguments;
+	
+	    _classCallCheck(this, ViewForm);
+	
+	    _get(Object.getPrototypeOf(ViewForm.prototype), 'constructor', this).apply(this, arguments);
+	
+	    this.shouldComponentUpdate = function (nextProps, nextState) {
+	      return nextProps != _this.props || nextState != _this.state;
+	    };
+	
+	    this.componentDidUpdate = function () {
+	      _this.props.onUpdate && _this.props.onUpdate.call(_this, _arguments2);
+	    };
+	
+	    this.render = function () {
+	      return React.createElement(
+	        'form',
+	        { action: '#' },
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'user-signup__intro' },
+	            React.createElement(
+	              'p',
+	              {
+	                ref: 'title',
+	                style: { fontSize: '22px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
+	              },
+	              _this.props.title
+	            ),
+	            React.createElement(
+	              'p',
+	              {
+	                ref: 'subtitle',
+	                style: { fontSize: '14px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
+	              },
+	              _this.props.subtitle
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(PollForm, {
+	            ref: 'pollForm',
+	            disabled: _this.props.disabled,
+	            options: _this.props.defaultItems,
+	            onValidSubmit: _this.props.onSubmit })
+	        )
+	      );
+	    };
+	  }
+	
+	  return ViewForm;
+	})(React.Component);
+	
+	;
+	
+	module.exports = ViewForm;
 
 /***/ }
 /******/ ]);

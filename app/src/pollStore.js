@@ -11,7 +11,26 @@ module.exports = (function() {
     });
   }
 
+  function render(obj) {
+    return {
+      title: obj.get('title'),
+      subtitle: obj.get('subtitle'),
+      options: obj.get('options').map((opt) => {
+        return { name: opt };
+      })
+    };
+  }
+
+  function fetch(id, cb) {
+    var query = new Parse.Query(Poll);
+    query.get(id, {
+      success: (obj) => { cb(null, render(obj)); },
+      error: (obj, err) => { cb(err, render(obj)); }
+    });
+  }
+
   return {
+    fetch: fetch,
     save: save
   };
 
