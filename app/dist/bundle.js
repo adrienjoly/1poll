@@ -32012,16 +32012,15 @@
 	      return nextProps != _this.props || nextState != _this.state;
 	    };
 	
+	    this.componentDidMount = function () {
+	      _this.refs.title.focus();
+	    };
+	
 	    this.componentDidUpdate = function () {
 	      _this.props.onUpdate && _this.props.onUpdate.call(_this, _arguments2);
 	    };
 	
 	    this.render = function () {
-	      setTimeout(function () {
-	        console.log('focus', _this.refs.title, _reactDom2['default'].findDOMNode(_this.refs.title));
-	        _this.refs.title.focus();
-	        _reactDom2['default'].findDOMNode(_this.refs.title).focus();
-	      }, 2000);
 	      return React.createElement(
 	        'form',
 	        { action: '#' },

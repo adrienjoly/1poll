@@ -23,16 +23,15 @@ class CreateForm extends React.Component {
     return nextProps != this.props || nextState != this.state;
   }
 
+  componentDidMount = () => {
+    this.refs.title.focus();
+  }
+
   componentDidUpdate = () => {
     this.props.onUpdate && this.props.onUpdate.call(this, arguments);
   }
 
   render = () => {
-    setTimeout(()=>{
-      console.log('focus', this.refs.title, ReactDOM.findDOMNode(this.refs.title));
-      this.refs.title.focus();
-      ReactDOM.findDOMNode(this.refs.title).focus();
-    }, 2000)
     return (
       <form action="#">
         <div className="row">
