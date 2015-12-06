@@ -13,11 +13,12 @@ class CreateForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      disabled: false
     };
   }
 
   shouldComponentUpdate = (nextProps, nextState) => {
-    return nextProps != this.props || nextState.options.disabled !== this.state.options.disabled;
+    return nextProps != this.props || nextState != this.state;
   }
 
   componentDidUpdate = () => {
@@ -32,7 +33,7 @@ class CreateForm extends React.Component {
             <TextField
               ref='title'
               name='title'
-              //disabled={this.props.disabled} // TODO
+              disabled={this.state.disabled}
               hintText='Enter a title for your poll'
               hintStyle={{ color: '#999' }}
               inputStyle={{ textAlign: 'center', color: 'white' }}
@@ -41,7 +42,7 @@ class CreateForm extends React.Component {
             <TextField
               ref='subtitle'
               name='subtitle'
-              //disabled={this.props.disabled} // TODO
+              disabled={this.state.disabled}
               hintText='Enter a description / call to action (optional)'
               hintStyle={{ color: '#999' }}
               inputStyle={{ textAlign: 'center', color: 'white' }}
@@ -52,8 +53,7 @@ class CreateForm extends React.Component {
         <div className="row">
           <PollForm
             ref='pollForm'
-            //disabled={this.props.disabled} // TODO
-            options={this.state.options}
+            disabled={this.state.disabled}
             options={this.props.defaultItems}
             onValidSubmit={this.onValidSubmit} />
         </div>

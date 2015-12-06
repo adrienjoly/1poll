@@ -12,26 +12,19 @@ module.exports = (function(){
 
   return class PollForm extends React.Component {
 
-    constructor(props) {
-      super(props);
-      this.state = {
-        disabled: false,
-      };
-    }
-
     render = () => {
       return (
         <div className='react-poll-form'>
           <Paper style={{ padding: '16px', paddingTop: '1px', color: '#333' }}>
             <Poll
               ref='poll'
-              disabled={this.state.disabled}
+              disabled={this.props.disabled}
               options={this.props.options}
               onNewOption={this._onNewOption}
               labelStyle={{ color: 'auto' }}
             />
             <RaisedButton
-              disabled={this.state.disabled}
+              disabled={this.props.disabled}
               label='Submit'
               primary={true}
               backgroundColor='#00a651'
