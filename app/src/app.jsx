@@ -42,12 +42,14 @@ import pollStore from './pollStore.js';
       title: formData.title,
       subtitle: formData.subtitle,
       options: formData.options.map((opt) => { return opt.name; })
-    }, function(err, result) {
+    }, function(err, poll) {
       setLoading(false);
       if (err) {
         alert('Error: ' + JSON.stringify(err));
       } else {
-        alert('TODO: display poll + link to share');
+        console.log('=> log', poll);
+        history.push('/' + poll.objectId); // redirects to poll URL
+        // TODO: display banner/toaster for sharing the poll URL
       }
     });
   };

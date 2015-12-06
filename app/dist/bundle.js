@@ -110,12 +110,14 @@
 	      options: formData.options.map(function (opt) {
 	        return opt.name;
 	      })
-	    }, function (err, result) {
+	    }, function (err, poll) {
 	      setLoading(false);
 	      if (err) {
 	        alert('Error: ' + JSON.stringify(err));
 	      } else {
-	        alert('TODO: display poll + link to share');
+	        console.log('=> log', poll);
+	        history.push('/' + poll.objectId); // redirects to poll URL
+	        // TODO: display banner/toaster for sharing the poll URL
 	      }
 	    });
 	  };
@@ -31593,20 +31595,9 @@
 	  Parse.initialize('EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7', 'UTu46JdJfO7VrD30GkmMJHAL5TgqQysLgh24JZlf');
 	  var Poll = Parse.Object.extend('Poll');
 	
-	  function save(pollData, cb) {
-	    console.log('storing poll:', pollData);
-	    new Poll().save(pollData, {
-	      success: function success(poll) {
-	        cb(null, poll);
-	      },
-	      error: function error(poll, err) {
-	        cb(err, poll);
-	      }
-	    });
-	  }
-	
 	  function render(obj) {
 	    return {
+	      objectId: obj.id,
 	      title: obj.get('title'),
 	      subtitle: obj.get('subtitle'),
 	      options: obj.get('options').map(function (opt) {
@@ -31618,6 +31609,18 @@
 	  function fetch(id, cb) {
 	    var query = new Parse.Query(Poll);
 	    query.get(id, {
+	      success: function success(obj) {
+	        cb(null, render(obj));
+	      },
+	      error: function error(obj, err) {
+	        cb(err, render(obj));
+	      }
+	    });
+	  }
+	
+	  function save(pollData, cb) {
+	    console.log('storing poll:', pollData);
+	    new Poll().save(pollData, {
 	      success: function success(obj) {
 	        cb(null, render(obj));
 	      },
