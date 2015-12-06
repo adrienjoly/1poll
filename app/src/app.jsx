@@ -1,18 +1,31 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { Router, Route, Link } from 'react-router';
 import { createHashHistory } from 'history';
+
+import ViewForm from './ViewForm.jsx';
+import CreateForm from './CreateForm.jsx';
+
+import pollStore from './pollStore.js';
+
 
 (function(){
   'use strict';
   
-  var React = require('react');
-  var ReactDOM = require('react-dom');
-  var CreateForm = require('./CreateForm.jsx');
-  var pollStore = require('./pollStore.js');
-
   // Needed for React Developer Tools
   window.React = React;
 
-  var DEFAULT_ITEMS = [ /* { name: 'Option 1' } */ ];
+  var appDiv = document.getElementById('app');
+
+  // animates the height of the options list
+  function heightTransition() {
+    setTimeout(function() {
+      appDiv.style.maxHeight = appDiv.childNodes[0].clientHeight + 'px';
+    });
+    setTimeout(function() {
+      appDiv.style.maxHeight = 'none';
+    }, 1000);
+  }
 
   // displays the loading animation if toggle == true
   function setLoading(toggle) {
@@ -23,7 +36,7 @@ import { createHashHistory } from 'history';
   }
 
   // store new poll in db
-  function submit(formData) {
+  function submitNewPoll(formData) {
     setLoading(true);
     pollStore.save({
       title: formData.title,
@@ -39,25 +52,15 @@ import { createHashHistory } from 'history';
     });
   };
 
-  // ___
-  // Main logic
-
-  var appDiv = document.getElementById('app');
-
-  function heightTransition() {
-    setTimeout(function() {
-      appDiv.style.maxHeight = appDiv.childNodes[0].clientHeight + 'px';
-    });
-    setTimeout(function() {
-      appDiv.style.maxHeight = 'none';
-    }, 1000);
+  function submitVote() {
+    console.log('submitvote', arguments);
   }
 
   var CreatePage = React.createClass({
     render: function() {
       return (
         <CreateForm
-          onSubmit={submit}
+          onSubmit={submitNewPoll}
           onUpdate={heightTransition}
         />
       );
@@ -76,7 +79,7 @@ import { createHashHistory } from 'history';
     }
   });
 
-  var Unknown = React.createClass({
+  var UnknownPage = React.createClass({
     render: function() {
       return (
         <p>unknown route</p>
@@ -92,7 +95,7 @@ import { createHashHistory } from 'history';
     <Router history={history}>
       <Route path='/' component={CreatePage}/>
       <Route path='/:id' component={PollPage}/>
-      <Route path='*' component={Unknown}/>
+      <Route path='*' component={UnknownPage}/>
     </Router>
   );
 
