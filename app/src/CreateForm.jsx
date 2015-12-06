@@ -33,15 +33,21 @@ class CreateForm extends React.Component {
             <TextField
               ref='title'
               name='title'
-              hintText='Enter a title for your poll (hint)'
-              errorText='Enter a title for your poll (error)'
-              errorStyle={{color: 'gray'}}
-              style={this.props.style || { textAlign: 'center', margin: '20px 0' }}
               //disabled={this.props.disabled} // TODO
+              hintText='Enter a title for your poll'
+              hintStyle={{ color: '#999' }}
+              inputStyle={{ textAlign: 'center', color: 'white' }}
+              style={{ fontSize: '22px', margin: '20px 0', width: '100%' }}
             />
-            <p style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '14px' }}>Please tick the dates that are convenient for you, or add more below:</span>
-            </p>
+            <TextField
+              ref='subtitle'
+              name='subtitle'
+              //disabled={this.props.disabled} // TODO
+              hintText='Enter a description / call to action (optional)'
+              hintStyle={{ color: '#999' }}
+              inputStyle={{ textAlign: 'center', color: 'white' }}
+              style={{ fontSize: '14px', margin: '20px 0', width: '100%' }}
+            />
           </div>
         </div>
         <div className="row">
@@ -68,6 +74,7 @@ class CreateForm extends React.Component {
     // Submitting data
     this.props.onSubmit({
       title: this.refs.title.getValue(),
+      subtitle: this.refs.subtitle.getValue(),
     });
   }
 

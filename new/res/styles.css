@@ -220,3 +220,7 @@ h1 {
     font-size: 75px;
   }
 }
+
+label {
+  font-weight: 400;
+}
