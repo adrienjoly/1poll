@@ -35,10 +35,12 @@
   "devDependencies": {
     "babel": "^5.8.23",
     "babel-loader": "^5.3.2",
+    "history": "^1.14.0",
     "material-ui": "^0.13.1",
     "react": "^0.14.3",
     "react-1poll": "^0.1.0",
     "react-dom": "^0.14.1",
+    "react-router": "^1.0.1",
     "react-tap-event-plugin": "^0.2.1",
     "webpack": "^1.12.2"
   }

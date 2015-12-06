@@ -1,3 +1,6 @@
+import { Router, Route, Link } from 'react-router';
+import { createHashHistory } from 'history';
+
 (function(){
   'use strict';
   
@@ -27,7 +30,6 @@
       subtitle: formData.subtitle,
       options: formData.options.map((opt) => { return opt.name; })
     }, function(err, result) {
-      console.log('=>', arguments);
       setLoading(false);
       if (err) {
         alert('Error: ' + JSON.stringify(err));
@@ -51,13 +53,37 @@
     }, 1000);
   }
 
-  var element =
-    <CreateForm
-      defaultItems={DEFAULT_ITEMS}
-      onSubmit={submit}
-      onUpdate={heightTransition}
-    />;
+  var CreatePage = React.createClass({
+    render: function() {
+      return (
+        <CreateForm
+          defaultItems={[{name:'coucou'}]}
+          onSubmit={submit}
+          onUpdate={heightTransition}
+        />
+      );
+    }
+  });
 
-  return ReactDOM.render(element, appDiv);
+  var Unknown = React.createClass({
+    render: function() {
+      return (
+        <p>unknown route</p>
+      );
+    }
+  });
+
+  var history = createHashHistory({
+    queryKey: false // removes state hashes, cf https://github.com/rackt/react-router/blob/master/docs/guides/basics/Histories.md#what-is-that-_kckuvup-junk-in-the-url
+  });
+
+  var router = (
+    <Router history={history}>
+      <Route path='/' component={CreatePage}></Route>
+      <Route path='*' component={Unknown}></Route>
+    </Router>
+  );
+
+  ReactDOM.render(router, appDiv);
 
 })();
