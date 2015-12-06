@@ -112,7 +112,18 @@
 	
 	    render: function render() {
 	      return React.createElement(CreateForm, {
-	        defaultItems: [{ name: 'coucou' }],
+	        onSubmit: submit,
+	        onUpdate: heightTransition
+	      });
+	    }
+	  });
+	
+	  var PollPage = React.createClass({
+	    displayName: 'PollPage',
+	
+	    render: function render() {
+	      return React.createElement(CreateForm, {
+	        defaultItems: [{ name: 'coucou' + this.props.params.id }],
 	        onSubmit: submit,
 	        onUpdate: heightTransition
 	      });
@@ -139,6 +150,7 @@
 	    _reactRouter.Router,
 	    { history: history },
 	    React.createElement(_reactRouter.Route, { path: '/', component: CreatePage }),
+	    React.createElement(_reactRouter.Route, { path: '/:id', component: PollPage }),
 	    React.createElement(_reactRouter.Route, { path: '*', component: Unknown })
 	  );
 	

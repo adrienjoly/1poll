@@ -57,7 +57,18 @@ import { createHashHistory } from 'history';
     render: function() {
       return (
         <CreateForm
-          defaultItems={[{name:'coucou'}]}
+          onSubmit={submit}
+          onUpdate={heightTransition}
+        />
+      );
+    }
+  });
+
+  var PollPage = React.createClass({
+    render: function() {
+      return (
+        <CreateForm
+          defaultItems={[{ name: 'coucou' + this.props.params.id }]}
           onSubmit={submit}
           onUpdate={heightTransition}
         />
@@ -79,8 +90,9 @@ import { createHashHistory } from 'history';
 
   var router = (
     <Router history={history}>
-      <Route path='/' component={CreatePage}></Route>
-      <Route path='*' component={Unknown}></Route>
+      <Route path='/' component={CreatePage}/>
+      <Route path='/:id' component={PollPage}/>
+      <Route path='*' component={Unknown}/>
     </Router>
   );
 
