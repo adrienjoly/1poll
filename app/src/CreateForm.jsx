@@ -13,7 +13,6 @@ class CreateForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      options: this.props.defaultItems
     };
   }
 
@@ -55,6 +54,7 @@ class CreateForm extends React.Component {
             ref='pollForm'
             //disabled={this.props.disabled} // TODO
             options={this.state.options}
+            options={this.props.defaultItems}
             onValidSubmit={this.onValidSubmit} />
         </div>
       </form>
