@@ -29,6 +29,9 @@ module.exports = (function(){
         options: props.options.map(this._checkByDefault)
       }, this._refreshSelectedOptions);
     },
+    shouldComponentUpdate: function(nextProps, nextState) {
+      return (nextProps != this.props || this.state.options != nextState.options);
+    },
     render: function() {
       return renderComponent(this.state.options.map(this._renderOption).concat([
         React.createElement(TextField, {
@@ -71,24 +74,30 @@ module.exports = (function(){
       }
     },
     _toggleOption: function(optionIndex, checked) {
-      this.state.options[parseInt(optionIndex)].checked = checked;
-      this._refreshSelectedOptions();
+      var options = this.state.options.slice(); // clone array
+      options[parseInt(optionIndex)].checked = checked;
+      this.setState({ options: options }, this._refreshSelectedOptions);
     },
     _onCheck: function(evt, checked) {
       this._toggleOption(evt.target.getAttribute('data-index'), checked);
     },
     _handleEntryBlur: function(evt) {
       if (!evt.target.value.trim()) return;
-      this.props.onNewOption({
-        name: evt.target.value,
-        defaultChecked: false
-      });
+      this._handleAddOption(evt, true);
     },
-    _handleAddOption: function(evt) {
-      this.props.onNewOption({
+    _handleAddOption: function(evt, notChecked) {
+      var newOption = {
         name: evt.target.value,
-        defaultChecked: true
-      });
+        checked: notChecked ? false : true,
+        defaultChecked: notChecked ? false : true
+      };
+      if (this.props.onNewOption) {
+        this.props.onNewOption(newOption);
+      } else {
+        this.setState({
+          options: this.state.options.concat([ newOption ])
+        });
+      }
     }
   });
 

@@ -39,7 +39,8 @@ Then, integrate it in your javascript project:
 
 - `options`: an Array of Objects that accept the following fields:
   - `name`: (String) name of the option, seen as a checkbox.
+  - `checked`: (Boolean) true if the checkbox is checked.
   - `defaultChecked`: (Boolean) true if the checkbox should be checked initially.
-- `onNewOption`: Function({ name: String, defaultChecked: Boolean }) that should update the `options` property.
-- `onSelectionChange`: Function([ { name: String, checked: true } ]) passes an Array of option Objects (as in the `options` property), which are currently selected (i.e. have their `checked` field set to true).
+- `onNewOption`: (optional) Function({ name: String, defaultChecked: Boolean }) overrides the function that adds the new option to the `options` state Array.
+- `onSelectionChange`: (optional) Function([ { name: String, checked: true } ]) passes an Array of option Objects (as in the `options` property), which are currently selected (i.e. have their `checked` field set to true).
 - `labelStyle`: an optional Object to override the inline-style of the Checkbox labels.
