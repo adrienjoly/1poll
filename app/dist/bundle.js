@@ -122,10 +122,6 @@
 	    });
 	  };
 	
-	  function submitVote() {
-	    console.log('submitvote', arguments);
-	  }
-	
 	  var CreatePage = _react2['default'].createClass({
 	    displayName: 'CreatePage',
 	
@@ -140,23 +136,10 @@
 	  var ViewPage = _react2['default'].createClass({
 	    displayName: 'ViewPage',
 	
-	    getInitialState: function getInitialState() {
-	      return { poll: {} };
-	    },
-	    componentWillMount: function componentWillMount() {
-	      var _this = this;
-	
-	      _pollStoreJs2['default'].fetch(this.props.params.id, function (err, poll) {
-	        console.log('fetch =>', err, poll);
-	        _this.setState({ poll: poll });
-	      });
-	    },
 	    render: function render() {
 	      return _react2['default'].createElement(_ViewFormJsx2['default'], {
-	        title: this.state.poll.title,
-	        subtitle: this.state.poll.subtitle,
-	        defaultItems: this.state.poll.options, // { name: 'id: ' + this.props.params.id }
-	        onSubmit: submitVote,
+	        id: this.props.params.id,
+	        pollStore: _pollStoreJs2['default'],
 	        onUpdate: heightTransition
 	      });
 	    }
@@ -32083,19 +32066,33 @@
 	  _inherits(ViewForm, _React$Component);
 	
 	  function ViewForm() {
-	    var _this = this,
+	    var _this2 = this,
 	        _arguments2 = arguments;
 	
 	    _classCallCheck(this, ViewForm);
 	
 	    _get(Object.getPrototypeOf(ViewForm.prototype), 'constructor', this).apply(this, arguments);
 	
+	    this.state = {
+	      poll: {}
+	    };
+	
+	    this.componentWillMount = function () {
+	      var _this = this;
+	
+	      this.props.pollStore.fetch(this.props.id, function (err, poll) {
+	        console.log('fetch =>', err, poll);
+	        _this.setState({ poll: poll });
+	        // TODO: display message on error
+	      });
+	    };
+	
 	    this.shouldComponentUpdate = function (nextProps, nextState) {
-	      return nextProps != _this.props || nextState != _this.state;
+	      return nextProps != _this2.props || nextState != _this2.state;
 	    };
 	
 	    this.componentDidUpdate = function () {
-	      _this.props.onUpdate && _this.props.onUpdate.call(_this, _arguments2);
+	      _this2.props.onUpdate && _this2.props.onUpdate.call(_this2, _arguments2);
 	    };
 	
 	    this.render = function () {
@@ -32114,7 +32111,7 @@
 	                ref: 'title',
 	                style: { fontSize: '22px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
 	              },
-	              _this.props.title
+	              _this2.state.poll.title
 	            ),
 	            React.createElement(
 	              'p',
@@ -32122,7 +32119,7 @@
 	                ref: 'subtitle',
 	                style: { fontSize: '14px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }
 	              },
-	              _this.props.subtitle
+	              _this2.state.poll.subtitle
 	            )
 	          )
 	        ),
@@ -32131,11 +32128,15 @@
 	          { className: 'row' },
 	          React.createElement(PollForm, {
 	            ref: 'pollForm',
-	            disabled: _this.props.disabled,
-	            options: _this.props.defaultItems,
-	            onValidSubmit: _this.props.onSubmit })
+	            disabled: _this2.props.disabled,
+	            options: _this2.state.poll.options,
+	            onValidSubmit: _this2._submitVote })
 	        )
 	      );
+	    };
+	
+	    this._submitVote = function () {
+	      console.log('submitvote', arguments);
 	    };
 	  }
 	

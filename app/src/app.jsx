@@ -54,10 +54,6 @@ import pollStore from './pollStore.js';
     });
   };
 
-  function submitVote() {
-    console.log('submitvote', arguments);
-  }
-
   var CreatePage = React.createClass({
     render: function() {
       return (
@@ -70,22 +66,11 @@ import pollStore from './pollStore.js';
   });
 
   var ViewPage = React.createClass({
-    getInitialState: function() {
-      return { poll: {} };
-    },
-    componentWillMount: function() {
-      pollStore.fetch(this.props.params.id, (err, poll) => {
-        console.log('fetch =>', err, poll);
-        this.setState({ poll: poll });
-      });
-    },
     render: function() {
       return (
         <ViewForm
-          title={this.state.poll.title}
-          subtitle={this.state.poll.subtitle}
-          defaultItems={this.state.poll.options} // { name: 'id: ' + this.props.params.id }
-          onSubmit={submitVote}
+          id={this.props.params.id}
+          pollStore={pollStore}
           onUpdate={heightTransition}
         />
       );
