@@ -25,8 +25,6 @@ module.exports = (function(){
       };
     },
     componentWillReceiveProps: function(props) {
-      //console.log('new props. options:');
-      //console.table(props.options);
       this.setState({
         options: props.options.map(this._checkByDefault)
       }, this._refreshSelectedOptions);
@@ -44,12 +42,6 @@ module.exports = (function(){
         })
       ]));
     },
-    /*
-    componentDidUpdate: function() {
-      console.log('1poll componentDidUpdate. selectedOptions:');
-      console.table(this.state.selectedOptions);
-    },
-    */
     _checkByDefault: function(option) {
       option.checked = option.checked || !!option.defaultChecked;
       return option;
@@ -67,8 +59,6 @@ module.exports = (function(){
       });
     },
     _refreshSelectedOptions: function() {
-      //console.log('_refreshSelectedOptions. options:');
-      //console.table(this.state.options);
       var selectedOptions = [];
       for (var i in this.state.options) {
         if (this.state.options[i].checked) {
