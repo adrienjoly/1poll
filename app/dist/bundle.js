@@ -25147,6 +25147,7 @@
 	              ref: 'pollForm',
 	              disabled: _this2.props.disabled,
 	              options: _this2.state.poll.options,
+	              callToAction: 'Vote',
 	              onValidSubmit: _this2._submitVote })
 	          )
 	        )
@@ -28341,7 +28342,7 @@
 	            }),
 	            React.createElement(RaisedButton, {
 	              disabled: _this.props.disabled,
-	              label: 'Submit',
+	              label: _this.props.callToAction || 'Submit',
 	              primary: true,
 	              backgroundColor: '#00a651',
 	              style: {
@@ -32079,6 +32080,7 @@
 	              ref: 'pollForm',
 	              disabled: _this.state.disabled,
 	              options: _this.props.defaultItems,
+	              callToAction: 'Publish',
 	              onValidSubmit: _this._submitNewPoll })
 	          )
 	        )

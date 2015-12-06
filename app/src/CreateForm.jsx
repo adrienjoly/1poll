@@ -66,6 +66,7 @@ class CreateForm extends React.Component {
             ref='pollForm'
             disabled={this.state.disabled}
             options={this.props.defaultItems}
+            callToAction='Publish'
             onValidSubmit={this._submitNewPoll} />
         </div>
       </form>

@@ -24,7 +24,7 @@ module.exports = (function(){
             />
             <RaisedButton
               disabled={this.props.disabled}
-              label='Submit'
+              label={this.props.callToAction || 'Submit'}
               primary={true}
               backgroundColor='#00a651'
               style={{

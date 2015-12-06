@@ -60,6 +60,7 @@ class ViewForm extends React.Component {
             ref='pollForm'
             disabled={this.props.disabled}
             options={this.state.poll.options}
+            callToAction='Vote'
             onValidSubmit={this._submitVote} />
         </div>
       </form>
