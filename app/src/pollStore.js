@@ -4,7 +4,7 @@ module.exports = (function() {
   var Poll = Parse.Object.extend('Poll');
 
   function render(obj) {
-    return {
+    return obj && {
       objectId: obj.id,
       title: obj.get('title'),
       subtitle: obj.get('subtitle'),
