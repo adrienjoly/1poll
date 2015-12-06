@@ -120,6 +120,7 @@
 	    render: function render() {
 	      return _react2['default'].createElement(_ViewFormJsx2['default'], {
 	        id: this.props.params.id,
+	        history: history,
 	        pollStore: _pollStoreJs2['default'],
 	        onUpdate: heightTransition
 	      });
@@ -24670,11 +24671,14 @@
 	            { className: 'user-signup__intro' },
 	            React.createElement(TextField, {
 	              ref: 'title',
+	              autoFocus: true,
 	              disabled: _this.state.disabled,
 	              hintText: 'Enter a title for your poll',
 	              hintStyle: { color: '#999' },
 	              inputStyle: { textAlign: 'center', color: 'white' },
-	              style: { fontSize: '22px', margin: '20px 0', width: '100%' }
+	              underlineStyle: { borderColor: 'transparent' },
+	              underlineFocusStyle: { borderColor: '#999' },
+	              style: { fontSize: '22px', width: '100%' }
 	            }),
 	            React.createElement(TextField, {
 	              ref: 'subtitle',
@@ -24682,7 +24686,9 @@
 	              hintText: 'Enter a description / call to action (optional)',
 	              hintStyle: { color: '#999' },
 	              inputStyle: { textAlign: 'center', color: 'white' },
-	              style: { fontSize: '14px', margin: '20px 0', width: '100%' }
+	              underlineStyle: { borderColor: 'transparent' },
+	              underlineFocusStyle: { borderColor: '#999' },
+	              style: { fontSize: '14px', marginBottom: '20px', width: '100%' }
 	            })
 	          )
 	        ),
@@ -32075,8 +32081,12 @@
 	
 	      this.props.pollStore.fetch(this.props.id, function (err, poll) {
 	        console.log('fetch =>', err, poll);
-	        _this.setState({ poll: poll });
-	        // TODO: display message on error
+	        if (err) {
+	          alert('We cannot find this poll, sorry...');
+	          _this.props.history.push('/'); // redirects to home page
+	        } else {
+	            _this.setState({ poll: poll });
+	          }
 	      });
 	    };
 	

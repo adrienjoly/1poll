@@ -32,11 +32,14 @@ class CreateForm extends React.Component {
           <div className="user-signup__intro">
             <TextField
               ref='title'
+              autoFocus
               disabled={this.state.disabled}
               hintText='Enter a title for your poll'
               hintStyle={{ color: '#999' }}
               inputStyle={{ textAlign: 'center', color: 'white' }}
-              style={{ fontSize: '22px', margin: '20px 0', width: '100%' }}
+              underlineStyle={{ borderColor: 'transparent' }}
+              underlineFocusStyle={{ borderColor: '#999' }}
+              style={{ fontSize: '22px', width: '100%' }}
             />
             <TextField
               ref='subtitle'
@@ -44,7 +47,9 @@ class CreateForm extends React.Component {
               hintText='Enter a description / call to action (optional)'
               hintStyle={{ color: '#999' }}
               inputStyle={{ textAlign: 'center', color: 'white' }}
-              style={{ fontSize: '14px', margin: '20px 0', width: '100%' }}
+              underlineStyle={{ borderColor: 'transparent' }}
+              underlineFocusStyle={{ borderColor: '#999' }}
+              style={{ fontSize: '14px', marginBottom: '20px', width: '100%' }}
             />
           </div>
         </div>
