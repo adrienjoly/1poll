@@ -1,3 +1,5 @@
+import ReactDOM from 'react-dom';
+
 'use strict';
 
 var React = require('react');
@@ -26,6 +28,11 @@ class CreateForm extends React.Component {
   }
 
   render = () => {
+    setTimeout(()=>{
+      console.log('focus', this.refs.title, ReactDOM.findDOMNode(this.refs.title));
+      this.refs.title.focus();
+      ReactDOM.findDOMNode(this.refs.title).focus();
+    }, 2000)
     return (
       <form action="#">
         <div className="row">
