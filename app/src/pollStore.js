@@ -2,7 +2,7 @@ module.exports = (function() {
   
   Parse.initialize('EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7', 'UTu46JdJfO7VrD30GkmMJHAL5TgqQysLgh24JZlf');
   Parse.serverURL = window.location.href.indexOf('http://localhost:') == -1
-    ? 'https://rocky-savannah-73915.herokuapp.com/'
+    ? 'https://rocky-savannah-73915.herokuapp.com/parse'
     : 'http://localhost:1337/parse';
   var Poll = Parse.Object.extend('Poll');
 
