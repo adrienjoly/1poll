@@ -1,7 +1,9 @@
 module.exports = (function() {
   
   Parse.initialize('EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7', 'UTu46JdJfO7VrD30GkmMJHAL5TgqQysLgh24JZlf');
-  Parse.serverURL = 'http://localhost:1337/parse';
+  Parse.serverURL = window.location.href.indexOf('http://localhost:') == -1
+    ? 'https://rocky-savannah-73915.herokuapp.com/'
+    : 'http://localhost:1337/parse';
   var Poll = Parse.Object.extend('Poll');
 
   function render(obj) {
