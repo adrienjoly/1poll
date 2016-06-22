@@ -8,6 +8,7 @@
     "build-prod": "webpack --progress --colors -p",
     "build-dev": "webpack --progress --colors -d --watch",
     "serve": "cd ..; python -m SimpleHTTPServer",
+    "start": "cd parse-server-example; npm start; cd ..",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
