@@ -68,8 +68,24 @@ class ViewForm extends React.Component {
     );
   }
 
-  _submitVote = function () {
-    console.log('submitvote', arguments);
+  // store vote in db
+  _submitVote = () => {
+    // UI action feedback
+    this.setState({ disabled: true });
+    this.props.setLoading(true);
+    // Submitting data
+    this.props.pollStore.vote(this.state.poll.objectId, {
+      votes: this.refs.pollForm.getOptions().map((opt) => { return opt.name; })
+    }, (err, poll) => {
+      this.props.setLoading(false);
+      if (err) {
+        alert('Error: ' + JSON.stringify(err));
+      } else {
+        console.log('=> log', poll);
+        this.props.history.push('/' + poll.objectId); // redirects to poll URL
+        // TODO: display banner/toaster for sharing the poll URL
+      }
+    });
   }
 
 };

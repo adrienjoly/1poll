@@ -67,11 +67,11 @@
 	
 	var _ViewFormJsx2 = _interopRequireDefault(_ViewFormJsx);
 	
-	var _CreateFormJsx = __webpack_require__(/*! ./CreateForm.jsx */ 278);
+	var _CreateFormJsx = __webpack_require__(/*! ./CreateForm.jsx */ 282);
 	
 	var _CreateFormJsx2 = _interopRequireDefault(_CreateFormJsx);
 	
-	var _pollStoreJs = __webpack_require__(/*! ./pollStore.js */ 279);
+	var _pollStoreJs = __webpack_require__(/*! ./pollStore.js */ 283);
 	
 	var _pollStoreJs2 = _interopRequireDefault(_pollStoreJs);
 	
@@ -122,6 +122,7 @@
 	        id: this.props.params.id,
 	        history: history,
 	        pollStore: _pollStoreJs2['default'],
+	        setLoading: setLoading,
 	        onUpdate: heightTransition
 	      });
 	    }
@@ -25062,15 +25063,15 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var _reactDocumentTitle = __webpack_require__(/*! react-document-title */ 280);
+	var _reactDocumentTitle = __webpack_require__(/*! react-document-title */ 212);
 	
 	var _reactDocumentTitle2 = _interopRequireDefault(_reactDocumentTitle);
 	
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 212);
-	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 242);
+	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 216);
+	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 246);
 	
 	var ViewForm = (function (_React$Component) {
 	  _inherits(ViewForm, _React$Component);
@@ -25155,7 +25156,24 @@
 	    };
 	
 	    this._submitVote = function () {
-	      console.log('submitvote', arguments); // TODO
+	      // UI action feedback
+	      _this2.setState({ disabled: true });
+	      _this2.props.setLoading(true);
+	      // Submitting data
+	      _this2.props.pollStore.vote(_this2.state.poll.objectId, {
+	        votes: _this2.refs.pollForm.getOptions().map(function (opt) {
+	          return opt.name;
+	        })
+	      }, function (err, poll) {
+	        _this2.props.setLoading(false);
+	        if (err) {
+	          alert('Error: ' + JSON.stringify(err));
+	        } else {
+	          console.log('=> log', poll);
+	          _this2.props.history.push('/' + poll.objectId); // redirects to poll URL
+	          // TODO: display banner/toaster for sharing the poll URL
+	        }
+	      });
 	    };
 	  }
 	
@@ -25165,9 +25183,288 @@
 	;
 	
 	module.exports = ViewForm;
+	
+	// store vote in db
 
 /***/ },
 /* 212 */
+/*!*****************************************!*\
+  !*** ./~/react-document-title/index.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 1),
+	    withSideEffect = __webpack_require__(/*! react-side-effect */ 213);
+	
+	function reducePropsToState(propsList) {
+	  var innermostProps = propsList[propsList.length - 1];
+	  if (innermostProps) {
+	    return innermostProps.title;
+	  }
+	}
+	
+	function handleStateChangeOnClient(title) {
+	  document.title = title || '';
+	}
+	
+	var DocumentTitle = React.createClass({
+	  propTypes: {
+	    title: React.PropTypes.string.isRequired
+	  },
+	
+	  render: function render() {
+	    if (this.props.children) {
+	      return React.Children.only(this.props.children);
+	    } else {
+	      return null;
+	    }
+	  }
+	});
+	
+	module.exports = withSideEffect(
+	  reducePropsToState,
+	  handleStateChangeOnClient
+	)(DocumentTitle);
+
+
+/***/ },
+/* 213 */
+/*!******************************************!*\
+  !*** ./~/react-side-effect/lib/index.js ***!
+  \******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _fbjsLibExecutionEnvironment = __webpack_require__(/*! fbjs/lib/ExecutionEnvironment */ 214);
+	
+	var _fbjsLibExecutionEnvironment2 = _interopRequireDefault(_fbjsLibExecutionEnvironment);
+	
+	var _fbjsLibShallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 215);
+	
+	var _fbjsLibShallowEqual2 = _interopRequireDefault(_fbjsLibShallowEqual);
+	
+	module.exports = function withSideEffect(reducePropsToState, handleStateChangeOnClient, mapStateOnServer) {
+	  if (typeof reducePropsToState !== 'function') {
+	    throw new Error('Expected reducePropsToState to be a function.');
+	  }
+	  if (typeof handleStateChangeOnClient !== 'function') {
+	    throw new Error('Expected handleStateChangeOnClient to be a function.');
+	  }
+	  if (typeof mapStateOnServer !== 'undefined' && typeof mapStateOnServer !== 'function') {
+	    throw new Error('Expected mapStateOnServer to either be undefined or a function.');
+	  }
+	
+	  function getDisplayName(WrappedComponent) {
+	    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+	  }
+	
+	  return function wrap(WrappedComponent) {
+	    if (typeof WrappedComponent !== 'function') {
+	      throw new Error('Expected WrappedComponent to be a React component.');
+	    }
+	
+	    var mountedInstances = [];
+	    var state = undefined;
+	
+	    function emitChange() {
+	      state = reducePropsToState(mountedInstances.map(function (instance) {
+	        return instance.props;
+	      }));
+	
+	      if (SideEffect.canUseDOM) {
+	        handleStateChangeOnClient(state);
+	      } else if (mapStateOnServer) {
+	        state = mapStateOnServer(state);
+	      }
+	    }
+	
+	    var SideEffect = (function (_Component) {
+	      _inherits(SideEffect, _Component);
+	
+	      function SideEffect() {
+	        _classCallCheck(this, SideEffect);
+	
+	        _Component.apply(this, arguments);
+	      }
+	
+	      SideEffect.peek = function peek() {
+	        return state;
+	      };
+	
+	      SideEffect.rewind = function rewind() {
+	        if (SideEffect.canUseDOM) {
+	          throw new Error('You may ony call rewind() on the server. Call peek() to read the current state.');
+	        }
+	
+	        var recordedState = state;
+	        state = undefined;
+	        mountedInstances = [];
+	        return recordedState;
+	      };
+	
+	      SideEffect.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps) {
+	        return !_fbjsLibShallowEqual2['default'](nextProps, this.props);
+	      };
+	
+	      SideEffect.prototype.componentWillMount = function componentWillMount() {
+	        mountedInstances.push(this);
+	        emitChange();
+	      };
+	
+	      SideEffect.prototype.componentDidUpdate = function componentDidUpdate() {
+	        emitChange();
+	      };
+	
+	      SideEffect.prototype.componentWillUnmount = function componentWillUnmount() {
+	        var index = mountedInstances.indexOf(this);
+	        mountedInstances.splice(index, 1);
+	        emitChange();
+	      };
+	
+	      SideEffect.prototype.render = function render() {
+	        return _react2['default'].createElement(WrappedComponent, this.props);
+	      };
+	
+	      _createClass(SideEffect, null, [{
+	        key: 'displayName',
+	
+	        // Try to use displayName of wrapped component
+	        value: 'SideEffect(' + getDisplayName(WrappedComponent) + ')',
+	
+	        // Expose canUseDOM so tests can monkeypatch it
+	        enumerable: true
+	      }, {
+	        key: 'canUseDOM',
+	        value: _fbjsLibExecutionEnvironment2['default'].canUseDOM,
+	        enumerable: true
+	      }]);
+	
+	      return SideEffect;
+	    })(_react.Component);
+	
+	    return SideEffect;
+	  };
+	};
+
+/***/ },
+/* 214 */
+/*!****************************************************************!*\
+  !*** ./~/react-side-effect/~/fbjs/lib/ExecutionEnvironment.js ***!
+  \****************************************************************/
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule ExecutionEnvironment
+	 */
+	
+	'use strict';
+	
+	var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
+	
+	/**
+	 * Simple, lightweight module assisting with the detection and context of
+	 * Worker. Helps avoid circular dependencies and allows code to reason about
+	 * whether or not they are in a Worker, even if they never include the main
+	 * `ReactWorker` dependency.
+	 */
+	var ExecutionEnvironment = {
+	
+	  canUseDOM: canUseDOM,
+	
+	  canUseWorkers: typeof Worker !== 'undefined',
+	
+	  canUseEventListeners: canUseDOM && !!(window.addEventListener || window.attachEvent),
+	
+	  canUseViewport: canUseDOM && !!window.screen,
+	
+	  isInWorker: !canUseDOM // For now, this is true - might change in the future.
+	
+	};
+	
+	module.exports = ExecutionEnvironment;
+
+/***/ },
+/* 215 */
+/*!********************************************************!*\
+  !*** ./~/react-side-effect/~/fbjs/lib/shallowEqual.js ***!
+  \********************************************************/
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule shallowEqual
+	 * @typechecks
+	 * 
+	 */
+	
+	'use strict';
+	
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	
+	/**
+	 * Performs equality by iterating through keys on an object and returning false
+	 * when any key has values which are not strictly equal between the arguments.
+	 * Returns true when the values of all keys are strictly equal.
+	 */
+	function shallowEqual(objA, objB) {
+	  if (objA === objB) {
+	    return true;
+	  }
+	
+	  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+	    return false;
+	  }
+	
+	  var keysA = Object.keys(objA);
+	  var keysB = Object.keys(objB);
+	
+	  if (keysA.length !== keysB.length) {
+	    return false;
+	  }
+	
+	  // Test for A's keys different from B.
+	  var bHasOwnProperty = hasOwnProperty.bind(objB);
+	  for (var i = 0; i < keysA.length; i++) {
+	    if (!bHasOwnProperty(keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
+	      return false;
+	    }
+	  }
+	
+	  return true;
+	}
+	
+	module.exports = shallowEqual;
+
+/***/ },
+/* 216 */
 /*!*****************************************!*\
   !*** ./~/material-ui/lib/text-field.js ***!
   \*****************************************/
@@ -25181,14 +25478,14 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 213);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 232);
-	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 233);
-	var EnhancedTextarea = __webpack_require__(/*! ./enhanced-textarea */ 234);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
-	var ContextPure = __webpack_require__(/*! ./mixins/context-pure */ 240);
+	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 217);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 236);
+	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 237);
+	var EnhancedTextarea = __webpack_require__(/*! ./enhanced-textarea */ 238);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
+	var ContextPure = __webpack_require__(/*! ./mixins/context-pure */ 244);
 	
 	/**
 	 * Check if a value is valid to be displayed inside an input.
@@ -25626,7 +25923,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 213 */
+/* 217 */
 /*!******************************************************!*\
   !*** ./~/material-ui/lib/utils/color-manipulator.js ***!
   \******************************************************/
@@ -25808,7 +26105,7 @@
 	};
 
 /***/ },
-/* 214 */
+/* 218 */
 /*!****************************************************!*\
   !*** ./~/material-ui/lib/mixins/style-propable.js ***!
   \****************************************************/
@@ -25817,8 +26114,8 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 215);
-	var Styles = __webpack_require__(/*! ../utils/styles */ 218);
+	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 219);
+	var Styles = __webpack_require__(/*! ../utils/styles */ 222);
 	
 	// This mixin isn't necessary and will be removed in v0.11
 	
@@ -25856,7 +26153,7 @@
 	};
 
 /***/ },
-/* 215 */
+/* 219 */
 /*!********************************************************!*\
   !*** ./~/material-ui/lib/utils/immutability-helper.js ***!
   \********************************************************/
@@ -25865,7 +26162,7 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var update = __webpack_require__(/*! react-addons-update */ 216);
+	var update = __webpack_require__(/*! react-addons-update */ 220);
 	
 	function mergeSingle(objA, objB) {
 	  if (!objA) return objB;
@@ -25905,16 +26202,16 @@
 	};
 
 /***/ },
-/* 216 */
+/* 220 */
 /*!****************************************!*\
   !*** ./~/react-addons-update/index.js ***!
   \****************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! react/lib/update */ 217);
+	module.exports = __webpack_require__(/*! react/lib/update */ 221);
 
 /***/ },
-/* 217 */
+/* 221 */
 /*!*******************************!*\
   !*** ./~/react/lib/update.js ***!
   \*******************************/
@@ -26030,7 +26327,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 218 */
+/* 222 */
 /*!*******************************************!*\
   !*** ./~/material-ui/lib/utils/styles.js ***!
   \*******************************************/
@@ -26038,8 +26335,8 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 	
-	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 219);
-	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 215);
+	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 223);
+	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 219);
 	
 	var reTranslate = /((^|\s)translate(3d|X)?\()(\-?[\d]+)/;
 	
@@ -26142,7 +26439,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 219 */
+/* 223 */
 /*!*************************************************!*\
   !*** ./~/material-ui/lib/styles/auto-prefix.js ***!
   \*************************************************/
@@ -26156,7 +26453,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _inlineStylePrefixer = __webpack_require__(/*! inline-style-prefixer */ 220);
+	var _inlineStylePrefixer = __webpack_require__(/*! inline-style-prefixer */ 224);
 	
 	var _inlineStylePrefixer2 = _interopRequireDefault(_inlineStylePrefixer);
 	
@@ -26230,7 +26527,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 220 */
+/* 224 */
 /*!*************************************************!*\
   !*** ./~/inline-style-prefixer/lib/Prefixer.js ***!
   \*************************************************/
@@ -26248,19 +26545,19 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var _getBrowserInformation = __webpack_require__(/*! ./getBrowserInformation */ 221);
+	var _getBrowserInformation = __webpack_require__(/*! ./getBrowserInformation */ 225);
 	
 	var _getBrowserInformation2 = _interopRequireDefault(_getBrowserInformation);
 	
-	var _getPrefixedKeyframes = __webpack_require__(/*! ./getPrefixedKeyframes */ 223);
+	var _getPrefixedKeyframes = __webpack_require__(/*! ./getPrefixedKeyframes */ 227);
 	
 	var _getPrefixedKeyframes2 = _interopRequireDefault(_getPrefixedKeyframes);
 	
-	var _caniuseData = __webpack_require__(/*! ./caniuseData */ 224);
+	var _caniuseData = __webpack_require__(/*! ./caniuseData */ 228);
 	
 	var _caniuseData2 = _interopRequireDefault(_caniuseData);
 	
-	var _Plugins = __webpack_require__(/*! ./Plugins */ 225);
+	var _Plugins = __webpack_require__(/*! ./Plugins */ 229);
 	
 	var _Plugins2 = _interopRequireDefault(_Plugins);
 	
@@ -26433,7 +26730,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 221 */
+/* 225 */
 /*!**************************************************************!*\
   !*** ./~/inline-style-prefixer/lib/getBrowserInformation.js ***!
   \**************************************************************/
@@ -26447,7 +26744,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _bowser = __webpack_require__(/*! bowser */ 222);
+	var _bowser = __webpack_require__(/*! bowser */ 226);
 	
 	var _bowser2 = _interopRequireDefault(_bowser);
 	
@@ -26645,7 +26942,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 222 */
+/* 226 */
 /*!****************************!*\
   !*** ./~/bowser/bowser.js ***!
   \****************************/
@@ -26945,7 +27242,7 @@
 
 
 /***/ },
-/* 223 */
+/* 227 */
 /*!*************************************************************!*\
   !*** ./~/inline-style-prefixer/lib/getPrefixedKeyframes.js ***!
   \*************************************************************/
@@ -26972,7 +27269,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 224 */
+/* 228 */
 /*!****************************************************!*\
   !*** ./~/inline-style-prefixer/lib/caniuseData.js ***!
   \****************************************************/
@@ -26981,7 +27278,7 @@
 	var caniuseData = {"chrome":{"transform":35,"transformOrigin":35,"transformOriginX":35,"transformOriginY":35,"backfaceVisibility":35,"perspective":35,"perspectiveOrigin":35,"transformStyle":35,"transformOriginZ":35,"animation":42,"animationDelay":42,"animationDirection":42,"animationFillMode":42,"animationDuration":42,"animationIterationCount":42,"animationName":42,"animationPlayState":42,"animationTimingFunction":42,"appearance":49,"userSelect":49,"fontKerning":32,"textEmphasisPosition":49,"textEmphasis":49,"textEmphasisStyle":49,"textEmphasisColor":49,"boxDecorationBreak":49,"clipPath":49,"maskImage":49,"maskMode":49,"maskRepeat":49,"maskPosition":49,"maskClip":49,"maskOrigin":49,"maskSize":49,"maskComposite":49,"mask":49,"maskBorderSource":49,"maskBorderMode":49,"maskBorderSlice":49,"maskBorderWidth":49,"maskBorderOutset":49,"maskBorderRepeat":49,"maskBorder":49,"maskType":49,"textDecorationStyle":49,"textDecorationSkip":49,"textDecorationLine":49,"textDecorationColor":49,"filter":49,"fontFeatureSettings":49,"breakAfter":49,"breakBefore":49,"breakInside":49,"columnCount":49,"columnFill":49,"columnGap":49,"columnRule":49,"columnRuleColor":49,"columnRuleStyle":49,"columnRuleWidth":49,"columns":49,"columnSpan":49,"columnWidth":49},"safari":{"flex":8,"flexBasis":8,"flexDirection":8,"flexGrow":8,"flexFlow":8,"flexShrink":8,"flexWrap":8,"alignContent":8,"alignItems":8,"alignSelf":8,"justifyContent":8,"order":8,"transition":6,"transitionDelay":6,"transitionDuration":6,"transitionProperty":6,"transitionTimingFunction":6,"transform":8,"transformOrigin":8,"transformOriginX":8,"transformOriginY":8,"backfaceVisibility":8,"perspective":8,"perspectiveOrigin":8,"transformStyle":8,"transformOriginZ":8,"animation":8,"animationDelay":8,"animationDirection":8,"animationFillMode":8,"animationDuration":8,"animationIterationCount":8,"animationName":8,"animationPlayState":8,"animationTimingFunction":8,"appearance":9,"userSelect":9,"backdropFilter":9,"fontKerning":9,"scrollSnapType":9,"scrollSnapPointsX":9,"scrollSnapPointsY":9,"scrollSnapDestination":9,"scrollSnapCoordinate":9,"textEmphasisPosition":7,"textEmphasis":7,"textEmphasisStyle":7,"textEmphasisColor":7,"boxDecorationBreak":9,"clipPath":9,"maskImage":9,"maskMode":9,"maskRepeat":9,"maskPosition":9,"maskClip":9,"maskOrigin":9,"maskSize":9,"maskComposite":9,"mask":9,"maskBorderSource":9,"maskBorderMode":9,"maskBorderSlice":9,"maskBorderWidth":9,"maskBorderOutset":9,"maskBorderRepeat":9,"maskBorder":9,"maskType":9,"textDecorationStyle":9,"textDecorationSkip":9,"textDecorationLine":9,"textDecorationColor":9,"shapeImageThreshold":9,"shapeImageMargin":9,"shapeImageOutside":9,"filter":9,"hyphens":9,"flowInto":9,"flowFrom":9,"breakBefore":8,"breakAfter":8,"breakInside":8,"regionFragment":9,"columnCount":8,"columnFill":8,"columnGap":8,"columnRule":8,"columnRuleColor":8,"columnRuleStyle":8,"columnRuleWidth":8,"columns":8,"columnSpan":8,"columnWidth":8},"firefox":{"appearance":45,"userSelect":45,"boxSizing":28,"textAlignLast":45,"textDecorationStyle":35,"textDecorationSkip":35,"textDecorationLine":35,"textDecorationColor":35,"tabSize":45,"hyphens":42,"fontFeatureSettings":33,"breakAfter":45,"breakBefore":45,"breakInside":45,"columnCount":45,"columnFill":45,"columnGap":45,"columnRule":45,"columnRuleColor":45,"columnRuleStyle":45,"columnRuleWidth":45,"columns":45,"columnSpan":45,"columnWidth":45},"opera":{"flex":16,"flexBasis":16,"flexDirection":16,"flexGrow":16,"flexFlow":16,"flexShrink":16,"flexWrap":16,"alignContent":16,"alignItems":16,"alignSelf":16,"justifyContent":16,"order":16,"transform":22,"transformOrigin":22,"transformOriginX":22,"transformOriginY":22,"backfaceVisibility":22,"perspective":22,"perspectiveOrigin":22,"transformStyle":22,"transformOriginZ":22,"animation":29,"animationDelay":29,"animationDirection":29,"animationFillMode":29,"animationDuration":29,"animationIterationCount":29,"animationName":29,"animationPlayState":29,"animationTimingFunction":29,"appearance":35,"userSelect":35,"fontKerning":19,"textEmphasisPosition":35,"textEmphasis":35,"textEmphasisStyle":35,"textEmphasisColor":35,"boxDecorationBreak":35,"clipPath":35,"maskImage":35,"maskMode":35,"maskRepeat":35,"maskPosition":35,"maskClip":35,"maskOrigin":35,"maskSize":35,"maskComposite":35,"mask":35,"maskBorderSource":35,"maskBorderMode":35,"maskBorderSlice":35,"maskBorderWidth":35,"maskBorderOutset":35,"maskBorderRepeat":35,"maskBorder":35,"maskType":35,"filter":35,"fontFeatureSettings":35,"breakAfter":35,"breakBefore":35,"breakInside":35,"columnCount":35,"columnFill":35,"columnGap":35,"columnRule":35,"columnRuleColor":35,"columnRuleStyle":35,"columnRuleWidth":35,"columns":35,"columnSpan":35,"columnWidth":35},"ie":{"gridTemplateRows":11,"grid":11,"flowInto":11,"flexDirection":10,"touchAction":10,"gridRow":11,"scrollSnapPointsX":11,"wrapMargin":11,"breakBefore":11,"gridRowEnd":11,"gridRowStart":11,"breakInside":11,"transformOrigin":9,"scrollSnapType":11,"scrollSnapDestination":11,"gridTemplate":11,"flexWrap":10,"transformOriginX":9,"flowFrom":11,"gridColumnStart":11,"userSelect":11,"wrapFlow":11,"scrollSnapCoordinate":11,"gridGap":11,"gridAutoRows":11,"hyphens":11,"regionFragment":11,"flex":10,"columnGap":11,"wrapThrough":11,"transformOriginY":9,"breakAfter":11,"rowGap":11,"gridTemplateColumns":11,"gridArea":11,"transform":9,"gridAutoFlow":11,"flexFlow":10,"gridTemplateAreas":11,"gridColumn":11,"gridAutoColumns":11,"scrollSnapPointsY":11,"textSizeAdjust":11},"ios_saf":{"flex":8.1,"flexBasis":8.1,"flexDirection":8.1,"flexGrow":8.1,"flexFlow":8.1,"flexShrink":8.1,"flexWrap":8.1,"alignContent":8.1,"alignItems":8.1,"alignSelf":8.1,"justifyContent":8.1,"order":8.1,"transition":6,"transitionDelay":6,"transitionDuration":6,"transitionProperty":6,"transitionTimingFunction":6,"transform":8.1,"transformOrigin":8.1,"transformOriginX":8.1,"transformOriginY":8.1,"backfaceVisibility":8.1,"perspective":8.1,"perspectiveOrigin":8.1,"transformStyle":8.1,"transformOriginZ":8.1,"animation":8.1,"animationDelay":8.1,"animationDirection":8.1,"animationFillMode":8.1,"animationDuration":8.1,"animationIterationCount":8.1,"animationName":8.1,"animationPlayState":8.1,"animationTimingFunction":8.1,"appearance":9,"userSelect":9,"backdropFilter":9,"fontKerning":9,"scrollSnapType":9,"scrollSnapPointsX":9,"scrollSnapPointsY":9,"scrollSnapDestination":9,"scrollSnapCoordinate":9,"boxDecorationBreak":9,"clipPath":9,"maskImage":9,"maskMode":9,"maskRepeat":9,"maskPosition":9,"maskClip":9,"maskOrigin":9,"maskSize":9,"maskComposite":9,"mask":9,"maskBorderSource":9,"maskBorderMode":9,"maskBorderSlice":9,"maskBorderWidth":9,"maskBorderOutset":9,"maskBorderRepeat":9,"maskBorder":9,"maskType":9,"textSizeAdjust":9,"textDecorationStyle":9,"textDecorationSkip":9,"textDecorationLine":9,"textDecorationColor":9,"shapeImageThreshold":9,"shapeImageMargin":9,"shapeImageOutside":9,"filter":9,"hyphens":9,"flowInto":9,"flowFrom":9,"breakBefore":8.1,"breakAfter":8.1,"breakInside":8.1,"regionFragment":9,"columnCount":8.1,"columnFill":8.1,"columnGap":8.1,"columnRule":8.1,"columnRuleColor":8.1,"columnRuleStyle":8.1,"columnRuleWidth":8.1,"columns":8.1,"columnSpan":8.1,"columnWidth":8.1},"android":{"borderImage":4.2,"borderImageOutset":4.2,"borderImageRepeat":4.2,"borderImageSlice":4.2,"borderImageSource":4.2,"borderImageWidth":4.2,"flex":4.2,"flexBasis":4.2,"flexDirection":4.2,"flexGrow":4.2,"flexFlow":4.2,"flexShrink":4.2,"flexWrap":4.2,"alignContent":4.2,"alignItems":4.2,"alignSelf":4.2,"justifyContent":4.2,"order":4.2,"transition":4.2,"transitionDelay":4.2,"transitionDuration":4.2,"transitionProperty":4.2,"transitionTimingFunction":4.2,"transform":4.4,"transformOrigin":4.4,"transformOriginX":4.4,"transformOriginY":4.4,"backfaceVisibility":4.4,"perspective":4.4,"perspectiveOrigin":4.4,"transformStyle":4.4,"transformOriginZ":4.4,"animation":4.4,"animationDelay":4.4,"animationDirection":4.4,"animationFillMode":4.4,"animationDuration":4.4,"animationIterationCount":4.4,"animationName":4.4,"animationPlayState":4.4,"animationTimingFunction":4.4,"appearance":44,"userSelect":44,"fontKerning":4.4,"textEmphasisPosition":44,"textEmphasis":44,"textEmphasisStyle":44,"textEmphasisColor":44,"boxDecorationBreak":44,"clipPath":44,"maskImage":44,"maskMode":44,"maskRepeat":44,"maskPosition":44,"maskClip":44,"maskOrigin":44,"maskSize":44,"maskComposite":44,"mask":44,"maskBorderSource":44,"maskBorderMode":44,"maskBorderSlice":44,"maskBorderWidth":44,"maskBorderOutset":44,"maskBorderRepeat":44,"maskBorder":44,"maskType":44,"filter":44,"fontFeatureSettings":44,"breakAfter":44,"breakBefore":44,"breakInside":44,"columnCount":44,"columnFill":44,"columnGap":44,"columnRule":44,"columnRuleColor":44,"columnRuleStyle":44,"columnRuleWidth":44,"columns":44,"columnSpan":44,"columnWidth":44},"and_chr":{"appearance":46,"userSelect":46,"textEmphasisPosition":46,"textEmphasis":46,"textEmphasisStyle":46,"textEmphasisColor":46,"boxDecorationBreak":46,"clipPath":46,"maskImage":46,"maskMode":46,"maskRepeat":46,"maskPosition":46,"maskClip":46,"maskOrigin":46,"maskSize":46,"maskComposite":46,"mask":46,"maskBorderSource":46,"maskBorderMode":46,"maskBorderSlice":46,"maskBorderWidth":46,"maskBorderOutset":46,"maskBorderRepeat":46,"maskBorder":46,"maskType":46,"textDecorationStyle":46,"textDecorationSkip":46,"textDecorationLine":46,"textDecorationColor":46,"filter":46,"fontFeatureSettings":46,"breakAfter":46,"breakBefore":46,"breakInside":46,"columnCount":46,"columnFill":46,"columnGap":46,"columnRule":46,"columnRuleColor":46,"columnRuleStyle":46,"columnRuleWidth":46,"columns":46,"columnSpan":46,"columnWidth":46},"and_uc":{"flex":9.9,"flexBasis":9.9,"flexDirection":9.9,"flexGrow":9.9,"flexFlow":9.9,"flexShrink":9.9,"flexWrap":9.9,"alignContent":9.9,"alignItems":9.9,"alignSelf":9.9,"justifyContent":9.9,"order":9.9,"transition":9.9,"transitionDelay":9.9,"transitionDuration":9.9,"transitionProperty":9.9,"transitionTimingFunction":9.9,"transform":9.9,"transformOrigin":9.9,"transformOriginX":9.9,"transformOriginY":9.9,"backfaceVisibility":9.9,"perspective":9.9,"perspectiveOrigin":9.9,"transformStyle":9.9,"transformOriginZ":9.9,"animation":9.9,"animationDelay":9.9,"animationDirection":9.9,"animationFillMode":9.9,"animationDuration":9.9,"animationIterationCount":9.9,"animationName":9.9,"animationPlayState":9.9,"animationTimingFunction":9.9,"appearance":9.9,"userSelect":9.9,"fontKerning":9.9,"textEmphasisPosition":9.9,"textEmphasis":9.9,"textEmphasisStyle":9.9,"textEmphasisColor":9.9,"maskImage":9.9,"maskMode":9.9,"maskRepeat":9.9,"maskPosition":9.9,"maskClip":9.9,"maskOrigin":9.9,"maskSize":9.9,"maskComposite":9.9,"mask":9.9,"maskBorderSource":9.9,"maskBorderMode":9.9,"maskBorderSlice":9.9,"maskBorderWidth":9.9,"maskBorderOutset":9.9,"maskBorderRepeat":9.9,"maskBorder":9.9,"maskType":9.9,"textSizeAdjust":9.9,"filter":9.9,"hyphens":9.9,"flowInto":9.9,"flowFrom":9.9,"breakBefore":9.9,"breakAfter":9.9,"breakInside":9.9,"regionFragment":9.9,"fontFeatureSettings":9.9,"columnCount":9.9,"columnFill":9.9,"columnGap":9.9,"columnRule":9.9,"columnRuleColor":9.9,"columnRuleStyle":9.9,"columnRuleWidth":9.9,"columns":9.9,"columnSpan":9.9,"columnWidth":9.9},"op_mini":{"borderImage":5,"borderImageOutset":5,"borderImageRepeat":5,"borderImageSlice":5,"borderImageSource":5,"borderImageWidth":5,"tabSize":5,"objectFit":5,"objectPosition":5}}; module.exports = caniuseData
 
 /***/ },
-/* 225 */
+/* 229 */
 /*!************************************************!*\
   !*** ./~/inline-style-prefixer/lib/Plugins.js ***!
   \************************************************/
@@ -26995,29 +27292,29 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _pluginsCursor = __webpack_require__(/*! ./plugins/cursor */ 226);
+	var _pluginsCursor = __webpack_require__(/*! ./plugins/cursor */ 230);
 	
 	var _pluginsCursor2 = _interopRequireDefault(_pluginsCursor);
 	
-	var _pluginsFlex = __webpack_require__(/*! ./plugins/flex */ 227);
+	var _pluginsFlex = __webpack_require__(/*! ./plugins/flex */ 231);
 	
 	var _pluginsFlex2 = _interopRequireDefault(_pluginsFlex);
 	
-	var _pluginsSizing = __webpack_require__(/*! ./plugins/sizing */ 228);
+	var _pluginsSizing = __webpack_require__(/*! ./plugins/sizing */ 232);
 	
 	var _pluginsSizing2 = _interopRequireDefault(_pluginsSizing);
 	
-	var _pluginsGradient = __webpack_require__(/*! ./plugins/gradient */ 229);
+	var _pluginsGradient = __webpack_require__(/*! ./plugins/gradient */ 233);
 	
 	var _pluginsGradient2 = _interopRequireDefault(_pluginsGradient);
 	
 	// special flexbox specifications
 	
-	var _pluginsFlexboxIE = __webpack_require__(/*! ./plugins/flexboxIE */ 230);
+	var _pluginsFlexboxIE = __webpack_require__(/*! ./plugins/flexboxIE */ 234);
 	
 	var _pluginsFlexboxIE2 = _interopRequireDefault(_pluginsFlexboxIE);
 	
-	var _pluginsFlexboxOld = __webpack_require__(/*! ./plugins/flexboxOld */ 231);
+	var _pluginsFlexboxOld = __webpack_require__(/*! ./plugins/flexboxOld */ 235);
 	
 	var _pluginsFlexboxOld2 = _interopRequireDefault(_pluginsFlexboxOld);
 	
@@ -27025,7 +27322,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 226 */
+/* 230 */
 /*!*******************************************************!*\
   !*** ./~/inline-style-prefixer/lib/plugins/cursor.js ***!
   \*******************************************************/
@@ -27054,7 +27351,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 227 */
+/* 231 */
 /*!*****************************************************!*\
   !*** ./~/inline-style-prefixer/lib/plugins/flex.js ***!
   \*****************************************************/
@@ -27083,7 +27380,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 228 */
+/* 232 */
 /*!*******************************************************!*\
   !*** ./~/inline-style-prefixer/lib/plugins/sizing.js ***!
   \*******************************************************/
@@ -27115,7 +27412,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 229 */
+/* 233 */
 /*!*********************************************************!*\
   !*** ./~/inline-style-prefixer/lib/plugins/gradient.js ***!
   \*********************************************************/
@@ -27145,7 +27442,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 230 */
+/* 234 */
 /*!**********************************************************!*\
   !*** ./~/inline-style-prefixer/lib/plugins/flexboxIE.js ***!
   \**********************************************************/
@@ -27194,7 +27491,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 231 */
+/* 235 */
 /*!***********************************************************!*\
   !*** ./~/inline-style-prefixer/lib/plugins/flexboxOld.js ***!
   \***********************************************************/
@@ -27249,7 +27546,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 232 */
+/* 236 */
 /*!*************************************************!*\
   !*** ./~/material-ui/lib/styles/transitions.js ***!
   \*************************************************/
@@ -27257,7 +27554,7 @@
 
 	'use strict';
 	
-	var AutoPrefix = __webpack_require__(/*! ./auto-prefix */ 219);
+	var AutoPrefix = __webpack_require__(/*! ./auto-prefix */ 223);
 	
 	module.exports = {
 	
@@ -27292,7 +27589,7 @@
 	};
 
 /***/ },
-/* 233 */
+/* 237 */
 /*!**********************************************!*\
   !*** ./~/material-ui/lib/utils/unique-id.js ***!
   \**********************************************/
@@ -27309,7 +27606,7 @@
 	};
 
 /***/ },
-/* 234 */
+/* 238 */
 /*!************************************************!*\
   !*** ./~/material-ui/lib/enhanced-textarea.js ***!
   \************************************************/
@@ -27323,9 +27620,9 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var rowsHeight = 24;
 	
@@ -27501,7 +27798,7 @@
 	module.exports = EnhancedTextarea;
 
 /***/ },
-/* 235 */
+/* 239 */
 /*!****************************************************************!*\
   !*** ./~/material-ui/lib/styles/raw-themes/light-raw-theme.js ***!
   \****************************************************************/
@@ -27509,9 +27806,9 @@
 
 	'use strict';
 	
-	var Colors = __webpack_require__(/*! ../colors */ 236);
-	var ColorManipulator = __webpack_require__(/*! ../../utils/color-manipulator */ 213);
-	var Spacing = __webpack_require__(/*! ../spacing */ 237);
+	var Colors = __webpack_require__(/*! ../colors */ 240);
+	var ColorManipulator = __webpack_require__(/*! ../../utils/color-manipulator */ 217);
+	var Spacing = __webpack_require__(/*! ../spacing */ 241);
 	
 	/*
 	 *  Light Theme is the default theme used in material-ui. It is guaranteed to
@@ -27538,7 +27835,7 @@
 	};
 
 /***/ },
-/* 236 */
+/* 240 */
 /*!********************************************!*\
   !*** ./~/material-ui/lib/styles/colors.js ***!
   \********************************************/
@@ -27841,7 +28138,7 @@
 	};
 
 /***/ },
-/* 237 */
+/* 241 */
 /*!*********************************************!*\
   !*** ./~/material-ui/lib/styles/spacing.js ***!
   \*********************************************/
@@ -27865,7 +28162,7 @@
 	};
 
 /***/ },
-/* 238 */
+/* 242 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/styles/theme-manager.js ***!
   \***************************************************/
@@ -27873,10 +28170,10 @@
 
 	'use strict';
 	
-	var Colors = __webpack_require__(/*! ./colors */ 236);
-	var ColorManipulator = __webpack_require__(/*! ../utils/color-manipulator */ 213);
-	var Extend = __webpack_require__(/*! ../utils/extend */ 239);
-	var update = __webpack_require__(/*! react-addons-update */ 216);
+	var Colors = __webpack_require__(/*! ./colors */ 240);
+	var ColorManipulator = __webpack_require__(/*! ../utils/color-manipulator */ 217);
+	var Extend = __webpack_require__(/*! ../utils/extend */ 243);
+	var update = __webpack_require__(/*! react-addons-update */ 220);
 	
 	module.exports = {
 	
@@ -28127,7 +28424,7 @@
 	};
 
 /***/ },
-/* 239 */
+/* 243 */
 /*!*******************************************!*\
   !*** ./~/material-ui/lib/utils/extend.js ***!
   \*******************************************/
@@ -28184,7 +28481,7 @@
 	module.exports = extend;
 
 /***/ },
-/* 240 */
+/* 244 */
 /*!**************************************************!*\
   !*** ./~/material-ui/lib/mixins/context-pure.js ***!
   \**************************************************/
@@ -28192,7 +28489,7 @@
 
 	'use strict';
 	
-	var shallowEqual = __webpack_require__(/*! ../utils/shallow-equal */ 241);
+	var shallowEqual = __webpack_require__(/*! ../utils/shallow-equal */ 245);
 	
 	function relevantContextKeysEqual(classObject, currentContext, nextContext) {
 	
@@ -28248,7 +28545,7 @@
 	};
 
 /***/ },
-/* 241 */
+/* 245 */
 /*!**************************************************!*\
   !*** ./~/material-ui/lib/utils/shallow-equal.js ***!
   \**************************************************/
@@ -28291,7 +28588,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 242 */
+/* 246 */
 /*!**************************!*\
   !*** ./src/PollForm.jsx ***!
   \**************************/
@@ -28308,10 +28605,10 @@
 	module.exports = (function () {
 	  'use strict';
 	  var React = __webpack_require__(/*! react */ 1);
-	  var Paper = __webpack_require__(/*! material-ui/lib/paper */ 243);
-	  var RaisedButton = __webpack_require__(/*! material-ui/lib/raised-button */ 248);
-	  var injectTapEventPlugin = __webpack_require__(/*! react-tap-event-plugin */ 265);
-	  var Poll = __webpack_require__(/*! react-1poll */ 269);
+	  var Paper = __webpack_require__(/*! material-ui/lib/paper */ 247);
+	  var RaisedButton = __webpack_require__(/*! material-ui/lib/raised-button */ 252);
+	  var injectTapEventPlugin = __webpack_require__(/*! react-tap-event-plugin */ 269);
+	  var Poll = __webpack_require__(/*! react-1poll */ 273);
 	
 	  // Needed for onTouchTap
 	  // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
@@ -28364,7 +28661,7 @@
 	})();
 
 /***/ },
-/* 243 */
+/* 247 */
 /*!************************************!*\
   !*** ./~/material-ui/lib/paper.js ***!
   \************************************/
@@ -28377,12 +28674,12 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var PropTypes = __webpack_require__(/*! ./utils/prop-types */ 247);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 232);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var PropTypes = __webpack_require__(/*! ./utils/prop-types */ 251);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 236);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var Paper = React.createClass({
 	  displayName: 'Paper',
@@ -28473,16 +28770,16 @@
 	module.exports = Paper;
 
 /***/ },
-/* 244 */
+/* 248 */
 /*!***************************************************!*\
   !*** ./~/react-addons-pure-render-mixin/index.js ***!
   \***************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! react/lib/ReactComponentWithPureRenderMixin */ 245);
+	module.exports = __webpack_require__(/*! react/lib/ReactComponentWithPureRenderMixin */ 249);
 
 /***/ },
-/* 245 */
+/* 249 */
 /*!**********************************************************!*\
   !*** ./~/react/lib/ReactComponentWithPureRenderMixin.js ***!
   \**********************************************************/
@@ -28501,7 +28798,7 @@
 	
 	'use strict';
 	
-	var shallowCompare = __webpack_require__(/*! ./shallowCompare */ 246);
+	var shallowCompare = __webpack_require__(/*! ./shallowCompare */ 250);
 	
 	/**
 	 * If your React component's render function is "pure", e.g. it will render the
@@ -28536,7 +28833,7 @@
 	module.exports = ReactComponentWithPureRenderMixin;
 
 /***/ },
-/* 246 */
+/* 250 */
 /*!***************************************!*\
   !*** ./~/react/lib/shallowCompare.js ***!
   \***************************************/
@@ -28568,7 +28865,7 @@
 	module.exports = shallowCompare;
 
 /***/ },
-/* 247 */
+/* 251 */
 /*!***********************************************!*\
   !*** ./~/material-ui/lib/utils/prop-types.js ***!
   \***********************************************/
@@ -28603,7 +28900,7 @@
 	};
 
 /***/ },
-/* 248 */
+/* 252 */
 /*!********************************************!*\
   !*** ./~/material-ui/lib/raised-button.js ***!
   \********************************************/
@@ -28617,15 +28914,15 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 232);
-	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 213);
-	var Children = __webpack_require__(/*! ./utils/children */ 249);
-	var Typography = __webpack_require__(/*! ./styles/typography */ 252);
-	var EnhancedButton = __webpack_require__(/*! ./enhanced-button */ 253);
-	var Paper = __webpack_require__(/*! ./paper */ 243);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 236);
+	var ColorManipulator = __webpack_require__(/*! ./utils/color-manipulator */ 217);
+	var Children = __webpack_require__(/*! ./utils/children */ 253);
+	var Typography = __webpack_require__(/*! ./styles/typography */ 256);
+	var EnhancedButton = __webpack_require__(/*! ./enhanced-button */ 257);
+	var Paper = __webpack_require__(/*! ./paper */ 247);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	function validateLabel(props, propName, componentName) {
 	  if (!props.children && !props.label) {
@@ -28888,7 +29185,7 @@
 	module.exports = RaisedButton;
 
 /***/ },
-/* 249 */
+/* 253 */
 /*!*********************************************!*\
   !*** ./~/material-ui/lib/utils/children.js ***!
   \*********************************************/
@@ -28897,7 +29194,7 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var createFragment = __webpack_require__(/*! react-addons-create-fragment */ 250);
+	var createFragment = __webpack_require__(/*! react-addons-create-fragment */ 254);
 	
 	module.exports = {
 	
@@ -28937,16 +29234,16 @@
 	};
 
 /***/ },
-/* 250 */
+/* 254 */
 /*!*************************************************!*\
   !*** ./~/react-addons-create-fragment/index.js ***!
   \*************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! react/lib/ReactFragment */ 251).create;
+	module.exports = __webpack_require__(/*! react/lib/ReactFragment */ 255).create;
 
 /***/ },
-/* 251 */
+/* 255 */
 /*!**************************************!*\
   !*** ./~/react/lib/ReactFragment.js ***!
   \**************************************/
@@ -29019,7 +29316,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 252 */
+/* 256 */
 /*!************************************************!*\
   !*** ./~/material-ui/lib/styles/typography.js ***!
   \************************************************/
@@ -29029,7 +29326,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var Colors = __webpack_require__(/*! ./colors */ 236);
+	var Colors = __webpack_require__(/*! ./colors */ 240);
 	
 	var Typography = function Typography() {
 	  _classCallCheck(this, Typography);
@@ -29054,7 +29351,7 @@
 	module.exports = new Typography();
 
 /***/ },
-/* 253 */
+/* 257 */
 /*!**********************************************!*\
   !*** ./~/material-ui/lib/enhanced-button.js ***!
   \**********************************************/
@@ -29067,16 +29364,16 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var Colors = __webpack_require__(/*! ./styles/colors */ 236);
-	var Children = __webpack_require__(/*! ./utils/children */ 249);
-	var Events = __webpack_require__(/*! ./utils/events */ 254);
-	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 255);
-	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 256);
-	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 262);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var Colors = __webpack_require__(/*! ./styles/colors */ 240);
+	var Children = __webpack_require__(/*! ./utils/children */ 253);
+	var Events = __webpack_require__(/*! ./utils/events */ 258);
+	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 259);
+	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 260);
+	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 266);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var styleInjected = false;
 	var listening = false;
@@ -29363,7 +29660,7 @@
 	module.exports = EnhancedButton;
 
 /***/ },
-/* 254 */
+/* 258 */
 /*!*******************************************!*\
   !*** ./~/material-ui/lib/utils/events.js ***!
   \*******************************************/
@@ -29411,7 +29708,7 @@
 	};
 
 /***/ },
-/* 255 */
+/* 259 */
 /*!*********************************************!*\
   !*** ./~/material-ui/lib/utils/key-code.js ***!
   \*********************************************/
@@ -29431,7 +29728,7 @@
 	};
 
 /***/ },
-/* 256 */
+/* 260 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/ripples/focus-ripple.js ***!
   \***************************************************/
@@ -29441,12 +29738,12 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 214);
-	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 219);
-	var Colors = __webpack_require__(/*! ../styles/colors */ 236);
-	var Transitions = __webpack_require__(/*! ../styles/transitions */ 232);
-	var ScaleInTransitionGroup = __webpack_require__(/*! ../transition-groups/scale-in */ 257);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 218);
+	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 223);
+	var Colors = __webpack_require__(/*! ../styles/colors */ 240);
+	var Transitions = __webpack_require__(/*! ../styles/transitions */ 236);
+	var ScaleInTransitionGroup = __webpack_require__(/*! ../transition-groups/scale-in */ 261);
 	
 	var pulsateDuration = 750;
 	
@@ -29565,7 +29862,7 @@
 	module.exports = FocusRipple;
 
 /***/ },
-/* 257 */
+/* 261 */
 /*!*********************************************************!*\
   !*** ./~/material-ui/lib/transition-groups/scale-in.js ***!
   \*********************************************************/
@@ -29578,12 +29875,12 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 258);
-	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 214);
-	var ScaleInChild = __webpack_require__(/*! ./scale-in-child */ 261);
-	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 238);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 262);
+	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 218);
+	var ScaleInChild = __webpack_require__(/*! ./scale-in-child */ 265);
+	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 242);
 	
 	var ScaleIn = React.createClass({
 	  displayName: 'ScaleIn',
@@ -29676,16 +29973,16 @@
 	module.exports = ScaleIn;
 
 /***/ },
-/* 258 */
+/* 262 */
 /*!**************************************************!*\
   !*** ./~/react-addons-transition-group/index.js ***!
   \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! react/lib/ReactTransitionGroup */ 259);
+	module.exports = __webpack_require__(/*! react/lib/ReactTransitionGroup */ 263);
 
 /***/ },
-/* 259 */
+/* 263 */
 /*!*********************************************!*\
   !*** ./~/react/lib/ReactTransitionGroup.js ***!
   \*********************************************/
@@ -29705,7 +30002,7 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! ./React */ 2);
-	var ReactTransitionChildMapping = __webpack_require__(/*! ./ReactTransitionChildMapping */ 260);
+	var ReactTransitionChildMapping = __webpack_require__(/*! ./ReactTransitionChildMapping */ 264);
 	
 	var assign = __webpack_require__(/*! ./Object.assign */ 39);
 	var emptyFunction = __webpack_require__(/*! fbjs/lib/emptyFunction */ 15);
@@ -29898,7 +30195,7 @@
 	module.exports = ReactTransitionGroup;
 
 /***/ },
-/* 260 */
+/* 264 */
 /*!****************************************************!*\
   !*** ./~/react/lib/ReactTransitionChildMapping.js ***!
   \****************************************************/
@@ -30004,7 +30301,7 @@
 	module.exports = ReactTransitionChildMapping;
 
 /***/ },
-/* 261 */
+/* 265 */
 /*!***************************************************************!*\
   !*** ./~/material-ui/lib/transition-groups/scale-in-child.js ***!
   \***************************************************************/
@@ -30018,12 +30315,12 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 214);
-	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 219);
-	var Transitions = __webpack_require__(/*! ../styles/transitions */ 232);
-	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 238);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 218);
+	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 223);
+	var Transitions = __webpack_require__(/*! ../styles/transitions */ 236);
+	var DefaultRawTheme = __webpack_require__(/*! ../styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ../styles/theme-manager */ 242);
 	
 	var ScaleInChild = React.createClass({
 	  displayName: 'ScaleInChild',
@@ -30151,7 +30448,7 @@
 	module.exports = ScaleInChild;
 
 /***/ },
-/* 262 */
+/* 266 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/ripples/touch-ripple.js ***!
   \***************************************************/
@@ -30161,12 +30458,12 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 258);
-	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 214);
-	var Dom = __webpack_require__(/*! ../utils/dom */ 263);
-	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 215);
-	var CircleRipple = __webpack_require__(/*! ./circle-ripple */ 264);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var ReactTransitionGroup = __webpack_require__(/*! react-addons-transition-group */ 262);
+	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 218);
+	var Dom = __webpack_require__(/*! ../utils/dom */ 267);
+	var ImmutabilityHelper = __webpack_require__(/*! ../utils/immutability-helper */ 219);
+	var CircleRipple = __webpack_require__(/*! ./circle-ripple */ 268);
 	
 	var TouchRipple = React.createClass({
 	  displayName: 'TouchRipple',
@@ -30325,7 +30622,7 @@
 	module.exports = TouchRipple;
 
 /***/ },
-/* 263 */
+/* 267 */
 /*!****************************************!*\
   !*** ./~/material-ui/lib/utils/dom.js ***!
   \****************************************/
@@ -30405,7 +30702,7 @@
 	};
 
 /***/ },
-/* 264 */
+/* 268 */
 /*!****************************************************!*\
   !*** ./~/material-ui/lib/ripples/circle-ripple.js ***!
   \****************************************************/
@@ -30419,11 +30716,11 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 214);
-	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 219);
-	var Transitions = __webpack_require__(/*! ../styles/transitions */ 232);
-	var Colors = __webpack_require__(/*! ../styles/colors */ 236);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var StylePropable = __webpack_require__(/*! ../mixins/style-propable */ 218);
+	var AutoPrefix = __webpack_require__(/*! ../styles/auto-prefix */ 223);
+	var Transitions = __webpack_require__(/*! ../styles/transitions */ 236);
+	var Colors = __webpack_require__(/*! ../styles/colors */ 240);
 	
 	var CircleRipple = React.createClass({
 	  displayName: 'CircleRipple',
@@ -30513,7 +30810,7 @@
 	module.exports = CircleRipple;
 
 /***/ },
-/* 265 */
+/* 269 */
 /*!**************************************************************!*\
   !*** ./~/react-tap-event-plugin/src/injectTapEventPlugin.js ***!
   \**************************************************************/
@@ -30521,13 +30818,13 @@
 
 	module.exports = function injectTapEventPlugin () {
 	  __webpack_require__(/*! react/lib/EventPluginHub */ 31).injection.injectEventPluginsByName({
-	    "TapEventPlugin":       __webpack_require__(/*! ./TapEventPlugin.js */ 266)
+	    "TapEventPlugin":       __webpack_require__(/*! ./TapEventPlugin.js */ 270)
 	  });
 	};
 
 
 /***/ },
-/* 266 */
+/* 270 */
 /*!********************************************************!*\
   !*** ./~/react-tap-event-plugin/src/TapEventPlugin.js ***!
   \********************************************************/
@@ -30558,10 +30855,10 @@
 	var EventPluginUtils = __webpack_require__(/*! react/lib/EventPluginUtils */ 33);
 	var EventPropagators = __webpack_require__(/*! react/lib/EventPropagators */ 73);
 	var SyntheticUIEvent = __webpack_require__(/*! react/lib/SyntheticUIEvent */ 87);
-	var TouchEventUtils = __webpack_require__(/*! ./TouchEventUtils */ 267);
+	var TouchEventUtils = __webpack_require__(/*! ./TouchEventUtils */ 271);
 	var ViewportMetrics = __webpack_require__(/*! react/lib/ViewportMetrics */ 38);
 	
-	var keyOf = __webpack_require__(/*! fbjs/lib/keyOf */ 268);
+	var keyOf = __webpack_require__(/*! fbjs/lib/keyOf */ 272);
 	var topLevelTypes = EventConstants.topLevelTypes;
 	
 	var isStartish = EventPluginUtils.isStartish;
@@ -30705,7 +31002,7 @@
 
 
 /***/ },
-/* 267 */
+/* 271 */
 /*!*********************************************************!*\
   !*** ./~/react-tap-event-plugin/src/TouchEventUtils.js ***!
   \*********************************************************/
@@ -30756,7 +31053,7 @@
 
 
 /***/ },
-/* 268 */
+/* 272 */
 /*!******************************************************!*\
   !*** ./~/react-tap-event-plugin/~/fbjs/lib/keyOf.js ***!
   \******************************************************/
@@ -30799,7 +31096,7 @@
 	module.exports = keyOf;
 
 /***/ },
-/* 269 */
+/* 273 */
 /*!****************************************************!*\
   !*** ./~/react-1poll/src/1poll-react-component.js ***!
   \****************************************************/
@@ -30808,8 +31105,8 @@
 	module.exports = (function(){
 	  'use strict';
 	  var React = __webpack_require__(/*! react */ 1);
-	  var Checkbox = __webpack_require__(/*! material-ui/lib/checkbox */ 270);
-	  var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 212);
+	  var Checkbox = __webpack_require__(/*! material-ui/lib/checkbox */ 274);
+	  var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 216);
 	
 	  function renderComponent(children) {
 	    var divContainer = [ 'div', { className: '1poll-component' } ];
@@ -30917,7 +31214,7 @@
 
 
 /***/ },
-/* 270 */
+/* 274 */
 /*!***************************************!*\
   !*** ./~/material-ui/lib/checkbox.js ***!
   \***************************************/
@@ -30930,13 +31227,13 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var EnhancedSwitch = __webpack_require__(/*! ./enhanced-switch */ 271);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 232);
-	var CheckboxOutline = __webpack_require__(/*! ./svg-icons/toggle/check-box-outline-blank */ 275);
-	var CheckboxChecked = __webpack_require__(/*! ./svg-icons/toggle/check-box */ 277);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var EnhancedSwitch = __webpack_require__(/*! ./enhanced-switch */ 275);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 236);
+	var CheckboxOutline = __webpack_require__(/*! ./svg-icons/toggle/check-box-outline-blank */ 279);
+	var CheckboxChecked = __webpack_require__(/*! ./svg-icons/toggle/check-box */ 281);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var Checkbox = React.createClass({
 	  displayName: 'Checkbox',
@@ -31107,7 +31404,7 @@
 	module.exports = Checkbox;
 
 /***/ },
-/* 271 */
+/* 275 */
 /*!**********************************************!*\
   !*** ./~/material-ui/lib/enhanced-switch.js ***!
   \**********************************************/
@@ -31121,17 +31418,17 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var ReactDOM = __webpack_require__(/*! react-dom */ 158);
-	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 255);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 232);
-	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 233);
-	var WindowListenable = __webpack_require__(/*! ./mixins/window-listenable */ 272);
-	var ClearFix = __webpack_require__(/*! ./clearfix */ 273);
-	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 256);
-	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 262);
-	var Paper = __webpack_require__(/*! ./paper */ 243);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var KeyCode = __webpack_require__(/*! ./utils/key-code */ 259);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 236);
+	var UniqueId = __webpack_require__(/*! ./utils/unique-id */ 237);
+	var WindowListenable = __webpack_require__(/*! ./mixins/window-listenable */ 276);
+	var ClearFix = __webpack_require__(/*! ./clearfix */ 277);
+	var FocusRipple = __webpack_require__(/*! ./ripples/focus-ripple */ 260);
+	var TouchRipple = __webpack_require__(/*! ./ripples/touch-ripple */ 266);
+	var Paper = __webpack_require__(/*! ./paper */ 247);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var EnhancedSwitch = React.createClass({
 	  displayName: 'EnhancedSwitch',
@@ -31545,7 +31842,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 4)))
 
 /***/ },
-/* 272 */
+/* 276 */
 /*!*******************************************************!*\
   !*** ./~/material-ui/lib/mixins/window-listenable.js ***!
   \*******************************************************/
@@ -31553,7 +31850,7 @@
 
 	'use strict';
 	
-	var Events = __webpack_require__(/*! ../utils/events */ 254);
+	var Events = __webpack_require__(/*! ../utils/events */ 258);
 	
 	module.exports = {
 	
@@ -31578,7 +31875,7 @@
 	};
 
 /***/ },
-/* 273 */
+/* 277 */
 /*!***************************************!*\
   !*** ./~/material-ui/lib/clearfix.js ***!
   \***************************************/
@@ -31591,10 +31888,10 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var BeforeAfterWrapper = __webpack_require__(/*! ./before-after-wrapper */ 274);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var BeforeAfterWrapper = __webpack_require__(/*! ./before-after-wrapper */ 278);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var ClearFix = React.createClass({
 	  displayName: 'ClearFix',
@@ -31663,7 +31960,7 @@
 	module.exports = ClearFix;
 
 /***/ },
-/* 274 */
+/* 278 */
 /*!***************************************************!*\
   !*** ./~/material-ui/lib/before-after-wrapper.js ***!
   \***************************************************/
@@ -31674,10 +31971,10 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var AutoPrefix = __webpack_require__(/*! ./styles/auto-prefix */ 219);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var AutoPrefix = __webpack_require__(/*! ./styles/auto-prefix */ 223);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	/**
 	 *  BeforeAfterWrapper
@@ -31801,7 +32098,7 @@
 	module.exports = BeforeAfterWrapper;
 
 /***/ },
-/* 275 */
+/* 279 */
 /*!***********************************************************************!*\
   !*** ./~/material-ui/lib/svg-icons/toggle/check-box-outline-blank.js ***!
   \***********************************************************************/
@@ -31810,8 +32107,8 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 276);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 280);
 	
 	var ToggleCheckBoxOutlineBlank = React.createClass({
 	  displayName: 'ToggleCheckBoxOutlineBlank',
@@ -31831,7 +32128,7 @@
 	module.exports = ToggleCheckBoxOutlineBlank;
 
 /***/ },
-/* 276 */
+/* 280 */
 /*!***************************************!*\
   !*** ./~/material-ui/lib/svg-icon.js ***!
   \***************************************/
@@ -31844,10 +32141,10 @@
 	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 214);
-	var Transitions = __webpack_require__(/*! ./styles/transitions */ 232);
-	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 235);
-	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 238);
+	var StylePropable = __webpack_require__(/*! ./mixins/style-propable */ 218);
+	var Transitions = __webpack_require__(/*! ./styles/transitions */ 236);
+	var DefaultRawTheme = __webpack_require__(/*! ./styles/raw-themes/light-raw-theme */ 239);
+	var ThemeManager = __webpack_require__(/*! ./styles/theme-manager */ 242);
 	
 	var SvgIcon = React.createClass({
 	  displayName: 'SvgIcon',
@@ -31954,7 +32251,7 @@
 	module.exports = SvgIcon;
 
 /***/ },
-/* 277 */
+/* 281 */
 /*!*********************************************************!*\
   !*** ./~/material-ui/lib/svg-icons/toggle/check-box.js ***!
   \*********************************************************/
@@ -31963,8 +32260,8 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 244);
-	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 276);
+	var PureRenderMixin = __webpack_require__(/*! react-addons-pure-render-mixin */ 248);
+	var SvgIcon = __webpack_require__(/*! ../../svg-icon */ 280);
 	
 	var ToggleCheckBox = React.createClass({
 	  displayName: 'ToggleCheckBox',
@@ -31984,7 +32281,7 @@
 	module.exports = ToggleCheckBox;
 
 /***/ },
-/* 278 */
+/* 282 */
 /*!****************************!*\
   !*** ./src/CreateForm.jsx ***!
   \****************************/
@@ -32004,15 +32301,15 @@
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
-	var _reactDocumentTitle = __webpack_require__(/*! react-document-title */ 280);
+	var _reactDocumentTitle = __webpack_require__(/*! react-document-title */ 212);
 	
 	var _reactDocumentTitle2 = _interopRequireDefault(_reactDocumentTitle);
 	
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 212);
-	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 242);
+	var TextField = __webpack_require__(/*! material-ui/lib/text-field */ 216);
+	var PollForm = __webpack_require__(/*! ./PollForm.jsx */ 246);
 	
 	var CreateForm = (function (_React$Component) {
 	  _inherits(CreateForm, _React$Component);
@@ -32125,7 +32422,7 @@
 	// store new poll in db
 
 /***/ },
-/* 279 */
+/* 283 */
 /*!**************************!*\
   !*** ./src/pollStore.js ***!
   \**************************/
@@ -32173,288 +32470,30 @@
 	    });
 	  }
 	
+	  function vote(pollId, voteObj) {
+	    console.log('voting for poll options:', pollId, voteObj);
+	    var query = new Parse.Query(Poll);
+	    query.get(pollId).then(function (poll) {
+	      console.log('remote poll obj:', poll);
+	      return;
+	      for (var i in voteObj) {
+	        // TODO
+	        poll.increment("reviews");
+	      }
+	      poll.save();
+	    }, function (error) {
+	      console.error(error);
+	      alert('There was a problem while saving your vote, sorry...');
+	      throw "Got an error " + error.code + " : " + error.message;
+	    });
+	  }
+	
 	  return {
+	    vote: vote,
 	    fetch: fetch,
 	    save: save
 	  };
 	})();
-
-/***/ },
-/* 280 */
-/*!*****************************************!*\
-  !*** ./~/react-document-title/index.js ***!
-  \*****************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(/*! react */ 1),
-	    withSideEffect = __webpack_require__(/*! react-side-effect */ 281);
-	
-	function reducePropsToState(propsList) {
-	  var innermostProps = propsList[propsList.length - 1];
-	  if (innermostProps) {
-	    return innermostProps.title;
-	  }
-	}
-	
-	function handleStateChangeOnClient(title) {
-	  document.title = title || '';
-	}
-	
-	var DocumentTitle = React.createClass({
-	  propTypes: {
-	    title: React.PropTypes.string.isRequired
-	  },
-	
-	  render: function render() {
-	    if (this.props.children) {
-	      return React.Children.only(this.props.children);
-	    } else {
-	      return null;
-	    }
-	  }
-	});
-	
-	module.exports = withSideEffect(
-	  reducePropsToState,
-	  handleStateChangeOnClient
-	)(DocumentTitle);
-
-
-/***/ },
-/* 281 */
-/*!******************************************!*\
-  !*** ./~/react-side-effect/lib/index.js ***!
-  \******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var _react = __webpack_require__(/*! react */ 1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _fbjsLibExecutionEnvironment = __webpack_require__(/*! fbjs/lib/ExecutionEnvironment */ 282);
-	
-	var _fbjsLibExecutionEnvironment2 = _interopRequireDefault(_fbjsLibExecutionEnvironment);
-	
-	var _fbjsLibShallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 283);
-	
-	var _fbjsLibShallowEqual2 = _interopRequireDefault(_fbjsLibShallowEqual);
-	
-	module.exports = function withSideEffect(reducePropsToState, handleStateChangeOnClient, mapStateOnServer) {
-	  if (typeof reducePropsToState !== 'function') {
-	    throw new Error('Expected reducePropsToState to be a function.');
-	  }
-	  if (typeof handleStateChangeOnClient !== 'function') {
-	    throw new Error('Expected handleStateChangeOnClient to be a function.');
-	  }
-	  if (typeof mapStateOnServer !== 'undefined' && typeof mapStateOnServer !== 'function') {
-	    throw new Error('Expected mapStateOnServer to either be undefined or a function.');
-	  }
-	
-	  function getDisplayName(WrappedComponent) {
-	    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
-	  }
-	
-	  return function wrap(WrappedComponent) {
-	    if (typeof WrappedComponent !== 'function') {
-	      throw new Error('Expected WrappedComponent to be a React component.');
-	    }
-	
-	    var mountedInstances = [];
-	    var state = undefined;
-	
-	    function emitChange() {
-	      state = reducePropsToState(mountedInstances.map(function (instance) {
-	        return instance.props;
-	      }));
-	
-	      if (SideEffect.canUseDOM) {
-	        handleStateChangeOnClient(state);
-	      } else if (mapStateOnServer) {
-	        state = mapStateOnServer(state);
-	      }
-	    }
-	
-	    var SideEffect = (function (_Component) {
-	      _inherits(SideEffect, _Component);
-	
-	      function SideEffect() {
-	        _classCallCheck(this, SideEffect);
-	
-	        _Component.apply(this, arguments);
-	      }
-	
-	      SideEffect.peek = function peek() {
-	        return state;
-	      };
-	
-	      SideEffect.rewind = function rewind() {
-	        if (SideEffect.canUseDOM) {
-	          throw new Error('You may ony call rewind() on the server. Call peek() to read the current state.');
-	        }
-	
-	        var recordedState = state;
-	        state = undefined;
-	        mountedInstances = [];
-	        return recordedState;
-	      };
-	
-	      SideEffect.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps) {
-	        return !_fbjsLibShallowEqual2['default'](nextProps, this.props);
-	      };
-	
-	      SideEffect.prototype.componentWillMount = function componentWillMount() {
-	        mountedInstances.push(this);
-	        emitChange();
-	      };
-	
-	      SideEffect.prototype.componentDidUpdate = function componentDidUpdate() {
-	        emitChange();
-	      };
-	
-	      SideEffect.prototype.componentWillUnmount = function componentWillUnmount() {
-	        var index = mountedInstances.indexOf(this);
-	        mountedInstances.splice(index, 1);
-	        emitChange();
-	      };
-	
-	      SideEffect.prototype.render = function render() {
-	        return _react2['default'].createElement(WrappedComponent, this.props);
-	      };
-	
-	      _createClass(SideEffect, null, [{
-	        key: 'displayName',
-	
-	        // Try to use displayName of wrapped component
-	        value: 'SideEffect(' + getDisplayName(WrappedComponent) + ')',
-	
-	        // Expose canUseDOM so tests can monkeypatch it
-	        enumerable: true
-	      }, {
-	        key: 'canUseDOM',
-	        value: _fbjsLibExecutionEnvironment2['default'].canUseDOM,
-	        enumerable: true
-	      }]);
-	
-	      return SideEffect;
-	    })(_react.Component);
-	
-	    return SideEffect;
-	  };
-	};
-
-/***/ },
-/* 282 */
-/*!****************************************************************!*\
-  !*** ./~/react-side-effect/~/fbjs/lib/ExecutionEnvironment.js ***!
-  \****************************************************************/
-/***/ function(module, exports) {
-
-	/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ExecutionEnvironment
-	 */
-	
-	'use strict';
-	
-	var canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
-	
-	/**
-	 * Simple, lightweight module assisting with the detection and context of
-	 * Worker. Helps avoid circular dependencies and allows code to reason about
-	 * whether or not they are in a Worker, even if they never include the main
-	 * `ReactWorker` dependency.
-	 */
-	var ExecutionEnvironment = {
-	
-	  canUseDOM: canUseDOM,
-	
-	  canUseWorkers: typeof Worker !== 'undefined',
-	
-	  canUseEventListeners: canUseDOM && !!(window.addEventListener || window.attachEvent),
-	
-	  canUseViewport: canUseDOM && !!window.screen,
-	
-	  isInWorker: !canUseDOM // For now, this is true - might change in the future.
-	
-	};
-	
-	module.exports = ExecutionEnvironment;
-
-/***/ },
-/* 283 */
-/*!********************************************************!*\
-  !*** ./~/react-side-effect/~/fbjs/lib/shallowEqual.js ***!
-  \********************************************************/
-/***/ function(module, exports) {
-
-	/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule shallowEqual
-	 * @typechecks
-	 * 
-	 */
-	
-	'use strict';
-	
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-	
-	/**
-	 * Performs equality by iterating through keys on an object and returning false
-	 * when any key has values which are not strictly equal between the arguments.
-	 * Returns true when the values of all keys are strictly equal.
-	 */
-	function shallowEqual(objA, objB) {
-	  if (objA === objB) {
-	    return true;
-	  }
-	
-	  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
-	    return false;
-	  }
-	
-	  var keysA = Object.keys(objA);
-	  var keysB = Object.keys(objB);
-	
-	  if (keysA.length !== keysB.length) {
-	    return false;
-	  }
-	
-	  // Test for A's keys different from B.
-	  var bHasOwnProperty = hasOwnProperty.bind(objB);
-	  for (var i = 0; i < keysA.length; i++) {
-	    if (!bHasOwnProperty(keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
-	      return false;
-	    }
-	  }
-	
-	  return true;
-	}
-	
-	module.exports = shallowEqual;
 
 /***/ }
 /******/ ]);
