@@ -55,6 +55,7 @@ import pollStore from './pollStore.js';
           id={this.props.params.id}
           history={history}
           pollStore={pollStore}
+          setLoading={setLoading}
           onUpdate={heightTransition}
         />
       );
