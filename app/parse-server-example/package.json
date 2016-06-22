@@ -15,6 +15,7 @@
     "parse-server": "~2.2.12"
   },
   "scripts": {
+    "test": "./test.sh",
     "start": "node index.js"
   },
   "engines": {
