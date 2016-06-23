@@ -72,7 +72,9 @@ class ViewForm extends React.Component {
     this.props.setLoading(true);
     // Submitting data
     this.props.pollStore.vote(this.state.poll.objectId, {
-      votes: this.refs.pollForm.getOptions().map((opt) => { return opt.name; })
+      votes: this.refs.pollForm.getOptions()
+        .filter((opt) => opt.checked)
+        .map((opt) => { return opt.name; })
     }, (err, poll) => {
       this.props.setLoading(false);
       if (err) {
