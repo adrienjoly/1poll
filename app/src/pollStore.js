@@ -1,9 +1,18 @@
 module.exports = (function() {
+
+  var inProd = window.location.href.indexOf('http://localhost:') == -1;
+
+  if (inProd) {
+    Parse.initialize('HurQRNhOKqk12EmbqokCcpDGyOJkXvAZCFc3yBTy', 'uFoO6Lsllhofn0R2mALz7mkgvsDUuFy3yEPfWkRt'); // heroku instance
+  }
+  else {
+    Parse.initialize('EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7', 'UTu46JdJfO7VrD30GkmMJHAL5TgqQysLgh24JZlf');
+  }
   
-  Parse.initialize('EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7', 'UTu46JdJfO7VrD30GkmMJHAL5TgqQysLgh24JZlf');
-  Parse.serverURL = window.location.href.indexOf('http://localhost:') == -1
+  Parse.serverURL = inProd
     ? 'https://rocky-savannah-73915.herokuapp.com/parse' // warning: getting error when posting a poll: ncaught Got an error 100 : XMLHttpRequest failed: "Unable to connect to the Parse API"
     : 'http://localhost:1337/parse';
+  
   var Poll = Parse.Object.extend('Poll');
 
   function render(obj) {
