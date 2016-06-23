@@ -1,4 +1,4 @@
-var _ = require("lodash");
+//var _ = require("lodash");
 var firebase = require("firebase");
 
 module.exports = (function() {
@@ -13,7 +13,7 @@ module.exports = (function() {
     storageBucket: "poll-edd8e.appspot.com",
   });
 
-  var polls = firebase.database().ref().child('polls');
+  var polls = firebase.database().ref('polls');
 
   function render(obj) {
     //console.log('render obj:', obj);
@@ -29,20 +29,20 @@ module.exports = (function() {
   }
 
   function serialize(objFromUi) {
-    return _.extend(objFromUi, {
+    return {
+      title: objFromUi.title,
+      subtitle: objFromUi.subtitle,
       options: objFromUi.options.map((opt) => { return { name : opt }; })
-    });
+    };
   }
 
   function fetch(id, cb) {
     //console.log('fetch', id);
-    firebase.database().ref('polls/' + id).once('value').then((poll) => {
+    polls.child(id).once('value').then((poll) => {
       //console.log('fetch', id, '->', arguments);
       cb(null, render(poll));
     }, cb);
   }
-
-  // TODO: make sure that an existing poll can be updated too
 
   function save(pollData, cb) {
     //console.log('storing poll:', pollData);
@@ -54,25 +54,26 @@ module.exports = (function() {
     });
   }
   
-  function vote(pollId, voteObj) {
-    return;
-    /*
-    console.log('voting for poll options:', pollId, voteObj);
-    var query = new Parse.Query(Poll);
-    query.get(pollId).then(function(poll) {
-      console.log('remote poll obj:', poll);
-      return;
-      for (var i in voteObj) {
-        // TODO
-        poll.increment("reviews");
-      }
-      poll.save();
-    }, function(error) {
-      console.error(error);
-      alert('There was a problem while saving your vote, sorry...');
-      throw "Got an error " + error.code + " : " + error.message;
+  function vote(id, voteObj) {
+    console.log('voting for poll options:', id, voteObj);
+    // 1) convert votes into a set
+    var votes = {};
+    for (var i in voteObj.votes) votes[voteObj.votes[i]] = 1;
+    // 2) increment votes in db
+    polls.child(id).child('options').transaction(function(pollOptions) {
+      console.log('transaction =>', arguments);
+      if (pollOptions === null) return pollOptions; // not ready => firebase will retry
+      return pollOptions.map((opt) => {
+        return {
+          name: opt.name,
+          votes: (opt.votes || 0) + (votes[opt.name] || 0)
+        };
+      });
+    }, function(err, committed, snapshot) {
+      console.log('vote() =>', arguments);
+      alert(committed ? 'Your vote was taken into account, thank you! :-)' : 'Oops, an error occured... Please try again!');
+      // TODO: callback ?
     });
-    */
   }
 
   return {
