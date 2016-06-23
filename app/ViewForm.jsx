@@ -67,6 +67,13 @@ class ViewForm extends React.Component {
             callToAction={this.state.done ? 'Thank you! :-)' : 'Vote'}
             onValidSubmit={this.state.done ? null : this._submitVote} />
         </div>
+        <div className="row">
+            <p style={{ fontSize: '12px', textAlign: 'center', margin: '40px 0', width: '100%' }}>
+              <a style={{ color: '#ccc !important' }} href="/">
+                Create your own poll in one click!
+              </a>
+            </p>
+        </div>
       </form>
     </DocumentTitle>
     );
