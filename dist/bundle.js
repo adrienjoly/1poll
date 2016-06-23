@@ -32751,9 +32751,7 @@
 	"use strict";
 	
 	var firebase = __webpack_require__(/*! firebase */ 285);
-	//require("firebase/app");
-	//require("firebase/auth");
-	//require("firebase/database");
+	
 	module.exports = function () {
 	
 	  var inProd = window.location.href.indexOf('http://localhost:') == -1;
@@ -32769,10 +32767,10 @@
 	  var polls = firebase.database().ref().child('polls');
 	
 	  function render(obj) {
-	    console.log('render obj:', obj);
+	    //console.log('render obj:', obj);
 	    if (!obj) return;
 	    var data = obj.val();
-	    console.log('render obj data:', data);
+	    //console.log('render obj data:', data);
 	    return {
 	      objectId: obj.key,
 	      title: data.title,
@@ -32784,22 +32782,19 @@
 	  }
 	
 	  function fetch(id, cb) {
-	    var _arguments = arguments;
-	
-	    console.log('fetch', id);
+	    //console.log('fetch', id);
 	    firebase.database().ref('polls/' + id).once('value').then(function (poll) {
-	      console.log('fetch', id, '->', _arguments);
+	      //console.log('fetch', id, '->', arguments);
 	      cb(null, render(poll));
 	    }, cb);
 	  }
 	
 	  function save(pollData, cb) {
-	    console.log('storing poll:', pollData);
+	    //console.log('storing poll:', pollData);
 	    var poll = polls.push();
 	    poll.set(pollData, function (err) {
-	      console.log('save -> set', arguments);
-	      fetch(poll.key, cb);
-	      //cb(err, !err && render(poll));
+	      //console.log('save -> set', arguments);
+	      if (err) cb(err);else fetch(poll.key, cb);
 	    });
 	  }
 	
