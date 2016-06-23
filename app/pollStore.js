@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var firebase = require("firebase");
 
 module.exports = (function() {
@@ -23,10 +24,14 @@ module.exports = (function() {
       objectId: obj.key,
       title: data.title,
       subtitle: data.subtitle,
-      options: data.options.map((opt) => {
-        return { name: opt };
-      })
+      options: data.options
     };
+  }
+
+  function serialize(objFromUi) {
+    return _.extend(objFromUi, {
+      options: objFromUi.options.map((opt) => { return { name : opt }; })
+    });
   }
 
   function fetch(id, cb) {
@@ -37,10 +42,12 @@ module.exports = (function() {
     }, cb);
   }
 
+  // TODO: make sure that an existing poll can be updated too
+
   function save(pollData, cb) {
     //console.log('storing poll:', pollData);
     var poll = polls.push();
-    poll.set(pollData, function(err){
+    poll.set(serialize(pollData), function(err){
       //console.log('save -> set', arguments);
       if (err) cb(err);
       else fetch(poll.key, cb);
