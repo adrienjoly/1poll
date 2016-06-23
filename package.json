@@ -29,7 +29,6 @@
     "firebase": "^3.0.5",
     "firebase-tools": "^3.0.3",
     "history": "^1.14.0",
-    "lodash": "^4.13.1",
     "material-ui": "^0.13.1",
     "react": "^0.14.3",
     "react-1poll": "^0.1.3",

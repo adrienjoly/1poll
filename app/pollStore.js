@@ -1,4 +1,3 @@
-//var _ = require("lodash"); // TODO: remove
 var firebase = require("firebase");
 
 module.exports = (function() {
