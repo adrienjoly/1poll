@@ -11,12 +11,15 @@ class ViewForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      poll: {}
+      disabled: false, // when true, prevents form from being submitted
+      poll: {}, // poll object fetched from the database: title, subtitle, options...
+      done: false // when true, the user can not vote again
     };
+    this._populate = this._populate.bind(this);
     this._submitVote = this._submitVote.bind(this);
   }
 
-  componentWillMount() {
+  _populate() {
     this.props.pollStore.fetch(this.props.id, (err, poll) => {
       console.log('fetch =>', err, poll);
       if (err) {
@@ -26,6 +29,10 @@ class ViewForm extends React.Component {
         this.setState({ poll: poll });
       }
     });
+  }
+
+  componentWillMount() {
+    this._populate();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -55,10 +62,10 @@ class ViewForm extends React.Component {
         <div className="row">
           <PollForm
             ref='pollForm'
-            disabled={this.props.disabled}
+            disabled={this.state.disabled || this.props.disabled}
             options={this.state.poll.options}
-            callToAction='Vote'
-            onValidSubmit={this._submitVote} />
+            callToAction={this.state.done ? 'Thank you! :-)' : 'Vote'}
+            onValidSubmit={this.state.done ? null : this._submitVote} />
         </div>
       </form>
     </DocumentTitle>
@@ -75,14 +82,14 @@ class ViewForm extends React.Component {
       votes: this.refs.pollForm.getOptions()
         .filter((opt) => opt.checked)
         .map((opt) => { return opt.name; })
-    }, (err, poll) => {
+    }, (err) => {
       this.props.setLoading(false);
       if (err) {
         alert('Error: ' + JSON.stringify(err));
       } else {
-        console.log('=> log', poll);
-        this.props.history.push('/' + poll.objectId); // redirects to poll URL
-        // TODO: display banner/toaster for sharing the poll URL
+        this.setState({ done: true });
+        this._populate(); // refresh vote counters
+        // TODO: display a nice banner/toaster for sharing the poll URL
       }
     });
   }

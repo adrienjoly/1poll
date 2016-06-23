@@ -1,4 +1,4 @@
-//var _ = require("lodash");
+//var _ = require("lodash"); // TODO: remove
 var firebase = require("firebase");
 
 module.exports = (function() {
@@ -69,7 +69,7 @@ module.exports = (function() {
     });
   }
   
-  function vote(id, voteObj) {
+  function vote(id, voteObj, cb) {
     console.log('voting for poll options:', id, voteObj);
     // 1) convert votes into a set
     var votes = {};
@@ -86,8 +86,7 @@ module.exports = (function() {
       });
     }, function(err, committed, snapshot) {
       console.log('vote() =>', arguments);
-      alert(committed ? 'Your vote was taken into account, thank you! :-)' : 'Oops, an error occured... Please try again!');
-      // TODO: callback ?
+      cb(err);
     });
   }
 

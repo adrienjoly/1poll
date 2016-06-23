@@ -25209,15 +25209,18 @@
 	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ViewForm).call(this, props));
 	
 	    _this.state = {
-	      poll: {}
+	      disabled: false, // when true, prevents form from being submitted
+	      poll: {}, // poll object fetched from the database: title, subtitle, options...
+	      done: false // when true, the user can not vote again
 	    };
+	    _this._populate = _this._populate.bind(_this);
 	    _this._submitVote = _this._submitVote.bind(_this);
 	    return _this;
 	  }
 	
 	  _createClass(ViewForm, [{
-	    key: 'componentWillMount',
-	    value: function componentWillMount() {
+	    key: '_populate',
+	    value: function _populate() {
 	      var _this2 = this;
 	
 	      this.props.pollStore.fetch(this.props.id, function (err, poll) {
@@ -25229,6 +25232,11 @@
 	            _this2.setState({ poll: poll });
 	          }
 	      });
+	    }
+	  }, {
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      this._populate();
 	    }
 	  }, {
 	    key: 'shouldComponentUpdate',
@@ -25278,10 +25286,10 @@
 	            { className: 'row' },
 	            React.createElement(PollForm, {
 	              ref: 'pollForm',
-	              disabled: this.props.disabled,
+	              disabled: this.state.disabled || this.props.disabled,
 	              options: this.state.poll.options,
-	              callToAction: 'Vote',
-	              onValidSubmit: this._submitVote })
+	              callToAction: this.state.done ? 'Thank you! :-)' : 'Vote',
+	              onValidSubmit: this.state.done ? null : this._submitVote })
 	          )
 	        )
 	      );
@@ -25304,14 +25312,14 @@
 	        }).map(function (opt) {
 	          return opt.name;
 	        })
-	      }, function (err, poll) {
+	      }, function (err) {
 	        _this3.props.setLoading(false);
 	        if (err) {
 	          alert('Error: ' + JSON.stringify(err));
 	        } else {
-	          console.log('=> log', poll);
-	          _this3.props.history.push('/' + poll.objectId); // redirects to poll URL
-	          // TODO: display banner/toaster for sharing the poll URL
+	          _this3.setState({ done: true });
+	          _this3._populate(); // refresh vote counters
+	          // TODO: display a nice banner/toaster for sharing the poll URL
 	        }
 	      });
 	    }
@@ -32754,7 +32762,7 @@
 	
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 	
-	//var _ = require("lodash");
+	//var _ = require("lodash"); // TODO: remove
 	var firebase = __webpack_require__(/*! firebase */ 285);
 	
 	module.exports = function () {
@@ -32831,7 +32839,7 @@
 	    });
 	  }
 	
-	  function vote(id, voteObj) {
+	  function vote(id, voteObj, cb) {
 	    console.log('voting for poll options:', id, voteObj);
 	    // 1) convert votes into a set
 	    var votes = {};
@@ -32849,8 +32857,7 @@
 	      });
 	    }, function (err, committed, snapshot) {
 	      console.log('vote() =>', arguments);
-	      alert(committed ? 'Your vote was taken into account, thank you! :-)' : 'Oops, an error occured... Please try again!');
-	      // TODO: callback ?
+	      cb(err);
 	    });
 	  }
 	
