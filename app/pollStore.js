@@ -24,15 +24,30 @@ module.exports = (function() {
       objectId: obj.key,
       title: data.title,
       subtitle: data.subtitle,
-      options: data.options
+      options: data.options.map((opt) => {
+        return {
+          name: opt.name + (opt.votes ? ' (' + opt.votes + ' votes)' : ''), // TODO: find a nicer way to display votes
+          votes: opt.votes
+        };
+      })
     };
+  }
+
+  function cleanOptionName(opt) {
+    // TODO: find a nicer way to display votes => this function should not exist
+    var [ suffix, nbVotes ] = / \((\d+) votes?\)/.exec(opt) || [];
+    return opt.split(suffix)[0];
   }
 
   function serialize(objFromUi) {
     return {
       title: objFromUi.title,
       subtitle: objFromUi.subtitle,
-      options: objFromUi.options.map((opt) => { return { name : opt }; })
+      options: objFromUi.options.map((opt) => {
+        return {
+          name : cleanOptionName(opt)
+        };
+      })
     };
   }
 
@@ -58,7 +73,7 @@ module.exports = (function() {
     console.log('voting for poll options:', id, voteObj);
     // 1) convert votes into a set
     var votes = {};
-    for (var i in voteObj.votes) votes[voteObj.votes[i]] = 1;
+    for (var i in voteObj.votes) votes[cleanOptionName(voteObj.votes[i])] = 1;
     // 2) increment votes in db
     polls.child(id).child('options').transaction(function(pollOptions) {
       console.log('transaction =>', arguments);

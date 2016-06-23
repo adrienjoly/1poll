@@ -25299,7 +25299,9 @@
 	      this.props.setLoading(true);
 	      // Submitting data
 	      this.props.pollStore.vote(this.state.poll.objectId, {
-	        votes: this.refs.pollForm.getOptions().map(function (opt) {
+	        votes: this.refs.pollForm.getOptions().filter(function (opt) {
+	          return opt.checked;
+	        }).map(function (opt) {
 	          return opt.name;
 	        })
 	      }, function (err, poll) {
@@ -32750,6 +32752,8 @@
 
 	"use strict";
 	
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+	
 	//var _ = require("lodash");
 	var firebase = __webpack_require__(/*! firebase */ 285);
 	
@@ -32776,8 +32780,26 @@
 	      objectId: obj.key,
 	      title: data.title,
 	      subtitle: data.subtitle,
-	      options: data.options
+	      options: data.options.map(function (opt) {
+	        return {
+	          name: opt.name + (opt.votes ? ' (' + opt.votes + ' votes)' : ''), // TODO: find a nicer way to display votes
+	          votes: opt.votes
+	        };
+	      })
 	    };
+	  }
+	
+	  function cleanOptionName(opt) {
+	    // TODO: find a nicer way to display votes => this function should not exist
+	
+	    var _ref = / \((\d+) votes?\)/.exec(opt) || [];
+	
+	    var _ref2 = _slicedToArray(_ref, 2);
+	
+	    var suffix = _ref2[0];
+	    var nbVotes = _ref2[1];
+	
+	    return opt.split(suffix)[0];
 	  }
 	
 	  function serialize(objFromUi) {
@@ -32785,7 +32807,9 @@
 	      title: objFromUi.title,
 	      subtitle: objFromUi.subtitle,
 	      options: objFromUi.options.map(function (opt) {
-	        return { name: opt };
+	        return {
+	          name: cleanOptionName(opt)
+	        };
 	      })
 	    };
 	  }
@@ -32812,7 +32836,7 @@
 	    // 1) convert votes into a set
 	    var votes = {};
 	    for (var i in voteObj.votes) {
-	      votes[voteObj.votes[i]] = 1;
+	      votes[cleanOptionName(voteObj.votes[i])] = 1;
 	    } // 2) increment votes in db
 	    polls.child(id).child('options').transaction(function (pollOptions) {
 	      console.log('transaction =>', arguments);
