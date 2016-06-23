@@ -17,9 +17,12 @@ var api = new ParseServer({
   databaseURI: databaseUri || 'mongodb://localhost:27017/dev',
   cloud: process.env.CLOUD_CODE_MAIN || __dirname + '/cloud/main.js',
   appId: process.env.APP_ID || 'EW02RQhhvjE3B58YDgbo87dqRWYCiJeZyusD8ll7',
+  /*
+  // Parse Server will enforce that any clients passing a key matches:
   clientKey: process.env.CLIENT_KEY,
   javascriptKey: process.env.JAVASCRIPT_KEY,
   fileKey: process.env.FILE_KEY,
+  */
   masterKey: process.env.MASTER_KEY || 'zCGYrajJjuzWnLTFIOvHaUsRRGxbhPZsNeYzB9Iz', //Add your master key here. Keep it secret!
   serverURL: process.env.SERVER_URL || 'http://localhost:1337/parse',  // Don't forget to change to https if needed
   liveQuery: {
