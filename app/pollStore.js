@@ -23,6 +23,7 @@ module.exports = (function() {
       objectId: obj.key,
       title: data.title,
       subtitle: data.subtitle,
+      allowNewEntries: !!data.allowNewEntries,
       options: data.options.map((opt) => {
         return {
           name: opt.name + (opt.votes ? ' (' + opt.votes + ' votes)' : ''), // TODO: find a nicer way to display votes
@@ -42,6 +43,7 @@ module.exports = (function() {
     return {
       title: objFromUi.title,
       subtitle: objFromUi.subtitle,
+      allowNewEntries: !!objFromUi.allowNewEntries,
       options: objFromUi.options.map((opt) => {
         return {
           name : cleanOptionName(opt)

@@ -5,6 +5,7 @@ import DocumentTitle from 'react-document-title';
 
 var React = require('react');
 var TextField = require('material-ui/lib/text-field');
+var Checkbox = require('material-ui/lib/checkbox');
 var PollForm = require('./PollForm.jsx');
 
 class CreateForm extends React.Component {
@@ -12,8 +13,10 @@ class CreateForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      entryToggle: true,
       disabled: false
     };
+    this._onToggleEntry = this._onToggleEntry.bind(this);
     this._submitNewPoll = this._submitNewPoll.bind(this);
   }
 
@@ -46,6 +49,7 @@ class CreateForm extends React.Component {
               underlineFocusStyle={{ borderColor: '#999' }}
               style={{ fontSize: '22px', width: '100%' }}
             />
+            {/*
             <TextField
               ref='subtitle'
               disabled={this.state.disabled}
@@ -54,7 +58,16 @@ class CreateForm extends React.Component {
               inputStyle={{ textAlign: 'center', color: 'white' }}
               underlineStyle={{ borderColor: 'transparent' }}
               underlineFocusStyle={{ borderColor: '#999' }}
-              style={{ fontSize: '14px', marginBottom: '20px', width: '100%' }}
+              style={{ fontSize: '14px', width: '100%' }}
+            />
+            */}
+            <Checkbox
+              name='entryToggle'
+              label='Allow voters to enter their own options'
+              checked={this.state.entryToggle}
+              onCheck={this._onToggleEntry}
+              labelStyle={{ color: '#999', fontFamily: 'Roboto, sans-serif' }}
+              style={{ marginTop: '20px', marginBottom: '20px' }}
             />
           </div>
         </div>
@@ -71,6 +84,12 @@ class CreateForm extends React.Component {
     );
   }
 
+  _onToggleEntry() {
+    this.setState({
+      entryToggle: !this.state.entryToggle
+    });
+  }
+
   // store new poll in db
   _submitNewPoll() {
     // UI action feedback
@@ -79,7 +98,8 @@ class CreateForm extends React.Component {
     // Submitting data
     this.props.pollStore.save({
       title: this.refs.title.getValue(),
-      subtitle: this.refs.subtitle.getValue(),
+      subtitle: '', //this.refs.subtitle.getValue(),
+      allowNewEntries: this.state.entryToggle,
       options: this.refs.pollForm.getOptions().map((opt) => { return opt.name; })
     }, (err, poll) => {
       this.props.setLoading(false);
