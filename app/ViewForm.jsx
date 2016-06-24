@@ -62,7 +62,6 @@ class ViewForm extends React.Component {
         <div className="row">
           <PollForm
             ref='pollForm'
-            allowNewEntries={false} // TODO: allow (and make it work) if poll author enabled it
             disabled={this.state.disabled || this.props.disabled}
             allowNewEntries={this.state.poll.allowNewEntries && !this.state.done}
             options={this.state.poll.options}
