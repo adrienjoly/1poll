@@ -62,10 +62,12 @@ class ViewForm extends React.Component {
         <div className="row">
           <PollForm
             ref='pollForm'
+            allowNewEntries={false} // TODO: allow (and make it work) if poll author enabled it
             disabled={this.state.disabled || this.props.disabled}
             options={this.state.poll.options}
             callToAction={this.state.done ? 'Thank you! :-)' : 'Vote'}
-            onValidSubmit={this.state.done ? null : this._submitVote} />
+            onValidSubmit={this.state.done ? null : this._submitVote}
+          />
         </div>
         <div className="row">
             <p style={{ fontSize: '12px', textAlign: 'center', margin: '40px 0', width: '100%' }}>

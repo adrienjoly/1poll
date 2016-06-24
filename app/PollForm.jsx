@@ -20,6 +20,7 @@ module.exports = (function(){
               ref='poll'
               disabled={this.props.disabled}
               options={this.props.options}
+              allowNewEntries={this.props.allowNewEntries}
               labelStyle={{ color: 'auto' }}
             />
             <RaisedButton
@@ -29,6 +30,7 @@ module.exports = (function(){
               backgroundColor='#00a651'
               style={{
                 display: 'block', // to fill the parent div's width
+                marginTop: '16px'
               }}
               onTouchTap={this.props.onValidSubmit}
             />
