@@ -72,19 +72,27 @@ module.exports = (function() {
   
   function vote(id, voteObj, cb) {
     console.log('voting for poll options:', id, voteObj);
-    // 1) convert votes into a set
-    var votes = {};
-    for (var i in voteObj.votes) votes[cleanOptionName(voteObj.votes[i])] = 1;
-    // 2) increment votes in db
     polls.child(id).child('options').transaction(function(pollOptions) {
       console.log('transaction =>', arguments);
       if (pollOptions === null) return pollOptions; // not ready => firebase will retry
-      return pollOptions.map((opt) => {
-        return {
-          name: opt.name,
-          votes: (opt.votes || 0) + (votes[opt.name] || 0)
-        };
+      // 1) clean voted options
+      var votedOptions = voteObj.votes.map(cleanOptionName);
+      // 2) index db options by name
+      var optIndexByName = {};
+      for (var i in pollOptions) optIndexByName[pollOptions[i].name] = i;
+      // 3) update options array with incremented vote counters, and new options
+      votedOptions.forEach((name) => {
+        var index = optIndexByName[name];
+        if (index === undefined) {
+          pollOptions.push({
+            name: name,
+            votes: 1
+          });
+        } else {
+          pollOptions[index].votes = (pollOptions[index].votes || 0) + 1;
+        }
       });
+      return pollOptions;
     }, function(err, committed, snapshot) {
       console.log('vote() =>', arguments);
       cb(err);
