@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 // following advice from http://survivejs.com/webpack/advanced-techniques/configuring-react/
 
-module.exports = {
+var config = {
   // Important! Do not remove ''. If you do, imports without
   // an extension won't work anymore!
   resolve: {
@@ -33,7 +33,11 @@ module.exports = {
       }
     ]
   },
-  plugins: [
+};
+
+// production-only settings
+if (process.env.npm_lifecycle_event === 'build') {
+  config.plugins = (config.plugins || []).concat([
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify('production')
@@ -45,5 +49,7 @@ module.exports = {
         warnings: false
       }
     })
-  ]
-};
+  ]);
+}
+
+module.exports = config;
