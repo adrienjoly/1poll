@@ -201,6 +201,10 @@ h1 {
   color: #FFF;
 }
 
+#forkme {
+  display: none;
+}
+
 @media all and (min-width:481px) {
   p {
     font-size: 22px;
@@ -218,6 +222,14 @@ h1 {
 
   h1 {
     font-size: 75px;
+  }
+
+  #forkme {
+    display: inline;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
   }
 }
 
