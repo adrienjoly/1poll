@@ -12,7 +12,7 @@ class ViewForm extends React.Component {
     super(props);
     this.state = {
       disabled: false, // when true, prevents form from being submitted
-      poll: {}, // poll object fetched from the database: title, subtitle, options...
+      poll: { allowNewEntries: false }, // poll object fetched from the database: title, subtitle, options...
       done: false // when true, the user can not vote again
     };
     this._populate = this._populate.bind(this);
