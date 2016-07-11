@@ -4,9 +4,16 @@ import DocumentTitle from 'react-document-title';
 'use strict';
 
 var React = require('react');
+var Paper = require('material-ui/lib/paper');
 var TextField = require('material-ui/lib/text-field');
 var Checkbox = require('material-ui/lib/checkbox');
-var PollForm = require('./PollForm.jsx');
+var RaisedButton = require('material-ui/lib/raised-button');
+var injectTapEventPlugin = require('react-tap-event-plugin');
+var Poll = require('react-1poll');
+
+// Needed for onTouchTap
+// Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
+injectTapEventPlugin();
 
 class CreateForm extends React.Component {
 
@@ -17,7 +24,7 @@ class CreateForm extends React.Component {
       entryToggle: true,
       disabled: false
     };
-    this._onOptionsChange = this._onOptionsChange.bind(this);
+    this._onNewOption = this._onNewOption.bind(this);
     this._onToggleEntry = this._onToggleEntry.bind(this);
     this._submitNewPoll = this._submitNewPoll.bind(this);
   }
@@ -74,24 +81,41 @@ class CreateForm extends React.Component {
           </div>
         </div>
         <div className="row">
-          <PollForm
-            ref='pollForm'
-            disabled={this.state.disabled}
-            options={this.state.options}
-            callToAction='Publish'
-            onOptionsChange={this._onOptionsChange}
-            disableSubmit={this.state.options.length == 0}
-            onValidSubmit={this._submitNewPoll} />
+          <div className='react-poll-form'>
+            <Paper style={{ padding: '16px', paddingTop: '1px', color: '#333' }}>
+              <Poll
+                ref='poll'
+                disabled={this.state.disabled}
+                options={this.state.options}
+                allowNewEntries={true}
+                onNewOption={this._onNewOption}
+                labelStyle={{ color: 'auto' }}
+              />
+              <RaisedButton
+                disabled={this.state.disabled || this.state.options.length == 0}
+                label='Publish'
+                primary={true}
+                backgroundColor='#00a651'
+                style={{
+                  display: 'block', // to fill the parent div's width
+                  marginTop: '16px'
+                }}
+                onTouchTap={this._submitNewPoll}
+              />
+            </Paper>
+          </div>
         </div>
       </form>
     </DocumentTitle>
     );
   }
 
-  _onOptionsChange() {
-    this.setState({
-      options: this.refs.pollForm.getOptions()
-    });
+  _onNewOption(newOption) {
+    if (newOption.name.trim().length > 0) {
+      this.setState({
+        options: this.state.options.concat([ newOption ])
+      });
+    }
   }
 
   _onToggleEntry() {
@@ -110,7 +134,7 @@ class CreateForm extends React.Component {
       title: this.refs.title.getValue(),
       subtitle: '', //this.refs.subtitle.getValue(),
       allowNewEntries: this.state.entryToggle,
-      options: this.refs.pollForm.getOptions().map((opt) => { return opt.name; })
+      options: this.state.options.map((opt) => { return opt.name; })
     }, (err, poll) => {
       this.props.setLoading(false);
       if (err) {
