@@ -62,10 +62,33 @@ import pollStore from './pollStore.js';
     }
   });
 
+  var DirectVotePage = React.createClass({
+    render: function() {
+      return (
+        <ViewForm
+          id={this.props.params.id}
+          directVoteOption={this.props.params.option}
+          history={history}
+          pollStore={pollStore}
+          setLoading={setLoading}
+          onUpdate={heightTransition}
+        />
+      );
+    }
+  });
+
   var UnknownPage = React.createClass({
     render: function() {
       return (
         <p>unknown route</p>
+      );
+    }
+  });
+
+  var ThanksPage = React.createClass({
+    render: function() {
+      return (
+        <p>Thanks for voting! :)</p>
       );
     }
   });
@@ -76,8 +99,10 @@ import pollStore from './pollStore.js';
 
   var router = (
     <Router history={history}>
+      <Route path='/vote/thanks' component={ThanksPage}/>
       <Route path='/' component={CreatePage}/>
       <Route path='/:id' component={ViewPage}/>
+      <Route path='/vote/:id/:option' component={DirectVotePage}/>
       <Route path='*' component={UnknownPage}/>
     </Router>
   );

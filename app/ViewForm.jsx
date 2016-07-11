@@ -30,23 +30,33 @@ class ViewForm extends React.Component {
     this._submitVote = this._submitVote.bind(this);
   }
 
-  _populate() {
+  _populate(vote, callback) {
     this.props.pollStore.fetch(this.props.id, (err, poll) => {
       console.log('fetch =>', err, poll);
       if (err) {
         alert('We cannot find this poll, sorry...');
         this.props.history.push('/'); // redirects to home page
+        callback(err);
       } else {
+        if (vote) {
+          poll.options = poll.options.map((opt) => {
+            opt.defaultChecked = opt.checked = (opt.name.indexOf(vote) == 0);
+            return opt;
+          });
+          callback = this._submitVote.bind(this, () => {
+            this.props.history.replace('/vote/thanks'); // redirects to poll URL
+          });
+        }
         this.setState({
           poll: poll,
           options: poll.options
-        });
+        }, callback);
       }
     });
   }
 
   componentWillMount() {
-    this._populate();
+    this._populate(this.props.directVoteOption);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -126,7 +136,7 @@ class ViewForm extends React.Component {
   }
 
   // store vote in db
-  _submitVote() {
+  _submitVote(callback) {
     // UI action feedback
     this.setState({ disabled: true });
     this.props.setLoading(true);
@@ -139,10 +149,17 @@ class ViewForm extends React.Component {
       this.props.setLoading(false);
       if (err) {
         alert('Error: ' + JSON.stringify(err));
+        // TODO: callback() ?
       } else {
-        this.setState({ done: true });
-        this._populate(); // refresh vote counters
-        // TODO: display a nice banner/toaster for sharing the poll URL
+        this.setState({ done: true }, () => {
+          // refresh vote counters
+          this._populate(null, () => {
+            // TODO: display a nice banner/toaster for sharing the poll URL
+            if (typeof callback == 'function') {
+              callback();
+            }
+          });
+        });
       }
     });
   }
