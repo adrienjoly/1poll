@@ -110,9 +110,11 @@ class ViewForm extends React.Component {
 
   _onNewOption(newOption) {
     newOption.defaultChecked = false;
-    this.setState({
-      options: this.state.options.concat([ newOption ])
-    }); 
+    if (newOption.name.trim().length > 0) {
+      this.setState({
+        options: this.state.options.concat([ newOption ])
+      });
+    }
   }
 
   _onSelectionChange(checkedOptions) {    
