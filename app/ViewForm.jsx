@@ -3,19 +3,30 @@ import DocumentTitle from 'react-document-title';
 'use strict';
 
 var React = require('react');
+var Paper = require('material-ui/lib/paper');
 var TextField = require('material-ui/lib/text-field');
-var PollForm = require('./PollForm.jsx');
+var RaisedButton = require('material-ui/lib/raised-button');
+var injectTapEventPlugin = require('react-tap-event-plugin');
+var Poll = require('react-1poll');
+
+// Needed for onTouchTap
+// Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
+// injectTapEventPlugin();
 
 class ViewForm extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      options: [],
+      disableSubmit: true,
       disabled: false, // when true, prevents form from being submitted
       poll: { allowNewEntries: false }, // poll object fetched from the database: title, subtitle, options...
       done: false // when true, the user can not vote again
     };
     this._populate = this._populate.bind(this);
+    this._onNewOption = this._onNewOption.bind(this);
+    this._onSelectionChange = this._onSelectionChange.bind(this);
     this._submitVote = this._submitVote.bind(this);
   }
 
@@ -26,7 +37,10 @@ class ViewForm extends React.Component {
         alert('We cannot find this poll, sorry...');
         this.props.history.push('/'); // redirects to home page
       } else {
-        this.setState({ poll: poll });
+        this.setState({
+          poll: poll,
+          options: poll.options
+        });
       }
     });
   }
@@ -50,24 +64,37 @@ class ViewForm extends React.Component {
         <div className="row">
           <div className="user-signup__intro">
             <p
-              ref='title'
               style={{ fontSize: '22px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }}
             >{this.state.poll.title}</p>
             <p
-              ref='subtitle'
               style={{ fontSize: '14px', textAlign: 'center', color: 'white', margin: '20px 0', width: '100%' }}
             >{this.state.poll.subtitle}</p>
           </div>
         </div>
         <div className="row">
-          <PollForm
-            ref='pollForm'
-            disabled={this.state.disabled || this.props.disabled}
-            allowNewEntries={this.state.poll.allowNewEntries && !this.state.done}
-            options={this.state.poll.options}
-            callToAction={this.state.done ? 'Thank you! :-)' : 'Vote'}
-            onValidSubmit={this.state.done ? null : this._submitVote}
-          />
+          <div className='react-poll-form'>
+            <Paper style={{ padding: '16px', paddingTop: '1px', color: '#333' }}>
+              <Poll
+                disabled={this.state.disabled || this.props.disabled}
+                options={this.state.options}
+                allowNewEntries={this.state.poll.allowNewEntries && !this.state.done}
+                onNewOption={this._onNewOption}
+                onSelectionChange={this._onSelectionChange}
+                labelStyle={{ color: 'auto' }}
+              />
+              <RaisedButton
+                disabled={this.state.disabled || this.props.disabled || this.state.disableSubmit}
+                label={this.state.done ? 'Thank you! :-)' : 'Vote'}
+                primary={true}
+                backgroundColor='#00a651'
+                style={{
+                  display: 'block', // to fill the parent div's width
+                  marginTop: '16px'
+                }}
+                onTouchTap={this.state.done ? null : this._submitVote}
+              />
+            </Paper>
+          </div>
         </div>
         <div className="row">
             <p style={{ fontSize: '12px', textAlign: 'center', margin: '40px 0', width: '100%' }}>
@@ -81,6 +108,21 @@ class ViewForm extends React.Component {
     );
   }
 
+  _onNewOption(newOption) {
+    newOption.defaultChecked = false;
+    this.setState({
+      options: this.state.options.concat([ newOption ])
+    }); 
+  }
+
+  _onSelectionChange(checkedOptions) {    
+    if (this.state.disableSubmit != checkedOptions.length == 0) {
+      this.setState({
+        disableSubmit: checkedOptions.length == 0
+      });
+    }
+  }
+
   // store vote in db
   _submitVote() {
     // UI action feedback
@@ -88,7 +130,7 @@ class ViewForm extends React.Component {
     this.props.setLoading(true);
     // Submitting data
     this.props.pollStore.vote(this.state.poll.objectId, {
-      votes: this.refs.pollForm.getOptions()
+      votes: this.state.options
         .filter((opt) => opt.checked)
         .map((opt) => { return opt.name; })
     }, (err) => {
