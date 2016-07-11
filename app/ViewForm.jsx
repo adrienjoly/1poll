@@ -1,13 +1,12 @@
-import DocumentTitle from 'react-document-title';
-
 'use strict';
 
-var React = require('react');
-var Paper = require('material-ui/lib/paper');
-var TextField = require('material-ui/lib/text-field');
-var RaisedButton = require('material-ui/lib/raised-button');
-var injectTapEventPlugin = require('react-tap-event-plugin');
-var Poll = require('react-1poll');
+import React from 'react';
+import DocumentTitle from 'react-document-title';
+import injectTapEventPlugin from 'react-tap-event-plugin';
+import Paper from 'material-ui/Paper';
+import TextField from 'material-ui/TextField';
+import RaisedButton from 'material-ui/RaisedButton';
+import Poll from 'react-1poll';
 
 // Needed for onTouchTap
 // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin

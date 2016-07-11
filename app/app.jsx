@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom';
 import { Router, Route, Link } from 'react-router';
 import { createHashHistory } from 'history';
 
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+
 import ViewForm from './ViewForm.jsx';
 import CreateForm from './CreateForm.jsx';
 
 import pollStore from './pollStore.js';
-
 
 (function(){
   'use strict';
@@ -98,6 +99,7 @@ import pollStore from './pollStore.js';
   });
 
   var router = (
+  <MuiThemeProvider>
     <Router history={history}>
       <Route path='/vote/thanks' component={ThanksPage}/>
       <Route path='/' component={CreatePage}/>
@@ -105,6 +107,7 @@ import pollStore from './pollStore.js';
       <Route path='/vote/:id/:option' component={DirectVotePage}/>
       <Route path='*' component={UnknownPage}/>
     </Router>
+  </MuiThemeProvider>
   );
 
   ReactDOM.render(router, appDiv);
