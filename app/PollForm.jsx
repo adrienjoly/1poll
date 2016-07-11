@@ -6,6 +6,8 @@ module.exports = (function(){
   var injectTapEventPlugin = require('react-tap-event-plugin');
   var Poll = require('react-1poll');
 
+  // TODO: merge this component into CreateForm ?
+
   // Needed for onTouchTap
   // Can go away when react 1.0 release, cf https://github.com/zilverline/react-tap-event-plugin
   injectTapEventPlugin();
@@ -39,7 +41,7 @@ module.exports = (function(){
               labelStyle={{ color: 'auto' }}
             />
             <RaisedButton
-              disabled={this.props.disabled || this.state.options.length == 0}
+              disabled={this.props.disabled || this.props.disableSubmit}
               label={this.props.callToAction || 'Submit'}
               primary={true}
               backgroundColor='#00a651'
@@ -55,9 +57,11 @@ module.exports = (function(){
     }
 
     _onNewOption(newOption) {
-      this.setState({
-        options: this.state.options.concat([ newOption ])
-      }, this.props.onOptionsChange); 
+      if (newOption.name.trim().length > 0) {
+        this.setState({
+          options: this.state.options.concat([ newOption ])
+        }, this.props.onOptionsChange);
+      }
     }
 
     getOptions() {
