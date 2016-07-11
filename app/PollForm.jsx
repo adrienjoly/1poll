@@ -61,9 +61,7 @@ module.exports = (function(){
     }
 
     getOptions() {
-      console.log('this.refs.poll.state.options:', this.refs.poll.state.options);
-      console.log('this.state.options:', this.refs.poll.state.options);
-      return this.refs.poll.state.options;
+      return this.state.options;
     }
 
   }
