@@ -12,6 +12,20 @@ module.exports = (function(){
 
   return class PollForm extends React.Component {
 
+    constructor(props) {
+      super(props);
+      this.state = {
+        options: this.props.options || []
+      };
+      this._onNewOption = this._onNewOption.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps) {
+      this.setState({
+        options: nextProps.options || []
+      });
+    }
+
     render() {
       return (
         <div className='react-poll-form'>
@@ -19,12 +33,13 @@ module.exports = (function(){
             <Poll
               ref='poll'
               disabled={this.props.disabled}
-              options={this.props.options}
+              options={this.state.options}
               allowNewEntries={this.props.allowNewEntries}
+              onNewOption={this._onNewOption}
               labelStyle={{ color: 'auto' }}
             />
             <RaisedButton
-              disabled={this.props.disabled}
+              disabled={this.props.disabled || this.state.options.length == 0}
               label={this.props.callToAction || 'Submit'}
               primary={true}
               backgroundColor='#00a651'
@@ -39,7 +54,15 @@ module.exports = (function(){
       );
     }
 
+    _onNewOption(newOption) {
+      this.setState({
+        options: this.state.options.concat([ newOption ])
+      }); 
+    }
+
     getOptions() {
+      console.log('this.refs.poll.state.options:', this.refs.poll.state.options);
+      console.log('this.state.options:', this.refs.poll.state.options);
       return this.refs.poll.state.options;
     }
 
