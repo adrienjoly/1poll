@@ -6,6 +6,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import Paper from 'material-ui/Paper';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
+import CircularProgress from 'material-ui/CircularProgress';
 import Poll from 'react-1poll';
 
 // Needed for onTouchTap
@@ -17,6 +18,7 @@ class ViewForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       options: [],
       disableSubmit: true,
       disabled: false, // when true, prevents form from being submitted
@@ -47,6 +49,7 @@ class ViewForm extends React.Component {
           });
         }
         this.setState({
+          loading: false,
           poll: poll,
           options: poll.options
         }, callback);
@@ -67,6 +70,18 @@ class ViewForm extends React.Component {
   }
 
   render() {
+    var options = this.state.loading
+      ? <CircularProgress style={{ margin: '30px auto', display: 'block' }} />
+      : (
+        <Poll
+          disabled={this.state.disabled || this.props.disabled}
+          options={this.state.options}
+          allowNewEntries={this.state.poll.allowNewEntries && !this.state.done}
+          onNewOption={this._onNewOption}
+          onSelectionChange={this._onSelectionChange}
+          labelStyle={{ color: 'auto' }}
+        />
+      );
     return (
     <DocumentTitle title={(this.state.poll.title || '( loading )') + ' - 1poll'}>
       <form action="#">
@@ -83,14 +98,7 @@ class ViewForm extends React.Component {
         <div className="row">
           <div className='react-poll-form'>
             <Paper style={{ padding: '16px', paddingTop: '1px', color: '#333' }}>
-              <Poll
-                disabled={this.state.disabled || this.props.disabled}
-                options={this.state.options}
-                allowNewEntries={this.state.poll.allowNewEntries && !this.state.done}
-                onNewOption={this._onNewOption}
-                onSelectionChange={this._onSelectionChange}
-                labelStyle={{ color: 'auto' }}
-              />
+              { options }
               <RaisedButton
                 disabled={this.state.disabled || this.props.disabled || this.state.disableSubmit}
                 label={this.state.done ? 'Thank you! :-)' : 'Vote'}
