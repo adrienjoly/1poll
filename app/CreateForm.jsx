@@ -56,7 +56,7 @@ class CreateForm extends React.Component {
               inputStyle={{ textAlign: 'center', color: 'white' }}
               underlineStyle={{ borderColor: 'transparent' }}
               underlineFocusStyle={{ borderColor: '#999' }}
-              style={{ fontSize: '22px', width: '100%' }}
+              style={{ fontSize: '22px', width: '100%', marginBottom: '20px' }}
             />
             {/*
             <TextField
@@ -70,14 +70,6 @@ class CreateForm extends React.Component {
               style={{ fontSize: '14px', width: '100%' }}
             />
             */}
-            <Checkbox
-              name='entryToggle'
-              label='Allow voters to enter their own options'
-              checked={this.state.entryToggle}
-              onCheck={this._onToggleEntry}
-              labelStyle={{ color: '#999', fontFamily: 'Roboto, sans-serif' }}
-              style={{ marginTop: '20px', marginBottom: '20px' }}
-            />
           </div>
         </div>
         <div className="row">
@@ -104,6 +96,14 @@ class CreateForm extends React.Component {
               />
             </Paper>
           </div>
+          <Checkbox
+            name='entryToggle'
+            label='Allow voters to add their own options'
+            checked={this.state.entryToggle}
+            onCheck={this._onToggleEntry}
+            labelStyle={{ color: '#999', fontFamily: 'Roboto, sans-serif' }}
+            style={{ marginTop: '20px' }}
+          />
         </div>
       </form>
     </DocumentTitle>
