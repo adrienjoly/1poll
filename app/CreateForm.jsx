@@ -13,9 +13,11 @@ class CreateForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      options: this.props.defaultItems,
       entryToggle: true,
       disabled: false
     };
+    this._onOptionsChange = this._onOptionsChange.bind(this);
     this._onToggleEntry = this._onToggleEntry.bind(this);
     this._submitNewPoll = this._submitNewPoll.bind(this);
   }
@@ -75,13 +77,21 @@ class CreateForm extends React.Component {
           <PollForm
             ref='pollForm'
             disabled={this.state.disabled}
-            options={this.props.defaultItems}
+            options={this.state.options}
             callToAction='Publish'
+            onOptionsChange={this._onOptionsChange}
+            disableSubmit={this.state.options.length == 0}
             onValidSubmit={this._submitNewPoll} />
         </div>
       </form>
     </DocumentTitle>
     );
+  }
+
+  _onOptionsChange() {
+    this.setState({
+      options: this.refs.pollForm.getOptions()
+    });
   }
 
   _onToggleEntry() {

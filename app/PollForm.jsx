@@ -57,7 +57,7 @@ module.exports = (function(){
     _onNewOption(newOption) {
       this.setState({
         options: this.state.options.concat([ newOption ])
-      }); 
+      }, this.props.onOptionsChange); 
     }
 
     getOptions() {
