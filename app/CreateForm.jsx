@@ -42,7 +42,7 @@ class CreateForm extends React.Component {
               ref='title'
               autoFocus
               disabled={this.state.disabled}
-              hintText='Enter a title for your poll'
+              hintText="Enter your poll question"
               hintStyle={{ color: '#999' }}
               inputStyle={{ textAlign: 'center', color: 'white' }}
               underlineStyle={{ borderColor: 'transparent' }}
